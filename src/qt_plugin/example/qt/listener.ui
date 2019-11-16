@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Listener</class>
+ <widget class="QMainWindow" name="Listener">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>529</width>
+    <height>432</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Listener</string>
+  </property>
+  <widget class="QWidget" name="_central">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="image"/>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="_inputs">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="port">
+        <property name="inputMask">
+         <string>#####</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="_port">
+        <property name="text">
+         <string>Port</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="ip">
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="_ip">
+        <property name="text">
+         <string>IP Address</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" rowspan="2">
+       <widget class="QPushButton" name="connect">
+        <property name="text">
+         <string>Connect</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="status"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>ip</tabstop>
+  <tabstop>port</tabstop>
+  <tabstop>connect</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>connect</sender>
+   <signal>clicked()</signal>
+   <receiver>Listener</receiver>
+   <slot>onConnect()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>478</x>
+     <y>371</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>215</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onConnect()</slot>
+ </slots>
+</ui>
