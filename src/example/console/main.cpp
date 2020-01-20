@@ -32,6 +32,14 @@ void freezeFn(int val)
     PRINT << (val ? "frozen" : "imaging");
 }
 
+/// callback for button press
+/// @param[in] btn the button that was pressed, 0 = up, 1 = down
+/// @param[in] clicks # of clicks used
+void buttonFn(int btn, int clicks)
+{
+    PRINT << (btn ? "down" : "up") << " button pressed, clicks: " << clicks;
+}
+
 /// callback for readback progreess
 /// @param[in] progress the readback progress
 void progressFn(int progress)
@@ -232,7 +240,7 @@ int init(int& argc, char** argv)
     PRINT << "starting listener...";
 
     // initialize with callbacks
-    if (clariusInitListener(argc, argv, keydir.c_str(), newImageFn, freezeFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
+    if (clariusInitListener(argc, argv, keydir.c_str(), newImageFn, freezeFn, buttonFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
     {
         ERROR << "could not initialize listener" << std::endl;
         return 4;

@@ -45,6 +45,12 @@ bool Listener::event(QEvent *event)
         setFreeze((static_cast<event::Freeze*>(event))->frozen());
         return true;
     }
+    else if (event->type() == event::Button::customType())
+    {
+        auto evt = static_cast<event::Button*>(event);
+        onButton(evt->button(), evt->clicks());
+        return true;
+    }
     else if (event->type() == event::Progress::customType())
     {
         setProgress((static_cast<event::Progress*>(event))->progress());
@@ -82,6 +88,14 @@ void Listener::setFreeze(bool en)
     ui_->shallower->setEnabled(!en);
     ui_->deeper->setEnabled(!en);
     rawData_ = RawDataInfo();
+}
+
+/// called when there is a button press on the ultrasound
+/// @param[in] btn the button pressed
+/// @param[in] clicks # of clicks used
+void Listener::onButton(int btn, int clicks)
+{
+    ui_->status->showMessage(QStringLiteral("Button %1 Pressed, %2 Clicks").arg(btn ? QStringLiteral("Down") : QStringLiteral("Up")).arg(clicks));
 }
 
 /// called when the download progress changes

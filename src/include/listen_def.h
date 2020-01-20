@@ -43,6 +43,10 @@ typedef void (*ClariusNewImageFn)(const void* newImage, const ClariusImageInfo* 
 /// freeze callback function
 /// @param[in] state 1 = frozen, 0 = imaging
 typedef void (*ClariusFreezeFn)(int state);
+/// button callback function
+/// @param[in] btn 0 = up, 1 = down
+/// @param[in] clicks # of clicks performed
+typedef void (*ClariusButtonFn)(int btn, int clicks);
 /// progress callback function
 /// @param[in] progress the current progress
 typedef void (*ClariusProgressFn)(int progress);

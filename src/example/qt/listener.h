@@ -80,6 +80,29 @@ namespace event
         bool frozen_;   ///< the freeze state
     };
 
+    /// wrapper for button press events that can be posted from the api callbacks
+    class Button : public QEvent
+    {
+    public:
+        /// default constructor
+        /// @param[in] btn the button pressed
+        /// @param[in] clicks # of clicks
+        Button(int btn, int clicks) : QEvent(customType()), button_(btn), clicks_(clicks)  { }
+        /// retrieves the button pressed
+        /// @return the event's encapsulated which button was pressed
+        int button() const { return button_; }
+        /// retrieves the # of clicks used
+        /// @return the event's encapsulated # of clicks used
+        int clicks() const { return clicks_; }
+        /// retrieves the event's custom user type
+        /// @return the event's custom user type
+        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 3); }
+
+    private:
+        int button_;    ///< button pressed, 0 = up, 1 = down
+        int clicks_;    ///< # of clicks
+    };
+
     /// wrapper for error events that can be posted from the api callbacks
     class Error : public QEvent
     {
@@ -92,7 +115,7 @@ namespace event
         QString error() const { return error_; }
         /// retrieves the event's custom user type
         /// @return the event's custom user type
-        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 3); }
+        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 4); }
 
     private:
         QString error_;     ///< the error message
@@ -110,7 +133,7 @@ namespace event
         int progress() const { return progress_; }
         /// retrieves the event's custom user type
         /// @return the event's custom user type
-        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 4); }
+        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 5); }
 
     private:
         int progress_;  ///< the current progress
@@ -128,7 +151,7 @@ namespace event
         bool success() const { return success_; }
         /// retrieves the event's custom user type
         /// @return the event's custom user type
-        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 5); }
+        static QEvent::Type customType() { return static_cast<QEvent::Type>(QEvent::User + 6); }
 
     private:
         bool success_;  ///< the current progress
@@ -185,6 +208,7 @@ protected:
 private:
     void newImage(const void* img, int w, int h, int bpp);
     void setFreeze(bool en);
+    void onButton(int btn, int clicks);
     void setProgress(int progress);
     void setError(const QString& err);
     bool rawDataReady(bool success);

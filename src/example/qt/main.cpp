@@ -38,6 +38,12 @@ int main(int argc, char *argv[])
             // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
             QApplication::postEvent(_listener.get(), new event::Freeze(frozen ? true : false));
         },
+        // button press callback
+        [](int btn, int clicks)
+        {
+            // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
+            QApplication::postEvent(_listener.get(), new event::Button(btn, clicks));
+        },
         // download progress state change callback
         [](int progress)
         {

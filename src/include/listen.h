@@ -10,6 +10,7 @@ extern "C"
     /// @param[in] dir the directory to store security keys
     /// @param[in] newImage new image callback
     /// @param[in] freeze freeze state callback
+    /// @param[in] btn button press callback
     /// @param[in] progress readback progress callback
     /// @param[in] err error message callback
     /// @param[in] fn callback to obtain success of call, if set to null, then the call will block
@@ -22,6 +23,7 @@ extern "C"
         const char* dir,
         ClariusNewImageFn newImage,
         ClariusFreezeFn freeze,
+        ClariusButtonFn btn,
         ClariusProgressFn progress,
         ClariusErrorFn err,
         ClariusReturnFn fn,
@@ -80,6 +82,13 @@ extern "C"
     /// @retval 0 the callback function was successfully set
     /// @retval -1 the callback function could not be set
     LISTEN_EXPORT int clariusSetFreezeFn(ClariusFreezeFn fn);
+
+    /// sets the callback for when there is a button press
+    /// @param[in] fn a pointer to the callback function
+    /// @return success of the call
+    /// @retval 0 the callback function was successfully set
+    /// @retval -1 the callback function could not be set
+    LISTEN_EXPORT int clariusSetButtonFn(ClariusButtonFn fn);
 
     /// sets the callback for when there is a change in the readback progress
     /// @param[in] fn a pointer to the callback function
