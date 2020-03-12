@@ -1,4 +1,3 @@
-
 #ifndef LISTEN_EXPORT_H
 #define LISTEN_EXPORT_H
 
@@ -8,11 +7,19 @@
 #else
 #  ifndef LISTEN_EXPORT
 #    ifdef listen_EXPORTS
-        /* We are building this library */
-#      define LISTEN_EXPORT __attribute__((visibility("default")))
+      /* We are building this library */
+#     ifdef _MSC_VER
+#      define LISTEN_EXPORT __declspec(dllexport)
+#     else
+#       define LISTEN_EXPORT __attribute__((visibility("default")))
+#     endif
 #    else
-        /* We are using this library */
-#      define LISTEN_EXPORT __attribute__((visibility("default")))
+      /* We are using this library */
+#     ifdef _MSC_VER
+#       define LISTEN_EXPORT __declspec(dllimport)
+#     else
+#       define LISTEN_EXPORT __attribute__((visibility("default")))
+#     endif
 #    endif
 #  endif
 

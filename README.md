@@ -16,4 +16,3 @@ primary platforms include:
 structure:
 - **src/include**         API headers
 - **src/example**         example programs
-- **src/qt_plugin**       Qt plugin headers and example program for direct gl rendering

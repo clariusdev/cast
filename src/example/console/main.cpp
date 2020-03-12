@@ -137,7 +137,11 @@ void processEventLoop(std::atomic_bool& quit)
                     PRINT << "successfully downloaded raw data" << std::endl;
 
                 // save raw data to disk as a compressed file
-                fp = fopen("raw_data.tar", "wb+");
+                #ifdef _MSC_VER
+                    fopen_s(&fp, "raw_data.tar", "wb+");
+                #else
+                    fp = fopen("raw_data.tar", "wb+");
+                #endif
                 fwrite(buffer, ret, 1, fp);
                 fclose(fp);
                 free(buffer);

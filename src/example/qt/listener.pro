@@ -1,14 +1,14 @@
-TARGET = listener_qt
+TARGET = listener_example
 TEMPLATE = app
 QT += core widgets gui
-CONFIG += c++14
+CONFIG += c++17
 DEFINES += QT_DEPRECATED_WARNINGS
 
-LIBPATH = $$PWD/../../lib
+# ensure to unpack the appropriate libs from the zip file into this folder
+LIBPATH = $$PWD/../../../lib
 INCLUDEPATH += $$PWD/../../include
 LIBS += -L$$LIBPATH/ -llisten
 
-SOURCES += main.cpp \
-           listener.cpp
+SOURCES += main.cpp listener.cpp
 HEADERS += listener.h
 FORMS += listener.ui
