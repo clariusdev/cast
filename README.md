@@ -24,12 +24,12 @@ Constraints:
 - Probe, mobile device, and PC/device must be on the **same wireless network**
 - Raw data can only be captured while **imaging is frozen**
 
-Primary platforms include:
+Supported platforms include:
 - **Linux**
 - **Windows**
 - **macOS**
 - **iOS**
-- **Android**
+- **Android** (must create an Android Qt program)
 
 Repository structure:
 - **lib**                 packaged binaries (platform of choice should be extracted into same folder)

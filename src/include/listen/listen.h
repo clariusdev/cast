@@ -8,7 +8,8 @@ extern "C"
     /// @param[in] argc the argument count for input parameters to pass to the library
     /// @param[in] argv the arguments to pass to the library, possibly required for qt graphics buffer initialization
     /// @param[in] dir the directory to store security keys
-    /// @param[in] newImage new image callback
+    /// @param[in] newProcessedImage new processed image callback (scan-converted image)
+    /// @param[in] newRawImage new raw image callback - (pre scan-converted image)
     /// @param[in] freeze freeze state callback
     /// @param[in] btn button press callback
     /// @param[in] progress readback progress callback
@@ -21,7 +22,8 @@ extern "C"
     LISTEN_EXPORT int clariusInitListener(int argc,
         char** argv,
         const char* dir,
-        ClariusNewImageFn newImage,
+        ClariusNewProcessedImageFn newProcessedImage,
+        ClariusNewRawImageFn newRawImage,
         ClariusFreezeFn freeze,
         ClariusButtonFn btn,
         ClariusProgressFn progress,
@@ -32,10 +34,12 @@ extern "C"
     );
 
     /// cleans up memory allocated by the listener
+    /// @retval 0 the destroy attempt was successful
+    /// @retval -1 the destroy attempt was not successful
     /// @note should be called prior to exiting the application
     LISTEN_EXPORT int clariusDestroyListener();
 
-    /// this function tries to connect to a clarius ultrasound scanner that is on the same network as the caller
+    /// tries to connect to a scanner that is on the same network as the caller
     /// @param[in] ipAddress the ip address of the ultrasound scanner
     /// @param[in] port the tcp port that the scanner's listener is setup on
     /// @param[in] fn callback to obtain success of call, if set to null, then the call will block
@@ -69,12 +73,19 @@ extern "C"
     ///       the frame will have various sizes of black borders around the image
     LISTEN_EXPORT int clariusSetOutputSize(int w, int h);
 
-    /// sets the callback for when new images are acquired and streamed to the listener
+    /// sets the callback for when new raw images are acquired and streamed to the listener
     /// @param[in] fn a pointer to the callback function
     /// @return success of the call
     /// @retval 0 the callback function was successfully set
     /// @retval -1 the callback function could not be set
-    LISTEN_EXPORT int clariusSetNewImageFn(ClariusNewImageFn fn);
+    LISTEN_EXPORT int clariusSetNewRawImageFn(ClariusNewRawImageFn fn);
+
+    /// sets the callback for when new processed images are acquired and streamed to the listener
+    /// @param[in] fn a pointer to the callback function
+    /// @return success of the call
+    /// @retval 0 the callback function was successfully set
+    /// @retval -1 the callback function could not be set
+    LISTEN_EXPORT int clariusSetNewProcessedImageFn(ClariusNewProcessedImageFn fn);
 
     /// sets the callback for when there is a change in the freeze state
     /// @param[in] fn a pointer to the callback function

@@ -1,15 +1,28 @@
 #pragma once
 
-/// image information supplied with each frame
-typedef struct _ClariusImageInfo
+/// raw image information supplied with each frame
+typedef struct _ClariusRawImageInfo
+{
+    int lines;              ///< number of ultrasound lines in the image
+    int samples;            ///< number of samples per line in the image
+    int bitsPerSample;      ///< bits per sample
+    double axialSize;       ///< axial microns per sample
+    double lateralSize;     ///< lateral microns per line
+    long long int tm;       ///< timestamp of image
+    int jpeg;               ///< size of the jpeg image, 0 if not a jpeg compressed image
+
+} ClariusRawImageInfo;
+
+/// processedd image information supplied with each frame
+typedef struct _ClariusProcessedImageInfo
 {
     int width;              ///< width of the image in pixels
     int height;             ///< height of the image in pixels
     int bitsPerPixel;       ///< bits per pixel of the image
-    int micronsPerPixel;    ///< microns per pixel (1:1 ratio by default)
-    long long int tm;       ///< timestamp of image
+    double micronsPerPixel; ///< microns per pixel (always 1:1 aspect ratio axially/laterally)
+    long long int tm;       ///< timestamp of imagesed
 
-} ClariusImageInfo;
+} ClariusProcessedImageInfo;
 
 /// positional data information structure
 typedef struct _ClariusPosInfo
@@ -34,12 +47,18 @@ typedef struct _ClariusPosInfo
 /// return status callback function
 /// @param[in] retCode the return code
 typedef void (*ClariusReturnFn)(int retCode);
+/// new data callback function
+/// @param[in] newImage pointer to the new greyscale image information
+/// @param[in] nfo image information associated with the image data
+/// @param[in] npos number of positional information data tagged with the image
+/// @param[in] pos the positional information data tagged with the image
+typedef void (*ClariusNewRawImageFn)(const void* newImage, const ClariusRawImageInfo* nfo, int npos, const ClariusPosInfo* pos);
 /// new image callback function
 /// @param[in] newImage pointer to the new greyscale image information
 /// @param[in] nfo image information associated with the image data
 /// @param[in] npos number of positional information data tagged with the image
 /// @param[in] pos the positional information data tagged with the image
-typedef void (*ClariusNewImageFn)(const void* newImage, const ClariusImageInfo* nfo, int npos, const ClariusPosInfo* pos);
+typedef void (*ClariusNewProcessedImageFn)(const void* newImage, const ClariusProcessedImageInfo* nfo, int npos, const ClariusPosInfo* pos);
 /// freeze callback function
 /// @param[in] state 1 = frozen, 0 = imaging
 typedef void (*ClariusFreezeFn)(int state);

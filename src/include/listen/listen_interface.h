@@ -74,8 +74,12 @@ namespace cus
         virtual void render(
             QOpenGLContext* context, //!< Open GL context to render into (made current already)
             const QPoint& point, //!< Top left of rendering (usually 0,0)
-            const QSize& size //!< Size of rendering (usually widget size)
+            const QSize& size, //!< Size of rendering (usually widget size)
+            double devicePixelRatio //! Common values are 1 for normal-dpi displays and 2 for high-dpi "retina" displays
         ) = 0;
+        //! @brief Get the B prescan data for the center frame
+        //! @return An image for the prescan center B frame, or null if not received
+        virtual QImage bPrescan() = 0;
         //! @brief Clean up the OpenGL textures, etc. that were created prior to rendering
         //! @details This function should be called with the QOpenGLContext used by 'render' made current.
         virtual void cleanupGL() = 0;

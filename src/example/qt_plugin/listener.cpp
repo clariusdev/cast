@@ -203,6 +203,6 @@ void UltrasoundImage::paintGL()
 {
     if (listen_)
     {
-        listen_->render(context(), QPoint(0, 0), size());
+        listen_->render(context(), QPoint(0, 0), size(), devicePixelRatioF());
     }
 }

@@ -47,26 +47,46 @@ void progressFn(int progress)
     ERROR << "download: " << progress;
 }
 
+/// prints imu data
+/// @param[in] npos the # of positional data points embedded with the frame
+/// @param[in] pos the buffer of positional data
+void printImuData(int npos, const ClariusPosInfo* pos)
+{
+    for (auto i = 0; i < npos; i++)
+    {
+        PRINT << "imu: " << i << ", time: " << pos[i].tm;
+        PRINT << "accel: " << pos[i].ax << "," << pos[i].ay << "," << pos[i].az;
+        PRINT << "gyro: " << pos[i].gx << "," << pos[i].gy << "," << pos[i].gz;
+        PRINT << "magnet: " << pos[i].mx << "," << pos[i].my << "," << pos[i].mz;
+    }
+}
+
+/// callback for a new pre-scan converted data sent from the scanner
+/// @param[in] newImage a pointer to the raw image bits of
+/// @param[in] nfo the image properties
+/// @param[in] npos the # of positional data points embedded with the frame
+/// @param[in] pos the buffer of positional data
+void newRawImageFn(const void* newImage, const ClariusRawImageInfo* nfo, int npos, const ClariusPosInfo* pos)
+{
+    PRINT << "new pre-scan data (" << newImage << "): " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
+          << "bits. @ " << nfo->axialSize << " microns per sample. imu points: " << npos << " jpeg size: " << (int)nfo->jpeg;
+
+    if (npos)
+        printImuData(npos, pos);
+}
+
 /// callback for a new image sent from the scanner
 /// @param[in] newImage a pointer to the raw image bits of
 /// @param[in] nfo the image properties
 /// @param[in] npos the # of positional data points embedded with the frame
 /// @param[in] pos the buffer of positional data
-void newImageFn(const void* newImage, const ClariusImageInfo* nfo, int npos, const ClariusPosInfo* pos)
+void newProcessedImageFn(const void* newImage, const ClariusProcessedImageInfo* nfo, int npos, const ClariusPosInfo* pos)
 {
     PRINT << "new image (" << newImage << "): " << nfo->width << " x " << nfo->height << " @ " << nfo->bitsPerPixel
           << "bits. @ " << nfo->micronsPerPixel << " microns per pixel. imu points: " << npos;
 
     if (npos)
-    {
-        for (auto i = 0; i < npos; i++)
-        {
-            PRINT << "imu: " << i << ", time: " << pos[i].tm;
-            PRINT << "accel: " << pos[i].ax << "," << pos[i].ay << "," << pos[i].az;
-            PRINT << "gyro: " << pos[i].gx << "," << pos[i].gy << "," << pos[i].gz;
-            PRINT << "magnet: " << pos[i].mx << "," << pos[i].my << "," << pos[i].mz;
-        }
-    }
+        printImuData(npos, pos);
 }
 
 void processEventLoop(std::atomic_bool& quit)
@@ -244,7 +264,7 @@ int init(int& argc, char** argv)
     PRINT << "starting listener...";
 
     // initialize with callbacks
-    if (clariusInitListener(argc, argv, keydir.c_str(), newImageFn, freezeFn, buttonFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
+    if (clariusInitListener(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, freezeFn, buttonFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
     {
         ERROR << "could not initialize listener" << std::endl;
         return 4;

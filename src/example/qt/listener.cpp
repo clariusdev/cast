@@ -34,34 +34,40 @@ void Listener::closeEvent(QCloseEvent*)
 /// @return handling status
 bool Listener::event(QEvent *event)
 {
-    if (event->type() == event::Image::customType())
+    if (event->type() == IMAGE_EVENT)
     {
         auto evt = static_cast<event::Image*>(event);
-        newImage(evt->data(), evt->width(), evt->height(), evt->bpp());
+        newProcessedImage(evt->data(), evt->width(), evt->height(), evt->bpp());
         return true;
     }
-    else if (event->type() == event::Freeze::customType())
+    if (event->type() == PRESCAN_EVENT)
+    {
+        auto evt = static_cast<event::PreScanImage*>(event);
+        newRawImage(evt->data(), evt->width(), evt->height(), evt->bpp(), evt->jpeg());
+        return true;
+    }
+    else if (event->type() == FREEZE_EVENT)
     {
         setFreeze((static_cast<event::Freeze*>(event))->frozen());
         return true;
     }
-    else if (event->type() == event::Button::customType())
+    else if (event->type() == BUTTON_EVENT)
     {
         auto evt = static_cast<event::Button*>(event);
         onButton(evt->button(), evt->clicks());
         return true;
     }
-    else if (event->type() == event::Progress::customType())
+    else if (event->type() == PROGRESS_EVENT)
     {
         setProgress((static_cast<event::Progress*>(event))->progress());
         return true;
     }
-    else if (event->type() == event::RawData::customType())
+    else if (event->type() == RAWDATA_EVENT)
     {
         rawDataReady((static_cast<event::RawData*>(event))->success());
         return true;
     }
-    else if (event->type() == event::Error::customType())
+    else if (event->type() == ERROR_EVENT)
     {
         setError((static_cast<event::Error*>(event))->error());
         return true;
@@ -110,9 +116,22 @@ void Listener::setProgress(int progress)
 /// @param[in] w width of the image
 /// @param[in] h height of the image
 /// @param[in] bpp the bits per pixel (should always be 8)
-void Listener::newImage(const void* img, int w, int h, int bpp)
+void Listener::newProcessedImage(const void* img, int w, int h, int bpp)
 {
     image_->loadImage(img, w, h, bpp);
+}
+
+/// called when a new pre-scan image has been sent
+/// @param[in] img the image data
+/// @param[in] w width of the image
+/// @param[in] h height of the image
+/// @param[in] bpp the bits per pixel (should always be 8)
+/// @param[in] jpg flag if the data is jpeg compressed
+void Listener::newRawImage(const void* img, int w, int h, int bpp, bool jpg)
+{
+    Q_UNUSED(bpp)
+    Q_UNUSED(jpg)
+    prescan_ = QImage(reinterpret_cast<const uchar*>(img), w, h, QImage::Format_ARGB32);
 }
 
 /// called when the connect/disconnect button is clicked
