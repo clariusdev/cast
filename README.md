@@ -41,3 +41,6 @@ Example Programs:
 - **console** a simple standalone command-line program that must be run with proper input arguments. The Windows version currently requires the boost c++ libraries to be installed for program argument parsing. Images cannot be viewed, however data/images can be captured. A Linux makefile and a Visual Studio solution have been created to help with compilation.
 - **qt** a graphical program that allows real-time viewing of the ultrasound stream and implements more functionality than the console program. A Qt Creator project file has been created to help with compilation. A valid compiler and Qt binaries should be installed in order for a proper kit to be defined within the IDE.
 - **qt_plugin** a graphical program that uses a separate API defined with Qt C++ calls that optimizes image viewing by rendering directly to an OpenGL context.
+
+Notes:
+- When running an example program on Windows, execution may require temporarily disabling the firewall defender or adding an exception for the executable. This is due to the use of randomized UDP ports that the API makes use of for streaming images.
