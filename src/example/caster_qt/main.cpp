@@ -1,6 +1,6 @@
-#include "listener.h"
+#include "caster.h"
 #include <memory>
-#include <listen/listen.h>
+#include <cast/cast.h>
 #include <iostream>
 
 #ifdef Clarius_BUILD
@@ -9,7 +9,7 @@
 #include <cus/qtplugins.h>
 #endif
 
-static std::unique_ptr<Listener> _listener;
+static std::unique_ptr<Caster> _caster;
 static std::vector<char> _image;
 static std::vector<char> _rawImage;
 
@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    _listener = std::make_unique<Listener>();
+    _caster = std::make_unique<Caster>();
     const int width  = 640; // Width of the rendered image
     const int height = 480; // Height of the rendered image
 
-    if (clariusInitListener(argc, argv, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString().c_str(),
+    if (clariusInitCast(argc, argv, QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString().c_str(),
         // new image callback
         [](const void* img, const ClariusProcessedImageInfo* nfo, int, const ClariusPosInfo*)
         {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
                 _image.resize(sz);
             memcpy(_image.data(), img, sz);
 
-            QApplication::postEvent(_listener.get(), new event::Image(_image.data(), nfo->width, nfo->height, nfo->bitsPerPixel));
+            QApplication::postEvent(_caster.get(), new event::Image(_image.data(), nfo->width, nfo->height, nfo->bitsPerPixel));
         },
         // new raw image callback
         [](const void* img, const ClariusRawImageInfo* nfo, int, const ClariusPosInfo*)
@@ -42,31 +42,31 @@ int main(int argc, char *argv[])
                 _rawImage.resize(sz);
             memcpy(_rawImage.data(), img, sz);
 
-            QApplication::postEvent(_listener.get(), new event::PreScanImage(_rawImage.data(), nfo->lines, nfo->samples, nfo->bitsPerSample, nfo->jpeg));
+            QApplication::postEvent(_caster.get(), new event::PreScanImage(_rawImage.data(), nfo->lines, nfo->samples, nfo->bitsPerSample, nfo->jpeg));
         },
         // freeze state change callback
         [](int frozen)
         {
             // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
-            QApplication::postEvent(_listener.get(), new event::Freeze(frozen ? true : false));
+            QApplication::postEvent(_caster.get(), new event::Freeze(frozen ? true : false));
         },
         // button press callback
         [](int btn, int clicks)
         {
             // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
-            QApplication::postEvent(_listener.get(), new event::Button(btn, clicks));
+            QApplication::postEvent(_caster.get(), new event::Button(btn, clicks));
         },
         // download progress state change callback
         [](int progress)
         {
             // post event here, as the gui (proress bar) will be updated directly, and it needs to come from the application thread
-            QApplication::postEvent(_listener.get(), new event::Progress(progress));
+            QApplication::postEvent(_caster.get(), new event::Progress(progress));
         },
         // error message callback
         [](const char* err)
         {
             // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
-            QApplication::postEvent(_listener.get(), new event::Error(err));
+            QApplication::postEvent(_caster.get(), new event::Error(err));
         },
         nullptr, width, height) != 0)
     {
@@ -74,6 +74,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    _listener->show();
+    _caster->show();
     return a.exec();
 }

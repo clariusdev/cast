@@ -10,7 +10,7 @@
 #include <unistd.h>
 #endif
 
-#include <listen/listen.h>
+#include <cast/cast.h>
 
 #define BLOCKINGCALL    nullptr
 #define PRINT           std::cout << std::endl
@@ -19,7 +19,7 @@
 #define SUCCESS         (0)
 
 /// callback for error messages
-/// @param[in] err the error message sent from the listener module
+/// @param[in] err the error message sent from the casting module
 void errorFn(const char* err)
 {
     ERROR << "error: " << err;
@@ -105,31 +105,31 @@ void processEventLoop(std::atomic_bool& quit)
         }
         else if (cmd == "F" || cmd == "f")
         {
-            ret = clariusUserFunction(USER_FN_TOGGLE_FREEZE, BLOCKINGCALL);
+            ret = clariusUserFunction(USER_FN_TOGGLE_FREEZE, 0, BLOCKINGCALL);
             if (ret < 0)
                 ERROR << "error toggling freeze" << std::endl;
         }
         else if (cmd == "D")
         {
-            ret = clariusUserFunction(USER_FN_DEPTH_INC, BLOCKINGCALL);
+            ret = clariusUserFunction(USER_FN_DEPTH_INC, 0, BLOCKINGCALL);
             if (ret < 0)
                 ERROR << "error incrementing depth" << std::endl;
         }
         else if (cmd == "d")
         {
-            ret = clariusUserFunction(USER_FN_DEPTH_DEC, BLOCKINGCALL);
+            ret = clariusUserFunction(USER_FN_DEPTH_DEC, 0, BLOCKINGCALL);
             if (ret < 0)
                 ERROR << "error decrementing depth" << std::endl;
         }
         else if (cmd == "G")
         {
-            ret = clariusUserFunction(USER_FN_GAIN_INC, BLOCKINGCALL);
+            ret = clariusUserFunction(USER_FN_GAIN_INC, 0, BLOCKINGCALL);
             if (ret < 0)
                 ERROR << "error incrementing gain" << std::endl;
         }
         else if (cmd == "g")
         {
-            ret = clariusUserFunction(USER_FN_GAIN_DEC, BLOCKINGCALL);
+            ret = clariusUserFunction(USER_FN_GAIN_DEC, 0, BLOCKINGCALL);
             if (ret < 0)
                 ERROR << "error decrementing gain" << std::endl;
         }
@@ -256,17 +256,17 @@ int init(int& argc, char** argv)
 
     if (!port)
     {
-        ERROR << "no listen port provided. run with '-p [port]" << std::endl;
+        ERROR << "no casting port provided. run with '-p [port]" << std::endl;
         return ERRCODE;
     }
 #endif
 
-    PRINT << "starting listener...";
+    PRINT << "starting caster...";
 
     // initialize with callbacks
-    if (clariusInitListener(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, freezeFn, buttonFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
+    if (clariusInitCast(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, freezeFn, buttonFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
     {
-        ERROR << "could not initialize listener" << std::endl;
+        ERROR << "could not initialize caster" << std::endl;
         return 4;
     }
     if (clariusConnect(ipAddr.c_str(), port, BLOCKINGCALL) < 0)
@@ -293,6 +293,6 @@ int main(int argc, char* argv[])
         eventLoop.join();
     }
 
-    clariusDestroyListener();
+    clariusDestroyCast();
     return rcode;
 }

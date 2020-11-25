@@ -4,7 +4,7 @@ import sys
 import os.path
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt, Slot, Signal
-import pylisten
+import pycast
 
 # custom event for handling change in freeze state
 class FreezeEvent(QtCore.QEvent):
@@ -43,14 +43,14 @@ class Signaller(QtCore.QObject):
             self.image.emit(self.usimage)
         return True
 
-# global required for the listen api callbacks
+# global required for the cast api callbacks
 signaller = Signaller()
 
 # draws the ultrasound image
 class ImageView(QtWidgets.QGraphicsView):
-    def __init__(self, listen):
+    def __init__(self, cast):
         QtWidgets.QGraphicsView.__init__(self)
-        self.listen = listen
+        self.cast = cast
         self.setScene(QtWidgets.QGraphicsScene())
 
     # set the new image and redraw
@@ -62,7 +62,7 @@ class ImageView(QtWidgets.QGraphicsView):
     def resizeEvent(self, evt):
         w = evt.size().width()
         h = evt.size().height()
-        self.listen.setOutputSize(w, h)
+        self.cast.setOutputSize(w, h)
         self.image = QtGui.QImage(w, h, QtGui.QImage.Format_ARGB32)
         self.image.fill(QtCore.Qt.black);
         self.setSceneRect(0, 0, w, h)
@@ -78,10 +78,10 @@ class ImageView(QtWidgets.QGraphicsView):
 
 # main widget with controls and ui
 class MainWidget(QtWidgets.QMainWindow):
-    def __init__(self, listen, parent=None):
+    def __init__(self, cast, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
 
-        self.listen = listen
+        self.cast = cast
 
         # create central widget within main window
         central = QtWidgets.QWidget()
@@ -96,14 +96,14 @@ class MainWidget(QtWidgets.QMainWindow):
 
         # try to connect/disconnect to/from the probe
         def tryConnect():
-            if not listen.isConnected():
-                if listen.connect(ip.text(), int(port.text())):
+            if not cast.isConnected():
+                if cast.connect(ip.text(), int(port.text())):
                     self.statusBar().showMessage("Connected")
                     conn.setText("Disconnect")
                 else:
                     self.statusBar().showMessage("Failed to connect to {0}".format(ip.text()))
             else:
-                if listen.disconnect():
+                if cast.disconnect():
                     self.statusBar().showMessage("Disconnected")
                     conn.setText("Connect")
                 else:
@@ -114,7 +114,7 @@ class MainWidget(QtWidgets.QMainWindow):
         quit.clicked.connect(self.shutdown)
 
         # add widgets to layout
-        self.img = ImageView(listen)
+        self.img = ImageView(cast)
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.img)
         layout.addWidget(ip)
@@ -130,7 +130,7 @@ class MainWidget(QtWidgets.QMainWindow):
 
         # get home path
         path = os.path.expanduser("~/")
-        if  listen.init(path, 640, 480):
+        if  cast.init(path, 640, 480):
             self.statusBar().showMessage("Initialized")
         else:
             self.statusBar().showMessage("Failed to initialize")
@@ -156,7 +156,7 @@ class MainWidget(QtWidgets.QMainWindow):
     # handles shutdown
     @Slot()
     def shutdown(self):
-        self.listen.destroy()
+        self.cast.destroy()
         QtWidgets.QApplication.quit()
 
 ## called when a new processed image is streamed
@@ -203,9 +203,9 @@ def buttonsFn(button, clicks):
 
 ## main function
 def main():
-    listen = pylisten.Listener(newProcessedImage, newRawImage, freezeFn, buttonsFn)
+    cast = pycast.Caster(newProcessedImage, newRawImage, freezeFn, buttonsFn)
     app = QtWidgets.QApplication(sys.argv)
-    widget = MainWidget(listen)
+    widget = MainWidget(cast)
     widget.resize(640, 480)
     widget.show()
     sys.exit(app.exec_())

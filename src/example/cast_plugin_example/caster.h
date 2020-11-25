@@ -25,11 +25,11 @@
 
 namespace Ui
 {
-    class Listener;
+    class Caster;
 }
 namespace cus
 {
-    class ListenInterface;
+    class CastInterface;
 }
 
 /// ultrasound image display
@@ -37,7 +37,7 @@ class UltrasoundImage : public QOpenGLWidget
 {
     Q_OBJECT
 public:
-    UltrasoundImage(cus::ListenInterface* listen, QWidget* parent);
+    UltrasoundImage(cus::CastInterface* cast, QWidget* parent);
 
 public slots:
     void cleanupGL();
@@ -47,17 +47,17 @@ protected:
     virtual void paintGL() override;
 
 private:
-    cus::ListenInterface* listen_;     ///< listen interface
+    cus::CastInterface* cast_;  ///< cast interface
 };
 
-/// listener gui application
-class Listener : public QMainWindow
+/// caster gui application
+class Caster : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit Listener(QWidget *parent = nullptr);
-    ~Listener();
+    explicit Caster(QWidget *parent = nullptr);
+    ~Caster();
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
@@ -71,7 +71,7 @@ public slots:
     void onConnect();
 
 private:
-    bool connected_;                   ///< connection state
-    std::unique_ptr<Ui::Listener> ui_; ///< ui controls, etc.
-    cus::ListenInterface* listen_;     ///< listen interface
+    bool connected_;                    ///< connection state
+    std::unique_ptr<Ui::Caster> ui_;    ///< ui controls, etc.
+    cus::CastInterface* cast_;          ///< cast interface
 };

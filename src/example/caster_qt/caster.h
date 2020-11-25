@@ -24,7 +24,7 @@
 
 namespace Ui
 {
-    class Listener;
+    class Caster;
 }
 
 #define IMAGE_EVENT     static_cast<QEvent::Type>(QEvent::User + 1)
@@ -222,14 +222,14 @@ public:
     char* ptr_;
 };
 
-/// listener gui application
-class Listener : public QMainWindow
+/// caster gui application
+class Caster : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit Listener(QWidget *parent = nullptr);
-    ~Listener();
+    explicit Caster(QWidget *parent = nullptr);
+    ~Caster();
 
 protected:
     virtual bool event(QEvent *event);
@@ -255,7 +255,7 @@ public slots:
 private:
     bool connected_;            ///< connection state
     RawDataInfo rawData_;       ///< raw data attributes
-    Ui::Listener *ui_;          ///< ui controls, etc.
+    Ui::Caster *ui_;            ///< ui controls, etc.
     UltrasoundImage* image_;    ///< image display
     QImage prescan_;            ///< pre-scan converted image
 };

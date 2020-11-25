@@ -2,19 +2,19 @@ TARGET_EXEC ?= $(notdir $(CURDIR))
 
 BUILD_DIR ?= ./build
 SRC_DIRS ?= ./
-LISTEN_SDK ?= ../..
+CAST_SDK ?= ../..
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
-INC_DIRS += $(LISTEN_SDK)/include
+INC_DIRS += $(CAST_SDK)/include
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS += $(INC_FLAGS)
 CXXFLAGS += -std=gnu++14
-LDFLAGS += -L$(LISTEN_SDK)/lib -llisten -lpthread
+LDFLAGS += -L$(CAST_SDK)/lib -lcast -lpthread
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)

@@ -1,23 +1,23 @@
-#include "listener.h"
-#include "ui_listener.h"
+#include "caster.h"
+#include "ui_caster.h"
 #ifdef Clarius_BUILD
-    #include <listen_plugin/listen_interface.h>
+    #include <cast_plugin/cast_interface.h>
 #else
-    #include <listen/listen_interface.h>
+    #include <cast/cast_interface.h>
 #endif
 
 namespace
 {
-    cus::ListenInterface* loadPlugin()
+    cus::CastInterface* loadPlugin()
     {
-#ifdef CLARIUS_LISTEN_STATIC
+#ifdef CLARIUS_CAST_STATIC
         auto staticPlugins = QPluginLoader::staticInstances();
         for (QObject *plugin : staticPlugins)
         {
-            auto listen = qobject_cast<cus::ListenInterface*>(plugin);
-            if (listen)
+            auto cast = qobject_cast<cus::CastInterface*>(plugin);
+            if (cast)
             {
-                return listen;
+                return cast;
             }
         }
 #else
@@ -29,45 +29,45 @@ namespace
             QObject *plugin = loader.instance();
             if (plugin)
             {
-                auto listen = qobject_cast<cus::ListenInterface*>(plugin);
-                if (listen)
+                auto cast = qobject_cast<cus::CastInterface*>(plugin);
+                if (cast)
                 {
-                    return listen;
+                    return cast;
                 }
             }
         }
-#endif //  CLARIUS_LISTEN_STATIC
+#endif //  CLARIUS_CAST_STATIC
         return nullptr;
     }
 }
 
 /// default constructor
 /// @param[in] parent the parent object
-Listener::Listener(QWidget *parent)
+Caster::Caster(QWidget *parent)
     : QMainWindow(parent)
     , connected_(false)
-    , ui_(new Ui::Listener)
-    , listen_(loadPlugin())
+    , ui_(new Ui::Caster)
+    , cast_(loadPlugin())
 {
     ui_->setupUi(this);
-    ui_->image->addWidget(new UltrasoundImage(listen_, this), 1);
-    if (listen_)
+    ui_->image->addWidget(new UltrasoundImage(cast_, this), 1);
+    if (cast_)
     {
         setMessage(QStringLiteral("Plugin loaded successfully"));
-        listen_->setDisconnectCallback(this, [](QObject* listener)
+        cast_->setDisconnectCallback(this, [](QObject* caster)
         {
-            auto thisPtr = static_cast<Listener*>(listener);
+            auto thisPtr = static_cast<Caster*>(caster);
             thisPtr->setMessage(QStringLiteral("Connection dropped"));
             thisPtr->setConnected(false);
         });
-        listen_->setFreezeCallback(this, [](QObject* listener, bool freeze)
+        cast_->setFreezeCallback(this, [](QObject* caster, bool freeze)
         {
             QString state = freeze ? QStringLiteral("Frozen") : QStringLiteral("Running");
-            static_cast<Listener*>(listener)->setMessage(QStringLiteral("Image: ") + state);
+            static_cast<Caster*>(caster)->setMessage(QStringLiteral("Image: ") + state);
         });
-        listen_->initialize(QCoreApplication::applicationDirPath(), this, [](QObject* listener, bool success, const QString& err)
+        cast_->initialize(QCoreApplication::applicationDirPath(), this, [](QObject* caster, bool success, const QString& err)
         {
-            auto thisPtr = static_cast<Listener*>(listener);
+            auto thisPtr = static_cast<Caster*>(caster);
             if (success)
             {
                 thisPtr->setMessage(QStringLiteral("Initialized plugin"));
@@ -85,31 +85,31 @@ Listener::Listener(QWidget *parent)
 }
 
 /// destructor
-Listener::~Listener()
+Caster::~Caster()
 {
 }
 
 /// called when the window is closing to clean up the clarius library
-void Listener::closeEvent(QCloseEvent* event)
+void Caster::closeEvent(QCloseEvent* event)
 {
-    if (listen_)
+    if (cast_)
     {
         // Don't care about when this finishes (hence no callback)
-        listen_->disconnect(nullptr, nullptr);
+        cast_->disconnect(nullptr, nullptr);
     }
     QMainWindow::closeEvent(event);
 }
 
 /// called to update the status bar message
 /// @param[in] message the new status bar message
-void Listener::setMessage(const QString& message)
+void Caster::setMessage(const QString& message)
 {
     ui_->status->showMessage(message);
 }
 
 /// called to update the connected/disconnected state
-/// @param[in] connected true if the listener is currently connected
-void Listener::setConnected(bool connected)
+/// @param[in] connected true if the caster is currently connected
+void Caster::setConnected(bool connected)
 {
     if (connected_ == connected)
     {
@@ -121,17 +121,17 @@ void Listener::setConnected(bool connected)
 }
 
 /// called when the connect/disconnect button is clicked
-void Listener::onConnect()
+void Caster::onConnect()
 {
-    if (!listen_)
+    if (!cast_)
     {
         return;
     }
     if (!connected_)
     {
-        listen_->connect(ui_->ip->text(), ui_->port->text().toInt(), this, [](QObject* listener, bool success, int udpPort, const QString& err)
+        cast_->connect(ui_->ip->text(), ui_->port->text().toInt(), this, [](QObject* caster, bool success, int udpPort, const QString& err)
         {
-            auto thisPtr = static_cast<Listener*>(listener);
+            auto thisPtr = static_cast<Caster*>(caster);
             if (success)
             {
                 thisPtr->setMessage(QStringLiteral("Connection successful, UDP port is %1").arg(udpPort));
@@ -145,9 +145,9 @@ void Listener::onConnect()
     }
     else
     {
-        listen_->disconnect(this, [](QObject* listener, bool success, const QString& err)
+        cast_->disconnect(this, [](QObject* caster, bool success, const QString& err)
         {
-            auto thisPtr = static_cast<Listener*>(listener);
+            auto thisPtr = static_cast<Caster*>(caster);
             thisPtr->setConnected(false);
             if (success)
             {
@@ -162,15 +162,15 @@ void Listener::onConnect()
 }
 
 /// default constructor
-/// @param[in] listen the listen plugin interface, if loaded
+/// @param[in] cast the cast plugin interface, if loaded
 /// @param[in] parent the parent object
-UltrasoundImage::UltrasoundImage(cus::ListenInterface* listen, QWidget* parent)
+UltrasoundImage::UltrasoundImage(cus::CastInterface* cast, QWidget* parent)
     : QOpenGLWidget(parent)
-    , listen_(listen)
+    , cast_(cast)
 {
-    if (listen_)
+    if (cast_)
     {
-        listen_->setNewImageCallback(this, [](QObject* image)
+        cast_->setNewImageCallback(this, [](QObject* image)
         {
             static_cast<UltrasoundImage*>(image)->update();
         });
@@ -183,26 +183,26 @@ void UltrasoundImage::initializeGL()
     auto glContext = context();
     // Setting the background color to black
     glContext->functions()->glClearColor(0, 0, 0, 1.0f);
-    // Listening to the context distroyed signal to allow the plugin clean up GL
+    // Casting to the context distroyed signal to allow the plugin clean up GL
     connect(glContext, &QOpenGLContext::aboutToBeDestroyed, this, &UltrasoundImage::cleanupGL);
 }
 
 /// function to initialize OpenGL
 void UltrasoundImage::cleanupGL()
 {
-    if (listen_)
+    if (cast_)
     {
         // Have to release all resources with the QOpenGLContext made current
         makeCurrent();
-        listen_->cleanupGL();
+        cast_->cleanupGL();
         doneCurrent();
     }
 }
 
 void UltrasoundImage::paintGL()
 {
-    if (listen_)
+    if (cast_)
     {
-        listen_->render(context(), QPoint(0, 0), size(), devicePixelRatioF());
+        cast_->render(context(), QPoint(0, 0), size(), devicePixelRatioF());
     }
 }

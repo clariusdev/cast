@@ -1,12 +1,12 @@
-#include "listener.h"
-#include "ui_listener.h"
-#include <listen/listen.h>
+#include "caster.h"
+#include "ui_caster.h"
+#include <cast/cast.h>
 
-static Listener* _me;
+static Caster* _me;
 
 /// default constructor
 /// @param[in] parent the parent object
-Listener::Listener(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(new Ui::Listener)
+Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(new Ui::Caster)
 {
     _me = this;
     ui_->setupUi(this);
@@ -15,24 +15,24 @@ Listener::Listener(QWidget *parent) : QMainWindow(parent), connected_(false), ui
 }
 
 /// destructor
-Listener::~Listener()
+Caster::~Caster()
 {
     delete ui_;
 }
 
 /// called when the window is closing to clean up the clarius library
-void Listener::closeEvent(QCloseEvent*)
+void Caster::closeEvent(QCloseEvent*)
 {
     if (connected_)
         clariusDisconnect(nullptr);
 
-    clariusDestroyListener();
+    clariusDestroyCast();
 }
 
-/// handles custom events posted by listener api callbacks
+/// handles custom events posted by caster api callbacks
 /// @param[in] event the event to parse
 /// @return handling status
-bool Listener::event(QEvent *event)
+bool Caster::event(QEvent *event)
 {
     if (event->type() == IMAGE_EVENT)
     {
@@ -78,14 +78,14 @@ bool Listener::event(QEvent *event)
 
 /// called when the api returns an error
 /// @param[in] err the error message
-void Listener::setError(const QString& err)
+void Caster::setError(const QString& err)
 {
     ui_->status->showMessage(QStringLiteral("Error: %1").arg(err));
 }
 
 /// called when the freeze status changes
 /// @param[in] en the freeze state
-void Listener::setFreeze(bool en)
+void Caster::setFreeze(bool en)
 {
     ui_->status->showMessage(QStringLiteral("Image: %1").arg(en ? QStringLiteral("Frozen") : QStringLiteral("Running")));
     ui_->freeze->setText(en ? QStringLiteral("Run") : QStringLiteral("Stop"));
@@ -99,14 +99,14 @@ void Listener::setFreeze(bool en)
 /// called when there is a button press on the ultrasound
 /// @param[in] btn the button pressed
 /// @param[in] clicks # of clicks used
-void Listener::onButton(int btn, int clicks)
+void Caster::onButton(int btn, int clicks)
 {
     ui_->status->showMessage(QStringLiteral("Button %1 Pressed, %2 Clicks").arg(btn ? QStringLiteral("Down") : QStringLiteral("Up")).arg(clicks));
 }
 
 /// called when the download progress changes
 /// @param[in] progress the current progress
-void Listener::setProgress(int progress)
+void Caster::setProgress(int progress)
 {
     ui_->progress->setValue(progress);
 }
@@ -116,7 +116,7 @@ void Listener::setProgress(int progress)
 /// @param[in] w width of the image
 /// @param[in] h height of the image
 /// @param[in] bpp the bits per pixel (should always be 8)
-void Listener::newProcessedImage(const void* img, int w, int h, int bpp)
+void Caster::newProcessedImage(const void* img, int w, int h, int bpp)
 {
     image_->loadImage(img, w, h, bpp);
 }
@@ -127,7 +127,7 @@ void Listener::newProcessedImage(const void* img, int w, int h, int bpp)
 /// @param[in] h height of the image
 /// @param[in] bpp the bits per pixel (should always be 8)
 /// @param[in] jpg flag if the data is jpeg compressed
-void Listener::newRawImage(const void* img, int w, int h, int bpp, bool jpg)
+void Caster::newRawImage(const void* img, int w, int h, int bpp, bool jpg)
 {
     Q_UNUSED(bpp)
     Q_UNUSED(jpg)
@@ -135,7 +135,7 @@ void Listener::newRawImage(const void* img, int w, int h, int bpp, bool jpg)
 }
 
 /// called when the connect/disconnect button is clicked
-void Listener::onConnect()
+void Caster::onConnect()
 {
     if (!connected_)
     {
@@ -168,38 +168,38 @@ void Listener::onConnect()
 }
 
 /// called when the freeze button is clicked
-void Listener::onFreeze()
+void Caster::onFreeze()
 {
     if (!connected_)
         return;
 
-    if (clariusUserFunction(USER_FN_TOGGLE_FREEZE, nullptr) < 0)
+    if (clariusUserFunction(USER_FN_TOGGLE_FREEZE, 0, nullptr) < 0)
         ui_->status->showMessage("Could not freeze/unfreeze scanner");
 }
 
 /// called when the shallower button is clicked
-void Listener::onShallower()
+void Caster::onShallower()
 {
     if (!connected_)
         return;
 
-    if (clariusUserFunction(USER_FN_DEPTH_DEC, nullptr) < 0)
+    if (clariusUserFunction(USER_FN_DEPTH_DEC, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image shallower");
 }
 
 /// called when the deeper button is clicked
-void Listener::onDeeper()
+void Caster::onDeeper()
 {
     if (!connected_)
         return;
 
-    if (clariusUserFunction(USER_FN_DEPTH_INC, nullptr) < 0)
+    if (clariusUserFunction(USER_FN_DEPTH_INC, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image deeper");
 }
 
 /// called when the request raw data button is clicked
 /// @note this can only be used while imaging is frozen
-void Listener::onRequest()
+void Caster::onRequest()
 {
     if (!connected_)
         return;
@@ -219,7 +219,7 @@ void Listener::onRequest()
 
 /// called when the request download button is clicked
 /// @note this can only be used once a raw data request has been made
-void Listener::onDownload()
+void Caster::onDownload()
 {
     if (!connected_)
         return;
@@ -247,7 +247,7 @@ void Listener::onDownload()
 /// called when the raw data download is ready
 /// @param[in] success the success of downloading the data
 /// @return success of the call
-bool Listener::rawDataReady(bool success)
+bool Caster::rawDataReady(bool success)
 {
     if (!success)
     {

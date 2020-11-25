@@ -1,4 +1,4 @@
-#include "listener.h"
+#include "caster.h"
 
 #ifdef Clarius_BUILD
 #define Clarius_IMPORT_QT_WIDGETS_LIB
@@ -7,13 +7,13 @@
 #endif
 
 #ifdef CLARIUS_LISTEN_STATIC
-Q_IMPORT_PLUGIN(Listen)
+Q_IMPORT_PLUGIN(Cast)
 #endif
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Listener listener;
-    listener.show();
+    Caster caster;
+    caster.show();
     return a.exec();
 }

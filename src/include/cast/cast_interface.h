@@ -1,5 +1,5 @@
-#ifndef LISTEN_INTERFACE_H
-#define LISTEN_INTERFACE_H
+#ifndef CAST_INTERFACE_H
+#define CAST_INTERFACE_H
 
 #include <QtPlugin>
 
@@ -20,11 +20,11 @@ namespace cus
     //! General callback with the context that was passed in, whether the call succeeded or not, the UDP port, and a message if the call failed
     typedef void(*ConnectFn)(QObject* context, bool success, int udpPort, const QString& errMessage);
 
-    class ListenInterface
+    class CastInterface
     {
     public:
         //! @brief Destructor
-        virtual ~ListenInterface() {}
+        virtual ~CastInterface() {}
         //! @brief Set the function that will be called when the connection is dropped
         //! @details The callback will be called from the main Qt thread (by posting an event to the main message loop).
         //!          The function will no longer be called when the context object is destroyed.
@@ -58,7 +58,7 @@ namespace cus
         //!          The callback function will not be called if the context object is destroyed.
         virtual void connect(
             const QString& ipAddress, //!< IP address to connect to (IP v4 or v6)
-            int port, //!< TCP port to connect to (listen port)
+            int port, //!< TCP port to connect to (casting port)
             QObject* context, //!< Valid QObject instance
             cus::ConnectFn fn //!< Function to call when finished; passes back the context pointer given
         ) = 0;
@@ -86,7 +86,7 @@ namespace cus
     };
 }
 
-#define CUS_LISTENINTERFACE_IID "me.clarius.ListenInterface"
-Q_DECLARE_INTERFACE(cus::ListenInterface, CUS_LISTENINTERFACE_IID)
+#define CUS_CASTINTERFACE_IID "me.clarius.CastInterface"
+Q_DECLARE_INTERFACE(cus::CastInterface, CUS_CASTINTERFACE_IID)
 
-#endif // !LISTEN_INTERFACE_H
+#endif

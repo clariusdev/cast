@@ -2,7 +2,7 @@
 
 import argparse
 import os.path
-import pylisten
+import pycast
 from PIL import Image
 
 ## called when a new processed image is streamed
@@ -69,8 +69,8 @@ def main():
     parser.set_defaults(height=480)
     args = parser.parse_args()
 
-    # uncomment to get documentation for pylisten module
-    #print(help(pylisten))
+    # uncomment to get documentation for pycast module
+    #print(help(pycast))
 
     if not args.ip or not args.port or args.port < 0:
         print("one or more arguments are invalid")
@@ -81,16 +81,16 @@ def main():
     path = os.path.expanduser("~/")
 
     # initialize
-    listen = pylisten.Listener(newProcessedImage, newRawImage, freezeFn, buttonsFn)
-    ret = listen.init(path, args.width, args.height)
+    cast = pycast.Caster(newProcessedImage, newRawImage, freezeFn, buttonsFn)
+    ret = cast.init(path, args.width, args.height)
     if ret:
         print("initialization succeeded")
-        ret = listen.connect(args.ip, args.port)
+        ret = cast.connect(args.ip, args.port)
         if ret:
             print("connected to {0} on port {1}".format(args.ip, args.port))
         else:
             print("connection failed")
-            listen.destroy()
+            cast.destroy()
             return
     else:
         print("initialization failed")
@@ -103,21 +103,21 @@ def main():
         if key == 'a' or key == 'A':
             key = input("(f)->freeze, (i)->image, (c)->cine, (d/D)->depth, (g/G)->gain: ")
             if key == 'f' or key == 'F':
-                listen.userFunction(1)
+                cast.userFunction(1, 0)
             elif key == 'i' or key == 'I':
-                listen.userFunction(2)
+                cast.userFunction(2, 0)
             elif key == 'c' or key == 'C':
-                listen.userFunction(3)
+                cast.userFunction(3, 0)
             elif key == 'd':
-                listen.userFunction(4)
+                cast.userFunction(4, 0)
             elif key == 'D':
-                listen.userFunction(5)
+                cast.userFunction(5, 0)
             elif key == 'g':
-                listen.userFunction(6)
+                cast.userFunction(6, 0)
             elif key == 'G':
-                listen.userFunction(7)
+                cast.userFunction(7, 0)
 
-    listen.destroy()
+    cast.destroy()
 
 if __name__ == '__main__':
     main()

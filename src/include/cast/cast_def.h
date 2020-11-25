@@ -13,7 +13,7 @@ typedef struct _ClariusRawImageInfo
 
 } ClariusRawImageInfo;
 
-/// processedd image information supplied with each frame
+/// processed image information supplied with each frame
 typedef struct _ClariusProcessedImageInfo
 {
     int width;              ///< width of the image in pixels
@@ -92,3 +92,5 @@ typedef void (*ClariusErrorFn)(const char* msg);
 #define USER_FN_MODE_PDI            15
 #define USER_FN_MODE_PW             16
 #define USER_FN_MODE_ELASTOGRAPHY   17
+#define USER_FN_SET_DEPTH           20
+#define USER_FN_SET_GAIN            21

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Listener</class>
- <widget class="QMainWindow" name="Listener">
+ <class>Caster</class>
+ <widget class="QMainWindow" name="Caster">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Listener</string>
+   <string>Caster</string>
   </property>
   <widget class="QWidget" name="_central">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -72,7 +72,7 @@
   <connection>
    <sender>connect</sender>
    <signal>clicked()</signal>
-   <receiver>Listener</receiver>
+   <receiver>Caster</receiver>
    <slot>onConnect()</slot>
    <hints>
     <hint type="sourcelabel">
