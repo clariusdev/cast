@@ -3,12 +3,8 @@ Clarius Cast API
 
 This repository contains all related items for the Clarius Cast API
 
-Release Cycle:
-- A new API gets published when Clarius releases a new App
-- APIs must be updated to the latest version, there is no backwards or forwards compatibility with older/newer Apps due to a probe firmware check that the library performs upon a connection
-- Binaries can be obtained in the releases section of the GitHub repositories
+# Features
 
-Features:
 - Obtain greyscale and color Doppler **images** (cartesian data) in real-time over the wireless network
 - Obtain greyscale and color Doppler **raw images** (polar co-ordinate data) in real-time over the wireless network
 - Obtain **9-DOF IMU** data in real-time over the wireless network **
@@ -20,17 +16,44 @@ Features:
 
 ** separate software licensing may be required for features to function
 
-Constraints:
+# Constraints
+
 - Must be executed while the **Clarius App is running** and connected to a probe, can be the same or different mobile device/PC
 - Probe, mobile device, and PC/device must be on the **same wireless network**
 - Raw data can only be captured while **imaging is frozen**
 
-Supported Platforms:
-- **Linux**
-- **Windows**
-- **macOS**
+# Architecture
 
-Repository Structure:
+The Cast API communicates with the _Clarius Scanner_ directly, and makes use of TCP technologies to create a secondary connection to the device that is able to receive images.
+
+                                      +-----------------------+
+                                      | Mobile Device         |
+    +---------+                       |    +-------------+    |
+    |         |   Primary Connection  |    |   Clarius   |    |
+    |  Probe  +-----------------------|--->+     App     |    |
+    |         |                       |    +-------------+    |
+    |         |    Cast Connection    |                       |
+    |         +<--------------+       +-----------------------+
+    |         |               |
+    +---------+               |       +-----------------------+
+                              |       | PC                    |
+                              |       |    +-------------+    |
+                              |       |    | Cast        |    |
+                              +-------|--->+ Application |    |
+                                      |    |             |    |
+                                      |    +-------------+    |
+                                      |                       |
+                                      +-----------------------+
+
+# Supported Platforms
+
+- **Windows**: Windows 10 only
+- **Linux**: tested on Ubuntu 20.04 and later
+- **macOS**: tested on macOS 10.15 and later
+
+# Repository
+
+Structure:
 - **src/include**         API headers
 - **src/example**         example programs
 - **src/python**          python examples (import pycast modules from release package)
@@ -54,5 +77,5 @@ imageCallback(image)
 }
 ```
 
-Notes:
+# Notes
 - When running under Windows, execution may require temporarily disabling the firewall defender or adding an exception for the executable - the latter is recommended. This is due to the use of randomized ports that the API makes use of for streaming images.
