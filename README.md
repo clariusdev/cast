@@ -22,6 +22,12 @@ This repository contains all related items for the Clarius Cast API
 - Probe, mobile device, and PC/device must be on the **same wireless network**
 - Raw data can only be captured while **imaging is frozen**
 
+# Releases
+
+- New API binaries and source code get published when Clarius releases a new App
+- APIs must be updated to the latest version, there is no backwards or forwards compatibility with older/newer Apps due to a probe firmware check that the library performs upon a connection
+- Binaries can be obtained in the [releases](https://github.com/clariusdev/cast/releases) section of the GitHub repositories
+
 # Architecture
 
 The Cast API communicates with the _Clarius Scanner_ directly, and makes use of TCP technologies to create a secondary connection to the device that is able to receive images.
