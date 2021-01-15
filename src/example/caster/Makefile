@@ -16,6 +16,10 @@ CPPFLAGS += $(INC_FLAGS)
 CXXFLAGS += -std=gnu++14
 LDFLAGS += -L$(CAST_SDK)/lib -lcast -lpthread
 
+ifeq ($(shell uname -s),Darwin)
+	LDFLAGS += -rpath ${CAST_SDK}/lib
+endif
+
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
