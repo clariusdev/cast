@@ -82,6 +82,16 @@ imageCallback(image)
   processImage(image)
 }
 ```
+# Network Information
+
+The Clarius App will display the network information on a top bar above the image for any scanner licensed for the Cast API. The port and IP address are required to make a connection through the Cast API.
+
+|<img height="250px" alt="connection in progress" src="blob/1.png"/>|<img height="250px" alt="connected" src="blob/2.png"/>|
+
+Licenced scanners also have the option for forcing the port by adjusting the Clarius Cast Permission setting within the App to "Research". This provides a potentially more streamlined method when automating connections from the custom software.
+
+|<img height="250px" alt="setting" src="blob/3.png"/>|
 
 # Notes
+
 - When running under Windows, execution may require temporarily disabling the firewall defender or adding an exception for the executable - the latter is recommended. This is due to the use of randomized ports that the API makes use of for streaming images.
