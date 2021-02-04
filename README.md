@@ -92,6 +92,8 @@ Licenced scanners also have the option for forcing the port by adjusting the Cla
 
 |<img height="250px" alt="setting" src="blob/3.png"/>|
 
+Since most connections will be made using the scanner's own Wi-Fi network, it is important to ensure the computer running the Cast program is on the same network. Scanner networks are typically prefixed with "DIRECT-", and the password is available for 60 seconds on the mobile device clipboard once the Clarius App has connected.
+
 # Notes
 
 - When running under Windows, execution may require temporarily disabling the firewall defender or adding an exception for the executable - the latter is recommended. This is due to the use of randomized ports that the API makes use of for streaming images.
