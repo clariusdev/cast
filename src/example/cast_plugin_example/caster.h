@@ -57,10 +57,10 @@ class Caster : public QMainWindow
 
 public:
     explicit Caster(QWidget *parent = nullptr);
-    ~Caster();
+    ~Caster() override;
 
 protected:
-    virtual void closeEvent(QCloseEvent *event);
+    virtual void closeEvent(QCloseEvent *event) override;
 
 private:
     void newImage();

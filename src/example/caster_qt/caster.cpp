@@ -1,4 +1,5 @@
 #include "caster.h"
+#include "display.h"
 #include "ui_caster.h"
 #include <cast/cast.h>
 
@@ -10,8 +11,11 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(ne
 {
     _me = this;
     ui_->setupUi(this);
+    setWindowIcon(QIcon(":/res/cast.png"));
     image_ = new UltrasoundImage(this);
+    signal_ = new RfSignal(this);
     ui_->image->addWidget(image_);
+    ui_->image->addWidget(signal_);
 }
 
 /// destructor
@@ -24,9 +28,9 @@ Caster::~Caster()
 void Caster::closeEvent(QCloseEvent*)
 {
     if (connected_)
-        clariusDisconnect(nullptr);
+        cusCastDisconnect(nullptr);
 
-    clariusDestroyCast();
+    cusCastDestroy();
 }
 
 /// handles custom events posted by caster api callbacks
@@ -37,39 +41,54 @@ bool Caster::event(QEvent *event)
     if (event->type() == IMAGE_EVENT)
     {
         auto evt = static_cast<event::Image*>(event);
-        newProcessedImage(evt->data(), evt->width(), evt->height(), evt->bpp());
+        newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_);
         return true;
     }
-    if (event->type() == PRESCAN_EVENT)
+    else if (event->type() == PRESCAN_EVENT)
     {
-        auto evt = static_cast<event::PreScanImage*>(event);
-        newRawImage(evt->data(), evt->width(), evt->height(), evt->bpp(), evt->jpeg());
+        auto evt = static_cast<event::Image*>(event);
+        newPrescanImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_);
+        return true;
+    }
+    else if (event->type() == RF_EVENT)
+    {
+        auto evt = static_cast<event::RfImage*>(event);
+        newRfData(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->lateral_, evt->axial_);
+        return true;
+    }
+    else if (event->type() == SPECTRUM_EVENT)
+    {
+        auto evt = static_cast<event::Spectrum*>(event);
+        if (evt->pw_)
+            newPwSpectrum(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->period_, evt->velocityPerSample_);
+        else
+            newMSpectrum(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->period_, evt->micronsPerSample_);
         return true;
     }
     else if (event->type() == FREEZE_EVENT)
     {
-        setFreeze((static_cast<event::Freeze*>(event))->frozen());
+        setFreeze((static_cast<event::Freeze*>(event))->frozen_);
         return true;
     }
     else if (event->type() == BUTTON_EVENT)
     {
         auto evt = static_cast<event::Button*>(event);
-        onButton(evt->button(), evt->clicks());
+        onButton(evt->button_, evt->clicks_);
         return true;
     }
     else if (event->type() == PROGRESS_EVENT)
     {
-        setProgress((static_cast<event::Progress*>(event))->progress());
+        setProgress((static_cast<event::Progress*>(event))->progress_);
         return true;
     }
     else if (event->type() == RAWDATA_EVENT)
     {
-        rawDataReady((static_cast<event::RawData*>(event))->success());
+        rawDataReady((static_cast<event::RawData*>(event))->success_);
         return true;
     }
     else if (event->type() == ERROR_EVENT)
     {
-        setError((static_cast<event::Error*>(event))->error());
+        setError((static_cast<event::Error*>(event))->error_);
         return true;
     }
 
@@ -115,23 +134,107 @@ void Caster::setProgress(int progress)
 /// @param[in] img the image data
 /// @param[in] w width of the image
 /// @param[in] h height of the image
-/// @param[in] bpp the bits per pixel (should always be 8)
-void Caster::newProcessedImage(const void* img, int w, int h, int bpp)
+/// @param[in] bpp the bits per pixel
+/// @param[in] sz size of the image in bytes
+void Caster::newProcessedImage(const void* img, int w, int h, int bpp, int sz)
 {
-    image_->loadImage(img, w, h, bpp);
+    image_->loadImage(img, w, h, bpp, sz);
 }
 
 /// called when a new pre-scan image has been sent
 /// @param[in] img the image data
 /// @param[in] w width of the image
 /// @param[in] h height of the image
-/// @param[in] bpp the bits per pixel (should always be 8)
-/// @param[in] jpg flag if the data is jpeg compressed
-void Caster::newRawImage(const void* img, int w, int h, int bpp, bool jpg)
+/// @param[in] bpp the bits per pixel
+/// @param[in] sz size of the image in bytes
+void Caster::newPrescanImage(const void* img, int w, int h, int bpp, int sz)
 {
-    Q_UNUSED(bpp)
-    Q_UNUSED(jpg)
-    prescan_ = QImage(reinterpret_cast<const uchar*>(img), w, h, QImage::Format_ARGB32);
+    if (sz == (w * h * (bpp / 8)))
+        prescan_ = QImage(reinterpret_cast<const uchar*>(img), w, h, QImage::Format_ARGB32);
+    else
+        prescan_.loadFromData(static_cast<const uchar*>(img), sz, "JPG");
+}
+
+/// called when new rf data has been sent
+/// @param[in] rfdata the rf data
+/// @param[in] l # of lines
+/// @param[in] s # of samples
+/// @param[in] bps the bits per sample (should always be 16)
+/// @param[in] lateral spacing between lines
+/// @param[in] axial sample size
+void Caster::newRfData(const void* rfdata, int l, int s, int bps, double lateral, double axial)
+{
+    signal_->loadSignal(rfdata, l, s, bps / 8);
+    Q_UNUSED(lateral)
+    Q_UNUSED(axial)
+}
+
+/// called when new m spectral data has been sent
+/// @param[in] rfdata the rf data
+/// @param[in] l # of lines
+/// @param[in] s # of samples
+/// @param[in] bps the bits per sample
+/// @param[in] period seconds per line
+/// @param[in] micronsPerSample # of microns per sample
+void Caster::newMSpectrum(const void* rfdata, int l, int s, int bps, double period, double micronsPerSample)
+{
+    Q_UNUSED(rfdata)
+    Q_UNUSED(l)
+    Q_UNUSED(s)
+    Q_UNUSED(bps)
+    Q_UNUSED(period)
+    Q_UNUSED(micronsPerSample)
+}
+
+/// called when new pw spectral data has been sent
+/// @param[in] rfdata the rf data
+/// @param[in] l # of lines
+/// @param[in] s # of samples
+/// @param[in] bps the bits per sample
+/// @param[in] period seconds per line
+/// @param[in] velocityPerSample speed per sample in m/s
+void Caster::newPwSpectrum(const void* rfdata, int l, int s, int bps, double period, double velocityPerSample)
+{
+    Q_UNUSED(rfdata)
+    Q_UNUSED(l)
+    Q_UNUSED(s)
+    Q_UNUSED(bps)
+    Q_UNUSED(period)
+    Q_UNUSED(velocityPerSample)
+}
+
+/// handles the connection result
+/// @param[in] res the connection result
+void Caster::connected(bool res)
+{
+    if (res)
+    {
+        ui_->status->showMessage("Connection successful");
+        connected_ = true;
+        ui_->connect->setText("Disconnect");
+        ui_->freeze->setEnabled(true);
+        ui_->shallower->setEnabled(true);
+        ui_->deeper->setEnabled(true);
+    }
+    else
+        ui_->status->showMessage("Could not connect to the specified device");
+}
+
+/// handles the disconnection result
+/// @param[in] res the disconnection result
+void Caster::disconnected(bool res)
+{
+    if (res)
+    {
+        ui_->status->showMessage("Disconnect successful");
+        connected_ = false;
+        ui_->connect->setText("Connect");
+        ui_->freeze->setEnabled(false);
+        ui_->shallower->setEnabled(false);
+        ui_->deeper->setEnabled(false);
+    }
+    else
+        ui_->status->showMessage("Could not disconnect");
 }
 
 /// called when the connect/disconnect button is clicked
@@ -139,31 +242,19 @@ void Caster::onConnect()
 {
     if (!connected_)
     {
-        if (clariusConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), nullptr) < 0)
-            ui_->status->showMessage("Could not connect to the specified device");
-        else
+        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), [](int ret)
         {
-            ui_->status->showMessage("Connection successful");
-            connected_ = true;
-            ui_->connect->setText("Disconnect");
-            ui_->freeze->setEnabled(true);
-            ui_->shallower->setEnabled(true);
-            ui_->deeper->setEnabled(true);
-        }
+            _me->connected(ret > 0);
+        }) < 0)
+            ui_->status->showMessage("Connection attempt failed");
     }
     else
     {
-        if (clariusDisconnect(nullptr) < 0)
-            ui_->status->showMessage("Could not disconnect");
-        else
+        if (cusCastDisconnect([](int ret)
         {
-            ui_->status->showMessage("Disconnect successful");
-            connected_ = false;
-            ui_->connect->setText("Connect");
-            ui_->freeze->setEnabled(false);
-            ui_->shallower->setEnabled(false);
-            ui_->deeper->setEnabled(false);
-        }
+            _me->disconnected(ret == 0);
+        }) < 0)
+            ui_->status->showMessage("Disconnect attempt failed");
     }
 }
 
@@ -173,8 +264,8 @@ void Caster::onFreeze()
     if (!connected_)
         return;
 
-    if (clariusUserFunction(USER_FN_TOGGLE_FREEZE, 0, nullptr) < 0)
-        ui_->status->showMessage("Could not freeze/unfreeze scanner");
+    if (cusCastUserFunction(USER_FN_TOGGLE_FREEZE, 0, nullptr) < 0)
+        ui_->status->showMessage("Toggle freeze failed");
 }
 
 /// called when the shallower button is clicked
@@ -183,7 +274,7 @@ void Caster::onShallower()
     if (!connected_)
         return;
 
-    if (clariusUserFunction(USER_FN_DEPTH_DEC, 0, nullptr) < 0)
+    if (cusCastUserFunction(USER_FN_DEPTH_DEC, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image shallower");
 }
 
@@ -193,18 +284,14 @@ void Caster::onDeeper()
     if (!connected_)
         return;
 
-    if (clariusUserFunction(USER_FN_DEPTH_INC, 0, nullptr) < 0)
+    if (cusCastUserFunction(USER_FN_DEPTH_INC, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image deeper");
 }
 
-/// called when the request raw data button is clicked
-/// @note this can only be used while imaging is frozen
-void Caster::onRequest()
+/// handles the result of a raw data request
+/// @param[in] sz size of the raw data available, or status if not available
+void Caster::rawData(int sz)
 {
-    if (!connected_)
-        return;
-
-    int sz = clariusRequestRawData(0, 0, nullptr);
     if (sz < 0)
         ui_->status->showMessage("Error requesting raw data");
     else if (sz == 0)
@@ -215,6 +302,20 @@ void Caster::onRequest()
         ui_->download->setEnabled(true);
         ui_->status->showMessage(QStringLiteral("Raw data available: %1B").arg(rawData_.size_));
     }
+}
+
+/// called when the request raw data button is clicked
+/// @note this can only be used while imaging is frozen
+void Caster::onRequest()
+{
+    if (!connected_)
+        return;
+
+    if (cusCastRequestRawData(0, 0, [](int sz)
+    {
+        _me->rawData(sz);
+    }) < 0)
+        ui_->status->showMessage("Raw data request failed");
 }
 
 /// called when the request download button is clicked
@@ -235,12 +336,12 @@ void Caster::onDownload()
         rawData_.data_.resize(rawData_.size_);
         rawData_.ptr_ = rawData_.data_.data();
 
-        // don't use a blocking call here so we can update the gui with download progress
-        clariusReadRawData((void**)(&rawData_.ptr_), [](int ret)
+        if (cusCastReadRawData((void**)(&rawData_.ptr_), [](int ret)
         {
             // call is complete, post event to manage actual storage
             QApplication::postEvent(_me, new event::RawData(ret < 0 ? false : true));
-        });
+        }) < 0)
+            ui_->status->showMessage("Raw data download failed");
     }
 }
 
@@ -268,94 +369,4 @@ bool Caster::rawDataReady(bool success)
     }
 
     return true;
-}
-
-/// default constructor
-/// @param[in] parent the parent object
-UltrasoundImage::UltrasoundImage(QWidget* parent) : QGraphicsView(parent)
-{
-    QGraphicsScene* sc = new QGraphicsScene(this);
-    setScene(sc);
-
-    // initialize image to some arbitrary size
-    image_ = QImage(320, 240, QImage::Format_ARGB32);
-    image_.fill(Qt::black);
-    setSceneRect(0, 0, image_.width(), image_.height());
-
-    QSizePolicy p(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    p.setHeightForWidth(true);
-    setSizePolicy(p);
-}
-
-/// loads a new image from raw data
-/// @param[in] img the new image data
-/// @param[in] w the image width
-/// @param[in] h the image height
-void UltrasoundImage::loadImage(const void* img, int w, int h, int bpp)
-{
-    // check for size match
-    if (image_.width() != w || image_.height() != h)
-        return;
-
-    // set the image data
-    lock_.lock();
-    memcpy(image_.bits(), img, w * h * (bpp / 8));
-    lock_.unlock();
-
-    // redraw
-    scene()->invalidate();
-}
-
-/// handles resizing of the image view
-/// @param[in] e the event to parse
-void UltrasoundImage::resizeEvent(QResizeEvent* e)
-{
-    auto w = e->size().width(), h = e->size().height();
-
-    setSceneRect(0, 0, w, h);
-    clariusSetOutputSize(w, h);
-
-    lock_.lock();
-    image_ = QImage(w, h, QImage::Format_ARGB32);
-    image_.fill(Qt::black);
-    lock_.unlock();
-
-    QGraphicsView::resizeEvent(e);
-}
-
-/// calculates the ratio of the test image to determine the proper height ratio for width
-/// @param[in] w the width of the widget
-/// @return the appropriate height
-int UltrasoundImage::heightForWidth(int w) const
-{
-    // keep a proper aspect 4:3 ratio
-    double ratio = 3.0 / 4.0;
-    return static_cast<int>(w * ratio);
-}
-
-/// size hint to keep the test image ratio
-/// @return the size hint
-QSize UltrasoundImage::sizeHint() const
-{
-    auto w = width();
-    return QSize(w, heightForWidth(w));
-}
-
-/// creates a black background
-/// @param[in] painter the drawing context
-/// @param[in] r the rectangle to fill (the entire view)
-void UltrasoundImage::drawBackground(QPainter* painter, const QRectF& r)
-{
-    painter->fillRect(r, QBrush(Qt::black));
-    QGraphicsView::drawBackground(painter, r);
-}
-
-/// draws the target image
-/// @param[in] painter the drawing context
-void UltrasoundImage::drawForeground(QPainter* painter, const QRectF& r)
-{
-    lock_.lock();
-    if (!image_.isNull())
-        painter->drawImage(r, image_);
-    lock_.unlock();
 }

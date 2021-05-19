@@ -12,11 +12,15 @@
 
 #include <cast/cast.h>
 
-#define BLOCKINGCALL    nullptr
 #define PRINT           std::cout << std::endl
+#define PRINTSL         std::cout << "\r"
 #define ERROR           std::cerr << std::endl
-#define ERRCODE         (-1)
+#define FAILURE         (-1)
 #define SUCCESS         (0)
+
+static char* buffer_ = nullptr;
+static int szRawData_ = 0;
+static int counter_ = 0;
 
 /// callback for error messages
 /// @param[in] err the error message sent from the casting module
@@ -30,6 +34,7 @@ void errorFn(const char* err)
 void freezeFn(int val)
 {
     PRINT << (val ? "frozen" : "imaging");
+    counter_ = 0;
 }
 
 /// callback for button press
@@ -40,11 +45,11 @@ void buttonFn(int btn, int clicks)
     PRINT << (btn ? "down" : "up") << " button pressed, clicks: " << clicks;
 }
 
-/// callback for readback progreess
+/// callback for readback progress
 /// @param[in] progress the readback progress
 void progressFn(int progress)
 {
-    ERROR << "download: " << progress;
+    PRINTSL << "downloading: " << progress << "%" << std::flush;
 }
 
 /// prints imu data
@@ -62,39 +67,91 @@ void printImuData(int npos, const ClariusPosInfo* pos)
 }
 
 /// callback for a new pre-scan converted data sent from the scanner
-/// @param[in] newImage a pointer to the raw image bits of
+/// @param[in] newImage a pointer to the raw image bits
 /// @param[in] nfo the image properties
 /// @param[in] npos the # of positional data points embedded with the frame
 /// @param[in] pos the buffer of positional data
 void newRawImageFn(const void* newImage, const ClariusRawImageInfo* nfo, int npos, const ClariusPosInfo* pos)
 {
-    PRINT << "new pre-scan data (" << newImage << "): " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
+#ifdef PRINTRAW
+    if (nfo->rf)
+        PRINT << "new rf data (" << newImage << "): " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
+          << "bits. @ " << nfo->axialSize << " microns per sample. imu points: " << npos;
+    else
+        PRINT << "new pre-scan data (" << newImage << "): " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
           << "bits. @ " << nfo->axialSize << " microns per sample. imu points: " << npos << " jpeg size: " << (int)nfo->jpeg;
 
     if (npos)
         printImuData(npos, pos);
+#else
+    (void)newImage;
+    (void)nfo;
+    (void)npos;
+    (void)pos;
+#endif
 }
 
 /// callback for a new image sent from the scanner
-/// @param[in] newImage a pointer to the raw image bits of
+/// @param[in] newImage a pointer to the raw image bits
 /// @param[in] nfo the image properties
 /// @param[in] npos the # of positional data points embedded with the frame
 /// @param[in] pos the buffer of positional data
 void newProcessedImageFn(const void* newImage, const ClariusProcessedImageInfo* nfo, int npos, const ClariusPosInfo* pos)
 {
-    PRINT << "new image (" << newImage << "): " << nfo->width << " x " << nfo->height << " @ " << nfo->bitsPerPixel
-          << "bits. @ " << nfo->micronsPerPixel << " microns per pixel. imu points: " << npos;
-
-    if (npos)
-        printImuData(npos, pos);
+    (void)newImage;
+    (void)pos;
+    PRINTSL << "new image (" << counter_++ << "): " << nfo->width << " x " << nfo->height << " @ " << nfo->bitsPerPixel << " bpp. @ "
+            << nfo->imageSize << "bytes. @ " << nfo->micronsPerPixel << " microns per pixel. imu points: " << npos << std::flush;
 }
 
+/// callback for a new spectral image sent from the scanner
+/// @param[in] newImage a pointer to the raw image bits
+/// @param[in] nfo the image properties
+void newSpectralImageFn(const void* newImage, const ClariusSpectralImageInfo* nfo)
+{
+    (void)newImage;
+    PRINTSL << "new spectrum: " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
+          << "bits. @ " << nfo->period << " sec/line." << std::flush;
+}
+
+/// saves raw data from the current download buffer
+/// @return success of the call
+bool saveRawData()
+{
+    if (!szRawData_ || !buffer_)
+        return false;
+
+    auto cleanup = []()
+    {
+        free(buffer_);
+        buffer_ = nullptr;
+        szRawData_ = 0;
+    };
+
+    FILE* fp = nullptr;
+    // save raw data to disk as a compressed file
+    #ifdef _MSC_VER
+        fopen_s(&fp, "raw_data.tar", "wb+");
+    #else
+        fp = fopen("raw_data.tar", "wb+");
+    #endif
+    if (!fp)
+    {
+        cleanup();
+        return false;
+    }
+
+    fwrite(buffer_, szRawData_, 1, fp);
+    fclose(fp);
+    cleanup();
+    return true;
+}
+
+/// processes the user input
+/// @param[out] quit the exit flag
 void processEventLoop(std::atomic_bool& quit)
 {
     std::string cmd;
-    int ret = 0;
-    char* buffer = nullptr;
-    FILE* fp = nullptr;
 
     while (std::getline(std::cin, cmd))
     {
@@ -105,75 +162,73 @@ void processEventLoop(std::atomic_bool& quit)
         }
         else if (cmd == "F" || cmd == "f")
         {
-            ret = clariusUserFunction(USER_FN_TOGGLE_FREEZE, 0, BLOCKINGCALL);
-            if (ret < 0)
+            if (cusCastUserFunction(USER_FN_TOGGLE_FREEZE, 0, nullptr) < 0)
                 ERROR << "error toggling freeze" << std::endl;
         }
         else if (cmd == "D")
         {
-            ret = clariusUserFunction(USER_FN_DEPTH_INC, 0, BLOCKINGCALL);
-            if (ret < 0)
+            if (cusCastUserFunction(USER_FN_DEPTH_INC, 0, nullptr) < 0)
                 ERROR << "error incrementing depth" << std::endl;
         }
         else if (cmd == "d")
         {
-            ret = clariusUserFunction(USER_FN_DEPTH_DEC, 0, BLOCKINGCALL);
-            if (ret < 0)
+            if (cusCastUserFunction(USER_FN_DEPTH_DEC, 0, nullptr) < 0)
                 ERROR << "error decrementing depth" << std::endl;
         }
         else if (cmd == "G")
         {
-            ret = clariusUserFunction(USER_FN_GAIN_INC, 0, BLOCKINGCALL);
-            if (ret < 0)
+            if (cusCastUserFunction(USER_FN_GAIN_INC, 0, nullptr) < 0)
                 ERROR << "error incrementing gain" << std::endl;
         }
         else if (cmd == "g")
         {
-            ret = clariusUserFunction(USER_FN_GAIN_DEC, 0, BLOCKINGCALL);
-            if (ret < 0)
+            if (cusCastUserFunction(USER_FN_GAIN_DEC, 0, nullptr) < 0)
                 ERROR << "error decrementing gain" << std::endl;
         }
         else if (cmd == "R" || cmd == "r")
         {
-            ret = clariusRequestRawData(0, 0, BLOCKINGCALL);
-            if (ret < 0)
+            if (cusCastRequestRawData(0, 0, [](int sz)
+            {
+                if (sz < 0)
+                    ERROR << "error requesting raw data" << std::endl;
+                else if (sz == 0)
+                {
+                    szRawData_ = 0;
+                    ERROR << "no raw data buffered" << std::endl;
+                }
+                else
+                {
+                    szRawData_ = sz;
+                    PRINT << "raw data file of size " << sz << "B ready to download";
+                }
+
+            }) < 0)
                 ERROR << "error requesting raw data" << std::endl;
-            else if (ret == 0)
-                ERROR << "no raw data buffered" << std::endl;
-            else
-                PRINT << "raw data file of size " << ret << "B ready to download";
         }
         else if (cmd == "Y" || cmd == "y")
         {
-            if (ret <= 0)
+            if (szRawData_ <= 0)
                 ERROR << "no raw data to download" << std::endl;
             else
             {
-                buffer = (char*)malloc(ret);
+                buffer_ = (char*)malloc(szRawData_);
 
-                if (clariusReadRawData((void**)(&buffer), BLOCKINGCALL) < 0)
-                    ERROR << "error download raw data" << std::endl;
-                else
-                    PRINT << "successfully downloaded raw data" << std::endl;
-
-                // save raw data to disk as a compressed file
-                #ifdef _MSC_VER
-                    fopen_s(&fp, "raw_data.tar", "wb+");
-                #else
-                    fp = fopen("raw_data.tar", "wb+");
-                #endif
-                fwrite(buffer, ret, 1, fp);
-                fclose(fp);
-                free(buffer);
-                buffer = nullptr;
-                ret = 0;
+                if (cusCastReadRawData((void**)(&buffer_), [](int ret)
+                {
+                    if (ret == SUCCESS)
+                    {
+                        PRINT << "successfully downloaded raw data" << std::endl;
+                        saveRawData();
+                    }
+                }) < 0)
+                    ERROR << "error downloading raw data" << std::endl;
             }
         }
         else
         {
-            PRINT << "valid commands: [q: quit]" << std::endl;
-            PRINT << "       imaging: [f: freeze, d/D: depth, g/G: gain]" << std::endl;
-            PRINT << "      raw data: [r: request, y: download]" << std::endl;
+            PRINT << "valid commands: [q: quit]";
+            PRINT << "       imaging: [f: freeze, d/D: depth, g/G: gain]";
+            PRINT << "      raw data: [r: request, y: download]";
         }
     }
 }
@@ -182,15 +237,16 @@ int init(int& argc, char** argv)
 {
     const int width  = 640;
     const int height = 480;
+    std::string keydir, ipAddr;
+    unsigned int port = 0;
+
     // ensure console buffers are flushed automatically
     setvbuf(stdout, nullptr, _IONBF, 0) != 0 || setvbuf(stderr, nullptr, _IONBF, 0);
 
     // Windows: Visual C++ doesn't have 'getopt' so use Boost's program_options instead
 #ifdef _MSC_VER
     namespace po = boost::program_options;
-
-    std::string keydir, ipAddr;
-    unsigned int port = 0;
+    keydir = "c:/";
 
     try
     {
@@ -208,7 +264,7 @@ int init(int& argc, char** argv)
         if (vm.count("help"))
         {
             PRINT << desc << std::endl;
-            return 1;
+            return FAILURE;
         }
 
         po::notify(vm);
@@ -216,17 +272,16 @@ int init(int& argc, char** argv)
     catch(std::exception& e)
     {
         ERROR << "Error: " << e.what() << std::endl;
-        return 2;
+        return FAILURE;
     }
     catch(...)
     {
         ERROR << "Unknown error!" << std::endl;
-        return 3;
+        return FAILURE;
     }
 #else // every other platform has 'getopt' which we're using so as to not pull in the Boost dependency
     int o;
-    std::string keydir = "/tmp/", ipAddr;
-    unsigned int port = 0;
+    keydir = "/tmp/";
 
     // check command line options
     while ((o = getopt(argc, argv, "k:a:p:")) != -1)
@@ -251,30 +306,36 @@ int init(int& argc, char** argv)
     if (!ipAddr.size())
     {
         ERROR << "no ip address provided. run with '-a [addr]" << std::endl;
-        return ERRCODE;
+        return FAILURE;
     }
 
     if (!port)
     {
         ERROR << "no casting port provided. run with '-p [port]" << std::endl;
-        return ERRCODE;
+        return FAILURE;
     }
 #endif
 
     PRINT << "starting caster...";
 
     // initialize with callbacks
-    if (clariusInitCast(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, freezeFn, buttonFn, progressFn, errorFn, BLOCKINGCALL, width, height) < 0)
+    if (cusCastInit(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, newSpectralImageFn, freezeFn, buttonFn, progressFn, errorFn, width, height) < 0)
     {
         ERROR << "could not initialize caster" << std::endl;
-        return 4;
+        return FAILURE;
     }
-    if (clariusConnect(ipAddr.c_str(), port, BLOCKINGCALL) < 0)
+    if (cusCastConnect(ipAddr.c_str(), port, [](int ret)
     {
-        ERROR << "could not connect to scanner" << std::endl;
-        return 5;
+        if (ret == FAILURE)
+            ERROR << "could not connect to scanner" << std::endl;
+        else
+            PRINT << "...connected, streaming port: " << ret;
+
+    }) < 0)
+    {
+        ERROR << "connection attempt failed" << std::endl;
+        return FAILURE;
     }
-    PRINT << "...connected, streaming port: " << clariusGetUdpPort();
 
     return 0;
 }
@@ -293,6 +354,6 @@ int main(int argc, char* argv[])
         eventLoop.join();
     }
 
-    clariusDestroyCast();
+    cusCastDestroy();
     return rcode;
 }

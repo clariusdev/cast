@@ -40,6 +40,18 @@ def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg):
     #img.save("raw_image.jpg")
     return
 
+## called when a new spectrum image is streamed
+# @param image the spectral image
+# @param lines number of lines in the spectrum
+# @param samples number of samples per line
+# @param bps bits per sample
+# @param period line repetition period of spectrum
+# @param micronsPerSample microns per sample for an m spectrum
+# @param velocityPerSample velocity per sample for a pw spectrum
+# @param pw flag that is true for a pw spectrum, false for an m spectrum
+def newSpectrumImage(image, lines, samples, bps, period, micronsPerSample, velocityPerSample, pw):
+    return
+
 ## called when freeze state changes
 # @param frozen the freeze state
 def freezeFn(frozen):
@@ -81,7 +93,7 @@ def main():
     path = os.path.expanduser("~/")
 
     # initialize
-    cast = pycast.Caster(newProcessedImage, newRawImage, freezeFn, buttonsFn)
+    cast = pycast.Caster(newProcessedImage, newRawImage, newSpectrumImage, freezeFn, buttonsFn)
     ret = cast.init(path, args.width, args.height)
     if ret:
         print("initialization succeeded")
