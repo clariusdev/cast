@@ -10,7 +10,7 @@ LIBPATH = $$PWD/../../lib
 INCLUDEPATH += $$PWD/../../include
 LIBS += -L$$LIBPATH/ -lcast
 
-SOURCES += main.cpp caster.cpp display.cpp pch.cpp
+SOURCES += main.cpp caster.cpp display.cpp
 HEADERS += caster.h display.h
 FORMS += caster.ui
 

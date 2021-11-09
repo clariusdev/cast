@@ -80,7 +80,7 @@ extern "C"
     CAST_EXPORT int cusCastSetOutputSize(int w, int h);
 
     /// sets a flag to separate overlays into separate images, for example if color/power Doppler or strain
-    /// imaging is enabled, two callbacks will be generated, one with the greyscale frame, and the other with the overlay
+    /// imaging is enabled, two callbacks will be generated, one with the grayscale frame, and the other with the overlay
     /// @param[in] en the enable flag for separating overlays
     /// @return success of the call
     /// @retval 0 the flag was successfully programmed
