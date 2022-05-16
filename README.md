@@ -69,7 +69,7 @@ The Cast API communicates with the _Clarius Probe_ directly, and makes use of TC
 Structure:
 - **src/include**         API headers
 - **src/example**         example programs
-- **src/python**          python examples (import pycast modules from release package)
+- **src/python**          python examples (import pycaster modules from release package)
 
 Example Programs:
 - **caster** a simple standalone command-line program that must be run with proper input arguments. The Windows version currently requires the boost c++ libraries to be installed for program argument parsing. Images cannot be viewed, however data/images can be captured. A Linux makefile and a Visual Studio solution have been created to help with compilation.

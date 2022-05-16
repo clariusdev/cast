@@ -2,7 +2,7 @@
 
 import sys
 import os.path
-import pycast
+import pyclariuscast
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt, Slot, Signal
 
@@ -215,7 +215,7 @@ def buttonsFn(button, clicks):
 
 ## main function
 def main():
-    cast = pycast.Caster(newProcessedImage, newRawImage, newSpectrumImage, freezeFn, buttonsFn)
+    cast = pyclariuscast.Caster(newProcessedImage, newRawImage, newSpectrumImage, freezeFn, buttonsFn)
     app = QtWidgets.QApplication(sys.argv)
     widget = MainWidget(cast)
     widget.resize(640, 480)

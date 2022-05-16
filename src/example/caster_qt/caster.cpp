@@ -264,7 +264,7 @@ void Caster::onFreeze()
     if (!connected_)
         return;
 
-    if (cusCastUserFunction(USER_FN_TOGGLE_FREEZE, 0, nullptr) < 0)
+    if (cusCastUserFunction(Freeze, 0, nullptr) < 0)
         ui_->status->showMessage("Toggle freeze failed");
 }
 
@@ -274,7 +274,7 @@ void Caster::onShallower()
     if (!connected_)
         return;
 
-    if (cusCastUserFunction(USER_FN_DEPTH_DEC, 0, nullptr) < 0)
+    if (cusCastUserFunction(DepthDec, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image shallower");
 }
 
@@ -284,7 +284,7 @@ void Caster::onDeeper()
     if (!connected_)
         return;
 
-    if (cusCastUserFunction(USER_FN_DEPTH_INC, 0, nullptr) < 0)
+    if (cusCastUserFunction(DepthInc, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image deeper");
 }
 

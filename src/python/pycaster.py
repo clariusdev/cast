@@ -2,7 +2,7 @@
 
 import argparse
 import os.path
-import pycast
+import pyclariuscast
 from PIL import Image
 
 ## called when a new processed image is streamed
@@ -81,8 +81,8 @@ def main():
     parser.set_defaults(height=480)
     args = parser.parse_args()
 
-    # uncomment to get documentation for pycast module
-    #print(help(pycast))
+    # uncomment to get documentation for pyclariuscast module
+    #print(help(pyclariuscast))
 
     if not args.ip or not args.port or args.port < 0:
         print("one or more arguments are invalid")
@@ -93,7 +93,7 @@ def main():
     path = os.path.expanduser("~/")
 
     # initialize
-    cast = pycast.Caster(newProcessedImage, newRawImage, newSpectrumImage, freezeFn, buttonsFn)
+    cast = pyclariuscast.Caster(newProcessedImage, newRawImage, newSpectrumImage, freezeFn, buttonsFn)
     ret = cast.init(path, args.width, args.height)
     if ret:
         print("initialization succeeded")

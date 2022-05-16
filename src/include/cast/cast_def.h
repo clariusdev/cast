@@ -1,36 +1,46 @@
 #pragma once
 
-/// processed image formats
-#define FORMAT_ARGB                 0   ///< processed images are sent in a raw and uncompressed in 32 bit argb
-#define FORMAT_JPEG                 1   ///< processed images are sent as a jpeg
-#define FORMAT_PNG                  2   ///< processed images are sent as a png
+/// image formats
+typedef enum _CusImageFormat
+{
+    Uncompressed,   ///< processed images are sent in a raw and uncompressed in 32 bit argb
+    Jpeg,           ///< processed images are sent as a jpeg
+    Png             ///< processed images are sent as a png
+
+} CusImageFormat;
 
 /// user function commands
-#define USER_FN_NONE                0
-#define USER_FN_TOGGLE_FREEZE       1
-#define USER_FN_CAPTURE_IMAGE       2
-#define USER_FN_CAPTURE_CINE        3
-#define USER_FN_DEPTH_DEC           4
-#define USER_FN_DEPTH_INC           5
-#define USER_FN_GAIN_DEC            6
-#define USER_FN_GAIN_INC            7
-#define USER_FN_TOGGLE_AUTOGAIN     8
-#define USER_FN_TOGGLE_ZOOM         9
-#define USER_FN_TOGGLE_FLIP         10
-#define USER_FN_TOGGLE_CINE_PLAY    11
-#define USER_FN_MODE_B              12
-#define USER_FN_MODE_M              13
-#define USER_FN_MODE_CFI            14
-#define USER_FN_MODE_PDI            15
-#define USER_FN_MODE_PW             16
-#define USER_FN_MODE_NEEDLE         17
-#define USER_FN_MODE_ELASTOGRAPHY   18
-#define USER_FN_MODE_RF             19
-#define USER_FN_SET_DEPTH           21
-#define USER_FN_SET_GAIN            22
+typedef enum _CusUserFunction
+{
+    Freeze = 1,         ///< toggle freeze
+    CaptureImage = 2,   ///< capture still image
+    CaptureCine,        ///< capture cine
+    DepthDec,           ///< decrease depth
+    DepthInc,           ///< increase depth
+    GainDec,            ///< increase gain
+    GainInc,            ///< decrease gain
+    AutoGain,           ///< toggle auto gain
+    Zoom,               ///< toggle zoom
+    Flip,               ///< toggle horizontal flip
+    PlayCine,           ///< play cine when frozen
+    BMode,              ///< enter b mode
+    MMode,              ///< enter m mode
+    ColorDoppler,       ///< enter color doppler mode
+    PowerDoppler,       ///< enter power doppler mode
+    PwDoppler,          ///< enter pulsed wave doppler mode (when available)
+    NeedleEnhance,      ///< enter needle enhance mode (when available)
+    Strain,             ///< enter strain elastography mode (when available)
+    RfMode,             ///< enter rf mode (when available)
+    NeedleSide,         ///< toggle needle enhance side
+    SetDepth,           ///< set depth in cm
+    SetGain,            ///< set gain in %
+    CenterGuide,        ///< toggle center guide
+    FullScreen          ///< toggle full screen
+
+} CusUserFunction;
 
 /// raw image information supplied with each frame
-typedef struct _ClariusRawImageInfo
+typedef struct _CusRawImageInfo
 {
     int lines;              ///< number of ultrasound lines in the image
     int samples;            ///< number of samples per line in the image
@@ -41,10 +51,10 @@ typedef struct _ClariusRawImageInfo
     int jpeg;               ///< size of the jpeg image, 0 if not a jpeg compressed image
     int rf;                 ///< flag specifying data is rf and not envelope
 
-} ClariusRawImageInfo;
+} CusRawImageInfo;
 
 /// processed image information supplied with each frame
-typedef struct _ClariusProcessedImageInfo
+typedef struct _CusProcessedImageInfo
 {
     int width;              ///< width of the image in pixels
     int height;             ///< height of the image in pixels
@@ -55,12 +65,12 @@ typedef struct _ClariusProcessedImageInfo
     double originY;         ///< image origin in microns in the vertical axis
     long long int tm;       ///< timestamp of images
     int overlay;            ///< flag that the image is an overlay without grayscale (ie. color doppler or strain)
-    int format;             ///< flag specifying the format of the image (see format definitions above)
+    CusImageFormat format;  ///< flag specifying the format of the image (see format definitions above)
 
-} ClariusProcessedImageInfo;
+} CusProcessedImageInfo;
 
 /// spectral image information supplied with each block
-typedef struct _ClariusSpectralImageInfo
+typedef struct _CusSpectralImageInfo
 {
     int lines;                  ///< number of lines in the block
     int samples;                ///< number of samples per line
@@ -70,20 +80,20 @@ typedef struct _ClariusSpectralImageInfo
     double velocityPerSample;   ///< velocity in m/s per pixel/sample in a pw spectrum
     int pw;                     ///< flag specifying the data is pw and not m
 
-} ClariusSpectralImageInfo;
+} CusSpectralImageInfo;
 
 /// probe information
-typedef struct _ClariusProbeInfo
+typedef struct _CusProbeInfo
 {
-    int version;    ///< version (1 = Clarius 1st Generation, 2 = Clarius HD)
+    int version;    ///< version (1 = clarius 1st generation, 2 = clarius HD, 3 = clarius HD3)
     int elements;   ///< # of probe elements
     int pitch;      ///< element pitch
     int radius;     ///< radius in mm
 
-} ClariusProbeInfo;
+} CusProbeInfo;
 
 /// positional data information structure
-typedef struct _ClariusPosInfo
+typedef struct _CusPosInfo
 {
     long long int tm;   ///< timestamp in nanoseconds
     double gx;          ///< gyroscope x; angular velocity is given in radians per second (rps)
@@ -100,38 +110,38 @@ typedef struct _ClariusPosInfo
     double qy;          ///< y component (imaginary) of the orientation quaternion
     double qz;          ///< z component (imaginary) of the orientation quaternion
 
-} ClariusPosInfo;
+} CusPosInfo;
 
 /// return status callback function
 /// @param[in] retCode the return code
-typedef void (*ClariusReturnFn)(int retCode);
+typedef void (*CusReturnFn)(int retCode);
 /// new data callback function
-/// @param[in] newImage pointer to the new grayscale image information
+/// @param[in] img pointer to the new grayscale image information
 /// @param[in] nfo image information associated with the image data
 /// @param[in] npos number of positional information data tagged with the image
 /// @param[in] pos the positional information data tagged with the image
-typedef void (*ClariusNewRawImageFn)(const void* newImage, const ClariusRawImageInfo* nfo, int npos, const ClariusPosInfo* pos);
+typedef void (*CusNewRawImageFn)(const void* img, const CusRawImageInfo* nfo, int npos, const CusPosInfo* pos);
 /// new image callback function
-/// @param[in] newImage pointer to the new grayscale image information
+/// @param[in] img pointer to the new grayscale image information
 /// @param[in] nfo image information associated with the image data
 /// @param[in] npos number of positional information data tagged with the image
 /// @param[in] pos the positional information data tagged with the image
-typedef void (*ClariusNewProcessedImageFn)(const void* newImage, const ClariusProcessedImageInfo* nfo, int npos, const ClariusPosInfo* pos);
+typedef void (*CusNewProcessedImageFn)(const void* img, const CusProcessedImageInfo* nfo, int npos, const CusPosInfo* pos);
 /// new spectral image callback function
-/// @param[in] newImage pointer to the new grayscale image information
+/// @param[in] img pointer to the new grayscale image information
 /// @param[in] nfo image information associated with the image data
-typedef void (*ClariusNewSpectralImageFn)(const void* newImage, const ClariusSpectralImageInfo* nfo);
+typedef void (*CusNewSpectralImageFn)(const void* img, const CusSpectralImageInfo* nfo);
 /// freeze callback function
 /// @param[in] state 1 = frozen, 0 = imaging
-typedef void (*ClariusFreezeFn)(int state);
+typedef void (*CusFreezeFn)(int state);
 /// button callback function
 /// @param[in] btn 0 = up, 1 = down
 /// @param[in] clicks # of clicks performed
-typedef void (*ClariusButtonFn)(int btn, int clicks);
+typedef void (*CusButtonFn)(int btn, int clicks);
 /// progress callback function
 /// @param[in] progress the current progress
-typedef void (*ClariusProgressFn)(int progress);
+typedef void (*CusProgressFn)(int progress);
 /// error callback function
 /// @param[in] msg the error message with associated error that occurred
-typedef void (*ClariusErrorFn)(const char* msg);
+typedef void (*CusErrorFn)(const char* msg);
 

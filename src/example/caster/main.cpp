@@ -55,7 +55,7 @@ void progressFn(int progress)
 /// prints imu data
 /// @param[in] npos the # of positional data points embedded with the frame
 /// @param[in] pos the buffer of positional data
-void printImuData(int npos, const ClariusPosInfo* pos)
+void printImuData(int npos, const CusPosInfo* pos)
 {
     for (auto i = 0; i < npos; i++)
     {
@@ -71,7 +71,7 @@ void printImuData(int npos, const ClariusPosInfo* pos)
 /// @param[in] nfo the image properties
 /// @param[in] npos the # of positional data points embedded with the frame
 /// @param[in] pos the buffer of positional data
-void newRawImageFn(const void* newImage, const ClariusRawImageInfo* nfo, int npos, const ClariusPosInfo* pos)
+void newRawImageFn(const void* newImage, const CusRawImageInfo* nfo, int npos, const CusPosInfo* pos)
 {
 #ifdef PRINTRAW
     if (nfo->rf)
@@ -96,7 +96,7 @@ void newRawImageFn(const void* newImage, const ClariusRawImageInfo* nfo, int npo
 /// @param[in] nfo the image properties
 /// @param[in] npos the # of positional data points embedded with the frame
 /// @param[in] pos the buffer of positional data
-void newProcessedImageFn(const void* newImage, const ClariusProcessedImageInfo* nfo, int npos, const ClariusPosInfo* pos)
+void newProcessedImageFn(const void* newImage, const CusProcessedImageInfo* nfo, int npos, const CusPosInfo* pos)
 {
     (void)newImage;
     (void)pos;
@@ -107,7 +107,7 @@ void newProcessedImageFn(const void* newImage, const ClariusProcessedImageInfo* 
 /// callback for a new spectral image sent from the scanner
 /// @param[in] newImage a pointer to the raw image bits
 /// @param[in] nfo the image properties
-void newSpectralImageFn(const void* newImage, const ClariusSpectralImageInfo* nfo)
+void newSpectralImageFn(const void* newImage, const CusSpectralImageInfo* nfo)
 {
     (void)newImage;
     PRINTSL << "new spectrum: " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
@@ -162,27 +162,27 @@ void processEventLoop(std::atomic_bool& quit)
         }
         else if (cmd == "F" || cmd == "f")
         {
-            if (cusCastUserFunction(USER_FN_TOGGLE_FREEZE, 0, nullptr) < 0)
+            if (cusCastUserFunction(Freeze, 0, nullptr) < 0)
                 ERROR << "error toggling freeze" << std::endl;
         }
         else if (cmd == "D")
         {
-            if (cusCastUserFunction(USER_FN_DEPTH_INC, 0, nullptr) < 0)
+            if (cusCastUserFunction(DepthInc, 0, nullptr) < 0)
                 ERROR << "error incrementing depth" << std::endl;
         }
         else if (cmd == "d")
         {
-            if (cusCastUserFunction(USER_FN_DEPTH_DEC, 0, nullptr) < 0)
+            if (cusCastUserFunction(DepthDec, 0, nullptr) < 0)
                 ERROR << "error decrementing depth" << std::endl;
         }
         else if (cmd == "G")
         {
-            if (cusCastUserFunction(USER_FN_GAIN_INC, 0, nullptr) < 0)
+            if (cusCastUserFunction(GainInc, 0, nullptr) < 0)
                 ERROR << "error incrementing gain" << std::endl;
         }
         else if (cmd == "g")
         {
-            if (cusCastUserFunction(USER_FN_GAIN_DEC, 0, nullptr) < 0)
+            if (cusCastUserFunction(GainDec, 0, nullptr) < 0)
                 ERROR << "error decrementing gain" << std::endl;
         }
         else if (cmd == "R" || cmd == "r")
