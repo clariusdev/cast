@@ -3,7 +3,7 @@
 
 /// default constructor
 /// @param[in] parent the parent object
-UltrasoundImage::UltrasoundImage(QWidget* parent) : QGraphicsView(parent)
+UltrasoundImage::UltrasoundImage(QWidget* parent) : QGraphicsView(parent), noImage_(false)
 {
     QGraphicsScene* sc = new QGraphicsScene(this);
     setScene(sc);
@@ -93,8 +93,17 @@ void UltrasoundImage::drawBackground(QPainter* painter, const QRectF& r)
 void UltrasoundImage::drawForeground(QPainter* painter, const QRectF& r)
 {
     lock_.lock();
+
     if (!image_.isNull())
         painter->drawImage(r, image_);
+
+    if (noImage_)
+    {
+        painter->setFont(QFont(QStringLiteral("Arial"), 12));
+        painter->setPen(Qt::white);
+        painter->drawText(r, Qt::AlignCenter | Qt::AlignBottom, QStringLiteral("No Image? Check the O/S Firewall Settings"));
+    }
+
     lock_.unlock();
 }
 

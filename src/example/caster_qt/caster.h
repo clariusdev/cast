@@ -189,4 +189,5 @@ private:
     UltrasoundImage* image_;    ///< image display
     RfSignal* signal_;          ///< rf signal display
     QImage prescan_;            ///< pre-scan converted image
+    QTimer imageTimer_;         ///< timer to warn the user about the firewall
 };

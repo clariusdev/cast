@@ -8,6 +8,7 @@ public:
     explicit UltrasoundImage(QWidget*);
 
     void loadImage(const void* img, int w, int h, int bpp, int sz);
+    void setNoImage(bool en) { noImage_ = en; }
 
 protected:
     virtual void drawForeground(QPainter*, const QRectF&) override;
@@ -18,6 +19,7 @@ protected:
     virtual QSize sizeHint() const override;
 
 private:
+    bool noImage_;  ///< no image flag for potential firewall issues
     QImage image_;  ///< the image buffer
     QMutex lock_;   ///< locking mechanism
 };

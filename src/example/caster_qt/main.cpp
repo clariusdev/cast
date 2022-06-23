@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         },
         width, height) != 0)
     {
-        qDebug() << "error initializing listner";
+        qDebug() << "error initializing listener";
         return -1;
     }
 

@@ -329,7 +329,7 @@ int init(int& argc, char** argv)
         if (ret == FAILURE)
             ERROR << "could not connect to scanner" << std::endl;
         else
-            PRINT << "...connected, streaming port: " << ret;
+            PRINT << "...connected, streaming port: " << ret << " -- check firewall settings if no image callback received";
 
     }) < 0)
     {

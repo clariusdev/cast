@@ -16,6 +16,12 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(ne
     signal_ = new RfSignal(this);
     ui_->image->addWidget(image_);
     ui_->image->addWidget(signal_);
+    imageTimer_.setSingleShot(true);
+    connect(&imageTimer_, &QTimer::timeout, [this]()
+    {
+        image_->setNoImage(true);
+        ui_->status->showMessage(QStringLiteral("No Image? Check the O/S Firewall Configuration"));
+    });
 }
 
 /// destructor
@@ -42,6 +48,11 @@ bool Caster::event(QEvent *event)
     {
         auto evt = static_cast<event::Image*>(event);
         newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_);
+        if (imageTimer_.isActive())
+        {
+            imageTimer_.stop();
+            image_->setNoImage(false);
+        }
         return true;
     }
     else if (event->type() == PRESCAN_EVENT)
@@ -113,6 +124,11 @@ void Caster::setFreeze(bool en)
     ui_->shallower->setEnabled(!en);
     ui_->deeper->setEnabled(!en);
     rawData_ = RawDataInfo();
+
+    if (en)
+        imageTimer_.start(3000);
+    else
+        imageTimer_.stop();
 }
 
 /// called when there is a button press on the ultrasound

@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 
-import sys
 import os.path
+import sys
+
 import pyclariuscast
 from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt, Slot, Signal
+from PySide2.QtCore import Qt, Signal, Slot
+
 
 # custom event for handling change in freeze state
 class FreezeEvent(QtCore.QEvent):
     def __init__(self, frozen):
         super().__init__(QtCore.QEvent.User)
         self.frozen = frozen
+
 
 # custom event for handling button presses
 class ButtonEvent(QtCore.QEvent):
@@ -19,10 +22,12 @@ class ButtonEvent(QtCore.QEvent):
         self.btn = btn
         self.clicks = clicks
 
+
 # custom event for handling new images
 class ImageEvent(QtCore.QEvent):
     def __init__(self):
         super().__init__(QtCore.QEvent.Type(QtCore.QEvent.User + 2))
+
 
 # manages custom events posted from callbacks, then relays as signals to the main widget
 class Signaller(QtCore.QObject):
@@ -42,6 +47,7 @@ class Signaller(QtCore.QObject):
         elif evt.type() == QtCore.QEvent.Type(QtCore.QEvent.User + 2):
             self.image.emit(self.usimage)
         return True
+
 
 # global required for the cast api callbacks
 signaller = Signaller()
@@ -64,7 +70,7 @@ class ImageView(QtWidgets.QGraphicsView):
         h = evt.size().height()
         self.cast.setOutputSize(w, h)
         self.image = QtGui.QImage(w, h, QtGui.QImage.Format_ARGB32)
-        self.image.fill(QtCore.Qt.black);
+        self.image.fill(QtCore.Qt.black)
         self.setSceneRect(0, 0, w, h)
 
     # black background
@@ -75,6 +81,7 @@ class ImageView(QtWidgets.QGraphicsView):
     def drawForeground(self, painter, rect):
         if not self.image.isNull():
             painter.drawImage(rect, self.image)
+
 
 # main widget with controls and ui
 class MainWidget(QtWidgets.QMainWindow):
@@ -93,6 +100,10 @@ class MainWidget(QtWidgets.QMainWindow):
         port.setInputMask("00000")
 
         conn = QtWidgets.QPushButton("Connect")
+        self.run = QtWidgets.QPushButton("Run")
+        quit = QtWidgets.QPushButton("Quit")
+        depthUp = QtWidgets.QPushButton("< Depth")
+        depthDown = QtWidgets.QPushButton("> Depth")
 
         # try to connect/disconnect to/from the probe
         def tryConnect():
@@ -109,9 +120,26 @@ class MainWidget(QtWidgets.QMainWindow):
                 else:
                     self.statusBar().showMessage("Failed to disconnect")
 
+        # try to freeze/unfreeze
+        def tryFreeze():
+            if cast.isConnected():
+                cast.userFunction(1, 0)
+
+        # try depth up
+        def tryDepthUp():
+            if cast.isConnected():
+                cast.userFunction(4, 0)
+
+        # try depth down
+        def tryDepthDown():
+            if cast.isConnected():
+                cast.userFunction(5, 0)
+
         conn.clicked.connect(tryConnect)
-        quit = QtWidgets.QPushButton("Quit")
+        self.run.clicked.connect(tryFreeze)
         quit.clicked.connect(self.shutdown)
+        depthUp.clicked.connect(tryDepthUp)
+        depthDown.clicked.connect(tryDepthDown)
 
         # add widgets to layout
         self.img = ImageView(cast)
@@ -120,8 +148,13 @@ class MainWidget(QtWidgets.QMainWindow):
         layout.addWidget(ip)
         layout.addWidget(port)
         layout.addWidget(conn)
+        layout.addWidget(self.run)
         layout.addWidget(quit)
         central.setLayout(layout)
+        hlayout = QtWidgets.QHBoxLayout()
+        layout.addLayout(hlayout)
+        hlayout.addWidget(depthUp)
+        hlayout.addWidget(depthDown)
 
         # connect signals
         signaller.freeze.connect(self.freeze)
@@ -130,7 +163,7 @@ class MainWidget(QtWidgets.QMainWindow):
 
         # get home path
         path = os.path.expanduser("~/")
-        if  cast.init(path, 640, 480):
+        if cast.init(path, 640, 480):
             self.statusBar().showMessage("Initialized")
         else:
             self.statusBar().showMessage("Failed to initialize")
@@ -139,9 +172,11 @@ class MainWidget(QtWidgets.QMainWindow):
     @Slot(bool)
     def freeze(self, frozen):
         if frozen:
+            self.run.setText("Run")
             self.statusBar().showMessage("Image Stopped")
         else:
-            self.statusBar().showMessage("Image Running")
+            self.run.setText("Freeze")
+            self.statusBar().showMessage("Image Running (check firewall settings if no image seen)")
 
     # handles button messages
     @Slot(int, int)
@@ -159,6 +194,7 @@ class MainWidget(QtWidgets.QMainWindow):
         self.cast.destroy()
         QtWidgets.QApplication.quit()
 
+
 ## called when a new processed image is streamed
 # @param image the scan-converted image data
 # @param width width of the image in pixels
@@ -174,6 +210,7 @@ def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, imu
     QtCore.QCoreApplication.postEvent(signaller, evt)
     return
 
+
 ## called when a new raw image is streamed
 # @param image the raw pre scan-converted image data, uncompressed 8-bit or jpeg compressed
 # @param lines number of lines in the data
@@ -183,8 +220,10 @@ def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, imu
 # @param lateral microns per line
 # @param timestamp the image timestamp in nanoseconds
 # @param jpg jpeg compression size if the data is in jpeg format
-def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg):
+# @param rf flag for if the image received is radiofrequency data
+def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf):
     return
+
 
 ## called when a new spectrum image is streamed
 # @param image the spectral image
@@ -198,12 +237,14 @@ def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg):
 def newSpectrumImage(image, lines, samples, bps, period, micronsPerSample, velocityPerSample, pw):
     return
 
+
 ## called when freeze state changes
 # @param frozen the freeze state
 def freezeFn(frozen):
     evt = FreezeEvent(frozen)
     QtCore.QCoreApplication.postEvent(signaller, evt)
     return
+
 
 ## called when a button is pressed
 # @param button the button that was pressed
@@ -212,6 +253,7 @@ def buttonsFn(button, clicks):
     evt = ButtonEvent(button, clicks)
     QtCore.QCoreApplication.postEvent(signaller, evt)
     return
+
 
 ## main function
 def main():
@@ -222,5 +264,6 @@ def main():
     widget.show()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
