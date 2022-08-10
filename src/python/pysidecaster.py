@@ -199,11 +199,14 @@ class MainWidget(QtWidgets.QMainWindow):
 # @param image the scan-converted image data
 # @param width width of the image in pixels
 # @param height height of the image in pixels
-# @param bpp bits per pixel
+# @param sz full size of image
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
-def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, imu):
-    img = QtGui.QImage(image, width, height, QtGui.QImage.Format_ARGB32)
+def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu):
+    if bpp == 4:
+        img = QtGui.QImage(image, width, height, QtGui.QImage.Format_ARGB32)
+    else:
+        img = QtGui.QImage(image, width, height, QtGui.QImage.Format_Grayscale8)
     # a deep copy is important here, as the memory from 'image' won't be valid after the event posting
     signaller.usimage = img.copy()
     evt = ImageEvent()

@@ -10,16 +10,17 @@ from PIL import Image
 # @param image the scan-converted image data
 # @param width width of the image in pixels
 # @param height height of the image in pixels
-# @param bpp bits per pixel
+# @param sz full size of image
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
-def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, imu):
+def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu):
+    bpp = sz / (width * height)
     print(
         "image: {0}, {1}x{2} @ {3} bpp, {4:.2f} um/px, imu: {5} pts".format(
             timestamp, width, height, bpp, micronsPerPixel, len(imu)
         ), end = "\r"
     )
-    if bpp == 32:
+    if bpp == 4:
         img = Image.frombytes("RGBA", (width, height), image)
     else:
         img = Image.frombytes("L", (width, height), image)
