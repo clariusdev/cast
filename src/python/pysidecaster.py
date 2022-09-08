@@ -203,6 +203,7 @@ class MainWidget(QtWidgets.QMainWindow):
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
 def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu):
+    bpp = sz / (width * height)
     if bpp == 4:
         img = QtGui.QImage(image, width, height, QtGui.QImage.Format_ARGB32)
     else:
