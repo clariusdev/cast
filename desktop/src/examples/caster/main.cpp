@@ -40,9 +40,9 @@ void freezeFn(int val)
 /// callback for button press
 /// @param[in] btn the button that was pressed, 0 = up, 1 = down
 /// @param[in] clicks # of clicks used
-void buttonFn(int btn, int clicks)
+void buttonFn(CusButton btn, int clicks)
 {
-    PRINT << (btn ? "down" : "up") << " button pressed, clicks: " << clicks;
+    PRINT << ((btn == ButtonDown) ? "down" : "up") << " button pressed, clicks: " << clicks;
 }
 
 /// callback for readback progress
@@ -324,7 +324,7 @@ int init(int& argc, char** argv)
         ERROR << "could not initialize caster" << std::endl;
         return FAILURE;
     }
-    if (cusCastConnect(ipAddr.c_str(), port, [](int ret)
+    if (cusCastConnect(ipAddr.c_str(), port, "research", [](int ret)
     {
         if (ret == FAILURE)
             ERROR << "could not connect to scanner" << std::endl;

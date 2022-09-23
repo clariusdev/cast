@@ -101,7 +101,7 @@ void UltrasoundImage::drawForeground(QPainter* painter, const QRectF& r)
     {
         painter->setFont(QFont(QStringLiteral("Arial"), 12));
         painter->setPen(Qt::white);
-        painter->drawText(r, Qt::AlignCenter | Qt::AlignBottom, QStringLiteral("No Image? Check the O/S Firewall Settings"));
+        painter->drawText(r, Qt::AlignCenter | Qt::AlignBottom, NO_IMAGE_STATEMENT);
     }
 
     lock_.unlock();

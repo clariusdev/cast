@@ -13,6 +13,10 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    QCoreApplication::setOrganizationName(QStringLiteral("Clarius"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("clarius.com"));
+    QCoreApplication::setApplicationName(QStringLiteral("Cast Demo"));
+
     _caster = std::make_unique<Caster>();
     const int width  = 640; // Width of the rendered image
     const int height = 480; // Height of the rendered image
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
             QApplication::postEvent(_caster.get(), new event::Freeze(frozen ? true : false));
         },
         // button press callback
-        [](int btn, int clicks)
+        [](CusButton btn, int clicks)
         {
             // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
             QApplication::postEvent(_caster.get(), new event::Button(btn, clicks));
@@ -95,5 +99,8 @@ int main(int argc, char *argv[])
     }
 
     _caster->show();
-    return a.exec();
+    const int result = a.exec();
+    cusCastDestroy();
+    _caster.reset();
+    return result;
 }

@@ -1,3 +1,4 @@
+
 #ifndef CAST_EXPORT_H
 #define CAST_EXPORT_H
 
@@ -7,19 +8,11 @@
 #else
 #  ifndef CAST_EXPORT
 #    ifdef cast_EXPORTS
-      /* We are building this library */
-#     ifdef _MSC_VER
-#      define CAST_EXPORT __declspec(dllexport)
-#     else
-#       define CAST_EXPORT __attribute__((visibility("default")))
-#     endif
+        /* We are building this library */
+#      define CAST_EXPORT __attribute__((visibility("default")))
 #    else
-      /* We are using this library */
-#     ifdef _MSC_VER
-#       define CAST_EXPORT __declspec(dllimport)
-#     else
-#       define CAST_EXPORT __attribute__((visibility("default")))
-#     endif
+        /* We are using this library */
+#      define CAST_EXPORT __attribute__((visibility("default")))
 #    endif
 #  endif
 

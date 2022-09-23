@@ -60,18 +60,20 @@ The Cast API communicates with the _Clarius Probe_ directly, and makes use of TC
 
 # Supported Platforms
 
-- **Windows**: Windows 10
-- **Linux**: Ubuntu 20.04 and later
-- **macOS**: macOS 10.15 and later
+- **Windows**: Tested on Windows 10
+- **Linux**: Tested on Ubuntu 20.04 and higher
+- **macOS**: Tested on macOS 10.15 and higher
+- **iOS**: Tested on iOS 13 or higher (note that clients wanting to run side-by-side on same device must use **iPadOS**)
+- **Android**: Tested on Android 10 or higher
 
 # Repository
 
 Structure:
-- **src/include**         API headers
-- **src/example**         example programs
-- **src/python**          python examples (import pycaster modules from release package)
+- **desktop/src/include**         desktop API headers
+- **desktop/src/example**         desktop example programs
+- **desktop/src/python**          python examples (import pyclariuscast modules from release package)
 
-Example Programs:
+Desktop Examples:
 - **caster** a simple standalone command-line program that must be run with proper input arguments. The Windows version currently requires the boost c++ libraries to be installed for program argument parsing. Images cannot be viewed, however data/images can be captured. A Linux makefile and a Visual Studio solution have been created to help with compilation.
 - **caster_qt** a graphical program that allows real-time viewing of the ultrasound stream and implements more functionality than the console program. A Qt Creator project file has been created to help with compilation. A valid compiler and Qt binaries should be installed in order for a proper kit to be defined within the IDE.
 

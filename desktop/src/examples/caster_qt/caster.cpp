@@ -17,10 +17,19 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(ne
     ui_->image->addWidget(image_);
     ui_->image->addWidget(signal_);
     imageTimer_.setSingleShot(true);
+
+    settings_ = std::make_unique<QSettings>(QStringLiteral("settings.ini"), QSettings::IniFormat);
+    auto ip = settings_->value("ip").toString();
+    if (!ip.isEmpty())
+        ui_->ip->setText(ip);
+    auto port = settings_->value("port").toString();
+    if (!port.isEmpty())
+        ui_->port->setText(port);
+
     connect(&imageTimer_, &QTimer::timeout, [this]()
     {
         image_->setNoImage(true);
-        ui_->status->showMessage(QStringLiteral("No Image? Check the O/S Firewall Configuration"));
+        ui_->status->showMessage(NO_IMAGE_STATEMENT);
     });
 }
 
@@ -48,11 +57,10 @@ bool Caster::event(QEvent *event)
     {
         auto evt = static_cast<event::Image*>(event);
         newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_);
+        image_->setNoImage(false);
         if (imageTimer_.isActive())
-        {
             imageTimer_.stop();
-            image_->setNoImage(false);
-        }
+
         return true;
     }
     else if (event->type() == PRESCAN_EVENT)
@@ -125,7 +133,7 @@ void Caster::setFreeze(bool en)
     ui_->deeper->setEnabled(!en);
     rawData_ = RawDataInfo();
 
-    if (en)
+    if (!en)
         imageTimer_.start(3000);
     else
         imageTimer_.stop();
@@ -258,11 +266,14 @@ void Caster::onConnect()
 {
     if (!connected_)
     {
-        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), [](int ret)
+        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research", [](int ret)
         {
             _me->connected(ret > 0);
         }) < 0)
             ui_->status->showMessage("Connection attempt failed");
+
+        settings_->setValue("ip", ui_->ip->text());
+        settings_->setValue("port", ui_->port->text());
     }
     else
     {

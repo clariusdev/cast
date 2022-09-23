@@ -1,5 +1,7 @@
 #pragma once
 
+#define NO_IMAGE_STATEMENT QStringLiteral("No Image? Check the O/S Firewall Settings")
+
 /// ultrasound image display
 class UltrasoundImage : public QGraphicsView
 {

@@ -4,8 +4,8 @@ import os.path
 import sys
 
 import pyclariuscast
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt, Signal, Slot
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt, Signal, Slot
 
 
 # custom event for handling change in freeze state
@@ -108,7 +108,7 @@ class MainWidget(QtWidgets.QMainWindow):
         # try to connect/disconnect to/from the probe
         def tryConnect():
             if not cast.isConnected():
-                if cast.connect(ip.text(), int(port.text())):
+                if cast.connect(ip.text(), int(port.text()), "research"):
                     self.statusBar().showMessage("Connected")
                     conn.setText("Disconnect")
                 else:

@@ -4,6 +4,15 @@
 #define CUS_SUCCESS 0
 #define CUS_FAILURE (-1)
 
+/// major clarius platforms
+typedef enum _CusPlatform
+{
+    V1,                         ///< first generation
+    HD,                         ///< second generation
+    HD3                         ///< third generation
+
+} CusPlatform;
+
 /// image formats
 typedef enum _CusImageFormat
 {
@@ -12,6 +21,15 @@ typedef enum _CusImageFormat
     Png                         ///< processed images are sent as a png
 
 } CusImageFormat;
+
+/// physical buttons
+typedef enum _CusButton
+{
+    ButtonUp,                   ///< up button
+    ButtonDown,                 ///< down button
+    ButtonHandle                ///< handle button (custom probes only)
+
+} CusButton;
 
 /// tgc information
 typedef struct _CusTgcInfo
@@ -95,3 +113,19 @@ typedef struct _CusPosInfo
     double qz;                  ///< z component (imaginary) of the orientation quaternion
 
 } CusPosInfo;
+
+/// point type
+typedef struct _CusPoint
+{
+    double x;                   ///< x co-ordinate for a point
+    double y;                   ///< y co-ordinate for a point
+
+} CusPoint;
+
+/// line type
+typedef struct _CusLine
+{
+    CusPoint p1;                ///< first point in the line
+    CusPoint p2;                ///< second point in the line
+
+} CusLine;

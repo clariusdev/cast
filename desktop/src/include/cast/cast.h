@@ -1,6 +1,7 @@
 #pragma once
+
 #include "cast_export.h"
-#include "cast_def.h"
+#include "cast_cb.h"
 
 extern "C"
 {
@@ -41,14 +42,25 @@ extern "C"
     /// @note should be called prior to exiting the application
     CAST_EXPORT int cusCastDestroy();
 
+    /// retrieves the firmware version for a given platform
+    /// @param[in] platform the platform to retrieve the firmware version for
+    /// @param[out] version holds the firmware version for the given platform
+    /// @param[in] sz size of the version string buffer, suggest at least 32 bytes allocated
+    /// @return success of the call
+    /// @retval 0 the information was retrieved
+    /// @retval -1 the information could not be retrieved
+    CAST_EXPORT int cusCastFwVersion(CusPlatform platform, char* version, int sz);
+
     /// tries to connect to a probe that is on the same network as the caller
     /// @param[in] ipAddress the ip address of the probe
     /// @param[in] port the probe's tcp casting port
+    /// @param[in] cert the certificate to authenticate the probe being connected to
     /// @param[in] fn callback to obtain success of call. the return value will be the udp port used if successful
     /// @return success of the call
+    /// @note pass "research" as the certificate to bypass authentication
     /// @retval 0 the connection attempt was successful
     /// @retval -1 the connection attempt was not successful
-    CAST_EXPORT int cusCastConnect(const char* ipAddress, unsigned int port, CusReturnFn fn);
+    CAST_EXPORT int cusCastConnect(const char* ipAddress, unsigned int port, const char* cert, CusReturnFn fn);
 
     /// disconnects from an existing connection
     /// @param[in] fn callback to obtain success of call
@@ -97,14 +109,14 @@ extern "C"
     CAST_EXPORT int cusCastSetFormat(CusImageFormat format);
 
     /// makes a request for raw data from the probe
-    /// @param[in] start the first frame to request, as determined by timestamp in nanoseconds, set to 0 along with end to requets all data in buffer
-    /// @param[in] end the last frame to request, as determined by timestamp in nanoseconds, set to 0 along with start to requets all data in buffer
+    /// @param[in] start the first frame to request, as determined by timestamp in nanoseconds, set to 0 along with end to requests all data in buffer
+    /// @param[in] end the last frame to request, as determined by timestamp in nanoseconds, set to 0 along with start to requests all data in buffer
     /// @param[in] fn callback to obtain the raw data size result, -1 if the request failed, 0 if no raw data exists, otherwise the raw data size
     /// @return success of the call
     /// @retval 0 the request was successfully made
     /// @retval -1 the request could not be made
     /// @note the probe must be frozen and in a raw data buffering mode in order for the call to succeed
-    CAST_EXPORT int cusCastRequestRawData(long long int start, long long int end, CusReturnFn fn);
+    CAST_EXPORT int cusCastRequestRawData(long long int start, long long int end, CusRawFn fn);
 
     /// retrieves raw data from a previous request
     /// @param[out] data a pointer to a buffer that has been allocated to read the raw data into, this must be pre-allocated with
@@ -114,7 +126,7 @@ extern "C"
     /// @retval 0 the data was successfully read into the buffer
     /// @retval -1 the data could not be read
     /// @note the probe must be frozen and a successful call to cusCastRequestRawData must have taken place in order for the call to succeed
-    CAST_EXPORT int cusCastReadRawData(void** data, CusReturnFn fn);
+    CAST_EXPORT int cusCastReadRawData(void** data, CusRawFn fn);
 
     /// performs a user function on a connected probe
     /// @param[in] cmd the user command to run

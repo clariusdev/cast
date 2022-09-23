@@ -6,6 +6,7 @@ import os.path
 import pyclariuscast
 from PIL import Image
 
+
 ## called when a new processed image is streamed
 # @param image the scan-converted image data
 # @param width width of the image in pixels
@@ -18,13 +19,14 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu)
     print(
         "image: {0}, {1}x{2} @ {3} bpp, {4:.2f} um/px, imu: {5} pts".format(
             timestamp, width, height, bpp, micronsPerPixel, len(imu)
-        ), end = "\r"
+        ),
+        end="\r",
     )
     if bpp == 4:
         img = Image.frombytes("RGBA", (width, height), image)
     else:
         img = Image.frombytes("L", (width, height), image)
-    # img.save("processed_image.jpeg")
+    # img.save("processed_image.png")
     return
 
 
@@ -41,14 +43,14 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu)
 def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf):
     # check the rf flag for radiofrequency data vs raw grey grayscale
     # raw grayscale data is non scan-converted and in polar co-ordinates
-    #print(
+    # print(
     #    "raw image: {0}, {1}x{2} @ {3} bps, {4:.2f} um/s, {5:.2f} um/l, rf: {6}".format(
     #        timestamp, lines, samples, bps, axial, lateral, rf
     #    ), end = "\r"
-    #)
-    #if jpg == 0:
+    # )
+    # if jpg == 0:
     #    img = Image.frombytes("L", (samples, lines), image, "raw")
-    #else:
+    # else:
     #    # note! this probably won't work unless a proper decoder is written
     #    img = Image.frombytes("L", (samples, lines), image, "jpg")
     # img.save("raw_image.jpg")
@@ -115,7 +117,7 @@ def main():
     ret = cast.init(path, args.width, args.height)
     if ret:
         print("initialization succeeded")
-        ret = cast.connect(args.ip, args.port)
+        ret = cast.connect(args.ip, args.port, "research")
         if ret:
             print("connected to {0} on port {1}".format(args.ip, args.port))
         else:
