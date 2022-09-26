@@ -1,0 +1,616 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		526CE01C28B71DC100405847 /* Cast_ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE00C28B71DC000405847 /* Cast_ExampleApp.swift */; };
+		526CE01D28B71DC100405847 /* Cast_ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE00C28B71DC000405847 /* Cast_ExampleApp.swift */; };
+		526CE01E28B71DC100405847 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE00D28B71DC000405847 /* ContentView.swift */; };
+		526CE01F28B71DC100405847 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE00D28B71DC000405847 /* ContentView.swift */; };
+		526CE02028B71DC100405847 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 526CE00E28B71DC100405847 /* Assets.xcassets */; };
+		526CE02128B71DC100405847 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 526CE00E28B71DC100405847 /* Assets.xcassets */; };
+		526CE03128B71E8C00405847 /* cast_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 526CE03028B71E8C00405847 /* cast_framework.framework */; };
+		526CE03228B71E8C00405847 /* cast_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 526CE03028B71E8C00405847 /* cast_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		526CE03528B71F3700405847 /* CastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE03428B71F3700405847 /* CastModel.swift */; };
+		526CE03628B71F3700405847 /* CastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE03428B71F3700405847 /* CastModel.swift */; };
+		5275387C28D13D04002FFF14 /* Cast-Example--iOS--Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5275387B28D13D04002FFF14 /* Cast-Example--iOS--Info.plist */; };
+		52DBCDB828C9489200680ABA /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 52DBCDB728C9489200680ABA /* Yams */; };
+		52DBCDBB28C948C700680ABA /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 52DBCDBA28C948C700680ABA /* Yams */; };
+		52DBCDBD28C96DBD00680ABA /* cast_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52DBCDBC28C96DBD00680ABA /* cast_framework.framework */; };
+		52DBCDBE28C96DBD00680ABA /* cast_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52DBCDBC28C96DBD00680ABA /* cast_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52DBCDC128C96EAF00680ABA /* BluetoothModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */; };
+		52DBCDC228C96EAF00680ABA /* BluetoothModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */; };
+		52DBCDC628C96EBE00680ABA /* Scanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC328C96EBE00680ABA /* Scanner.swift */; };
+		52DBCDC728C96EBE00680ABA /* Scanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC328C96EBE00680ABA /* Scanner.swift */; };
+		52DBCDC828C96EBE00680ABA /* ScannerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC428C96EBE00680ABA /* ScannerList.swift */; };
+		52DBCDC928C96EBE00680ABA /* ScannerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC428C96EBE00680ABA /* ScannerList.swift */; };
+		52DBCDCA28C96EBE00680ABA /* ScannersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC528C96EBE00680ABA /* ScannersModel.swift */; };
+		52DBCDCB28C96EBE00680ABA /* ScannersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC528C96EBE00680ABA /* ScannersModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		526CE03328B71E8C00405847 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				526CE03228B71E8C00405847 /* cast_framework.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52DBCDBF28C96DBD00680ABA /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				52DBCDBE28C96DBD00680ABA /* cast_framework.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		526CE00C28B71DC000405847 /* Cast_ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cast_ExampleApp.swift; sourceTree = "<group>"; };
+		526CE00D28B71DC000405847 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		526CE00E28B71DC100405847 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		526CE01328B71DC100405847 /* Cast Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cast Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		526CE01928B71DC100405847 /* Cast Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cast Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		526CE01B28B71DC100405847 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		526CE02A28B71E3800405847 /* Cast Example (iOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Cast Example (iOS)-Bridging-Header.h"; sourceTree = "<group>"; };
+		526CE02B28B71E3800405847 /* Cast Example (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Cast Example (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
+		526CE03028B71E8C00405847 /* cast_framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cast_framework.framework; path = "../../Library/Frameworks/cast_framework.framework"; sourceTree = "<group>"; };
+		526CE03428B71F3700405847 /* CastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastModel.swift; sourceTree = "<group>"; };
+		5275387B28D13D04002FFF14 /* Cast-Example--iOS--Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Cast-Example--iOS--Info.plist"; sourceTree = "<group>"; };
+		52DBCDBC28C96DBD00680ABA /* cast_framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cast_framework.framework; path = "../../Library/Frameworks/cast_framework.framework"; sourceTree = "<group>"; };
+		52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothModel.swift; sourceTree = "<group>"; };
+		52DBCDC328C96EBE00680ABA /* Scanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scanner.swift; sourceTree = "<group>"; };
+		52DBCDC428C96EBE00680ABA /* ScannerList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerList.swift; sourceTree = "<group>"; };
+		52DBCDC528C96EBE00680ABA /* ScannersModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannersModel.swift; sourceTree = "<group>"; };
+		52DBCDCC28C974E100680ABA /* Cast-Example--macOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Cast-Example--macOS--Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		526CE01028B71DC100405847 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52DBCDBD28C96DBD00680ABA /* cast_framework.framework in Frameworks */,
+				52DBCDB828C9489200680ABA /* Yams in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		526CE01628B71DC100405847 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52DBCDBB28C948C700680ABA /* Yams in Frameworks */,
+				526CE03128B71E8C00405847 /* cast_framework.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		526CE00628B71DC000405847 = {
+			isa = PBXGroup;
+			children = (
+				5275387B28D13D04002FFF14 /* Cast-Example--iOS--Info.plist */,
+				52DBCDCC28C974E100680ABA /* Cast-Example--macOS--Info.plist */,
+				526CE00B28B71DC000405847 /* Shared */,
+				526CE01A28B71DC100405847 /* macOS */,
+				526CE01428B71DC100405847 /* Products */,
+				526CE02F28B71E8C00405847 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		526CE00B28B71DC000405847 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				52DBCDC328C96EBE00680ABA /* Scanner.swift */,
+				52DBCDC428C96EBE00680ABA /* ScannerList.swift */,
+				52DBCDC528C96EBE00680ABA /* ScannersModel.swift */,
+				52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */,
+				526CE00C28B71DC000405847 /* Cast_ExampleApp.swift */,
+				526CE00D28B71DC000405847 /* ContentView.swift */,
+				526CE00E28B71DC100405847 /* Assets.xcassets */,
+				526CE02A28B71E3800405847 /* Cast Example (iOS)-Bridging-Header.h */,
+				526CE02B28B71E3800405847 /* Cast Example (macOS)-Bridging-Header.h */,
+				526CE03428B71F3700405847 /* CastModel.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		526CE01428B71DC100405847 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				526CE01328B71DC100405847 /* Cast Example.app */,
+				526CE01928B71DC100405847 /* Cast Example.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		526CE01A28B71DC100405847 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				526CE01B28B71DC100405847 /* macOS.entitlements */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		526CE02F28B71E8C00405847 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				52DBCDBC28C96DBD00680ABA /* cast_framework.framework */,
+				526CE03028B71E8C00405847 /* cast_framework.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		526CE01228B71DC100405847 /* Cast Example (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 526CE02428B71DC100405847 /* Build configuration list for PBXNativeTarget "Cast Example (iOS)" */;
+			buildPhases = (
+				526CE00F28B71DC100405847 /* Sources */,
+				526CE01028B71DC100405847 /* Frameworks */,
+				526CE01128B71DC100405847 /* Resources */,
+				52DBCDBF28C96DBD00680ABA /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Cast Example (iOS)";
+			packageProductDependencies = (
+				52DBCDB728C9489200680ABA /* Yams */,
+			);
+			productName = "Cast Example (iOS)";
+			productReference = 526CE01328B71DC100405847 /* Cast Example.app */;
+			productType = "com.apple.product-type.application";
+		};
+		526CE01828B71DC100405847 /* Cast Example (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 526CE02728B71DC100405847 /* Build configuration list for PBXNativeTarget "Cast Example (macOS)" */;
+			buildPhases = (
+				526CE01528B71DC100405847 /* Sources */,
+				526CE01628B71DC100405847 /* Frameworks */,
+				526CE01728B71DC100405847 /* Resources */,
+				526CE03328B71E8C00405847 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Cast Example (macOS)";
+			packageProductDependencies = (
+				52DBCDBA28C948C700680ABA /* Yams */,
+			);
+			productName = "Cast Example (macOS)";
+			productReference = 526CE01928B71DC100405847 /* Cast Example.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		526CE00728B71DC000405847 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1340;
+				LastUpgradeCheck = 1340;
+				TargetAttributes = {
+					526CE01228B71DC100405847 = {
+						CreatedOnToolsVersion = 13.4.1;
+						LastSwiftMigration = 1340;
+					};
+					526CE01828B71DC100405847 = {
+						CreatedOnToolsVersion = 13.4.1;
+						LastSwiftMigration = 1340;
+					};
+				};
+			};
+			buildConfigurationList = 526CE00A28B71DC000405847 /* Build configuration list for PBXProject "Cast Example" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 526CE00628B71DC000405847;
+			packageReferences = (
+				52DBCDB628C9489200680ABA /* XCRemoteSwiftPackageReference "Yams" */,
+				52DBCDB928C948C700680ABA /* XCRemoteSwiftPackageReference "Yams" */,
+			);
+			productRefGroup = 526CE01428B71DC100405847 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				526CE01228B71DC100405847 /* Cast Example (iOS) */,
+				526CE01828B71DC100405847 /* Cast Example (macOS) */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		526CE01128B71DC100405847 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5275387C28D13D04002FFF14 /* Cast-Example--iOS--Info.plist in Resources */,
+				526CE02028B71DC100405847 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		526CE01728B71DC100405847 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				526CE02128B71DC100405847 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		526CE00F28B71DC100405847 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				526CE01E28B71DC100405847 /* ContentView.swift in Sources */,
+				526CE01C28B71DC100405847 /* Cast_ExampleApp.swift in Sources */,
+				52DBCDC828C96EBE00680ABA /* ScannerList.swift in Sources */,
+				52DBCDC128C96EAF00680ABA /* BluetoothModel.swift in Sources */,
+				52DBCDC628C96EBE00680ABA /* Scanner.swift in Sources */,
+				52DBCDCA28C96EBE00680ABA /* ScannersModel.swift in Sources */,
+				526CE03528B71F3700405847 /* CastModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		526CE01528B71DC100405847 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				526CE01F28B71DC100405847 /* ContentView.swift in Sources */,
+				526CE01D28B71DC100405847 /* Cast_ExampleApp.swift in Sources */,
+				52DBCDC928C96EBE00680ABA /* ScannerList.swift in Sources */,
+				52DBCDC228C96EAF00680ABA /* BluetoothModel.swift in Sources */,
+				52DBCDC728C96EBE00680ABA /* Scanner.swift in Sources */,
+				52DBCDCB28C96EBE00680ABA /* ScannersModel.swift in Sources */,
+				526CE03628B71F3700405847 /* CastModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		526CE02228B71DC100405847 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		526CE02328B71DC100405847 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		526CE02528B71DC100405847 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CUNXN3MT5U;
+				ENABLE_BITCODE = NO;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cast-Example--iOS--Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Requires Bluetooth to Look for Scanners";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Clarius-Mobile-Health.Cast-Example";
+				PRODUCT_NAME = "Cast Example";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Cast Example (iOS)-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		526CE02628B71DC100405847 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CUNXN3MT5U;
+				ENABLE_BITCODE = NO;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cast-Example--iOS--Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Requires Bluetooth to Look for Scanners";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Clarius-Mobile-Health.Cast-Example";
+				PRODUCT_NAME = "Cast Example";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Cast Example (iOS)-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		526CE02828B71DC100405847 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CUNXN3MT5U;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cast-Example--macOS--Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is required for connecting to scanners.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Clarius-Mobile-Health.Cast-Example";
+				PRODUCT_NAME = "Cast Example";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Cast Example (macOS)-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		526CE02928B71DC100405847 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CUNXN3MT5U;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Cast-Example--macOS--Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is required for connecting to scanners.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Clarius-Mobile-Health.Cast-Example";
+				PRODUCT_NAME = "Cast Example";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Shared/Cast Example (macOS)-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		526CE00A28B71DC000405847 /* Build configuration list for PBXProject "Cast Example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				526CE02228B71DC100405847 /* Debug */,
+				526CE02328B71DC100405847 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		526CE02428B71DC100405847 /* Build configuration list for PBXNativeTarget "Cast Example (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				526CE02528B71DC100405847 /* Debug */,
+				526CE02628B71DC100405847 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		526CE02728B71DC100405847 /* Build configuration list for PBXNativeTarget "Cast Example (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				526CE02828B71DC100405847 /* Debug */,
+				526CE02928B71DC100405847 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		52DBCDB628C9489200680ABA /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		52DBCDB928C948C700680ABA /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		52DBCDB728C9489200680ABA /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52DBCDB628C9489200680ABA /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+		52DBCDBA28C948C700680ABA /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52DBCDB628C9489200680ABA /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 526CE00728B71DC000405847 /* Project object */;
+}
