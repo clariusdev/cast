@@ -5,7 +5,7 @@ This repository contains all related items for the Clarius Cast API
 
 # Overview
 
-The Cast API is based on the Clarius Cast protocol that the Clarius App uses for streaming images to multiple clients at once. It's primary use is for research purposes when access to real-time images is required, the Cast API provides a relatively simple way to get started. The API is deployed on desktop only, primarily because Clarius uses Qt heavily, a library that can often introduce difficulties when deploying or linking on mobile platforms. For commercial users wanting to deploy on mobile, Clarius has created the Java-based [Mobile API](https://github.com/clariusdev/mobileapi), specifically for interfacing to the Clarius App in an Android environment.
+The Cast API is based on the Clarius Cast protocol that the Clarius App uses for streaming images to multiple clients at once. It's primary use is for research purposes when access to real-time images is required, the Cast API provides a relatively simple way to get started. The pure C API is deployed on desktop only, primarily because Clarius uses Qt heavily, a library that can often introduce difficulties when deploying or linking on mobile platforms. For commercial users wanting to deploy on mobile, Clarius has created a Java version specifically for interfacing to the Clarius App in an Android environment and an Objective-C framework specifically for interfacing to the Clarius App in an iOS environment.
 
 The Cast API does provide some mechanisms for control of the ultrasound probe, such as the ability to freeze, change parameters such as depth and gain; however these are generally considered secondary functions, as the main purpose of the Cast API is to easily obtain the images in real-time, as opposed to duplicating a control interface.
 
@@ -72,10 +72,16 @@ Structure:
 - **desktop/src/include**         desktop API headers
 - **desktop/src/example**         desktop example programs
 - **desktop/src/python**          python examples (import pyclariuscast modules from release package)
+- **ios/src/Library**             iOS framework headers (for full framework, download iOS binary zip)
+- **ios/src/examples**            iOS example programs
+- **android/src/examples**        Android example programs
 
 Desktop Examples:
 - **caster** a simple standalone command-line program that must be run with proper input arguments. The Windows version currently requires the boost c++ libraries to be installed for program argument parsing. Images cannot be viewed, however data/images can be captured. A Linux makefile and a Visual Studio solution have been created to help with compilation.
 - **caster_qt** a graphical program that allows real-time viewing of the ultrasound stream and implements more functionality than the console program. A Qt Creator project file has been created to help with compilation. A valid compiler and Qt binaries should be installed in order for a proper kit to be defined within the IDE.
+
+iOS Example:
+- **cast_swift** a simple SwiftUI program that demonstrates some of the features of the framework. To build, the full iOS framework zip must be extracted to the ../../Library/Frameworks/ path or the path must be adjusted in the project settings. A signing certificate must be specified in the project settings. Ensure that the build target is iOS 64-bit arm to match the downloaded framework. The program demonstrates populating scanner details via bluetooth and image streaming.
 
 Typical Usage:
 ```
