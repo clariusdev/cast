@@ -38,7 +38,7 @@ struct Scanner: Identifiable {
     var rssi: Int
     /// Battery level in 0-100%
     var battery: Int
-    /// Temperature in degrees Celcius
+    /// Temperature in degrees Celsius
     var temperature: Int
     /// Turn if currently powered on
     var powered: Bool
