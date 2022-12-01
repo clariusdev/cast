@@ -24,10 +24,15 @@
             android:theme="@style/Theme.CastExample.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="me.clarius.sdk.action.LAUNCH" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".CastService"
+            android:enabled="true"
+            android:exported="false" />
+
     </application>
 
 </manifest>

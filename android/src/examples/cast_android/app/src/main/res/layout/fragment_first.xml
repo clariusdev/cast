@@ -6,32 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".FirstFragment">
 
-    <Button
-        android:id="@+id/button_bluetooth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/bluetooth"
-        app:layout_constraintBottom_toTopOf="@+id/connection_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/connection_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/control_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_bluetooth">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/ip_address_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="IP address"
+            android:hint="@string/ip_address"
             app:errorEnabled="true"
-            app:layout_constraintBottom_toTopOf="@+id/tcp_port_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -51,7 +39,6 @@
             android:layout_height="wrap_content"
             android:hint="@string/tcp_port"
             app:errorEnabled="true"
-            app:layout_constraintBottom_toTopOf="@+id/connection_layout_flow"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ip_address_layout">
@@ -92,7 +79,6 @@
         android:id="@+id/control_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/image_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/connection_layout">
@@ -104,16 +90,16 @@
             android:text="@string/toggle_run" />
 
         <Button
-            android:id="@+id/button_ask_state"
+            android:id="@+id/button_raw_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ask_state" />
+            android:text="@string/get_raw_data" />
 
         <androidx.constraintlayout.helper.widget.Flow
             android:id="@+id/control_layout_flow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:constraint_referenced_ids="button_run,button_ask_state"
+            app:constraint_referenced_ids="button_run,button_raw_data"
             app:flow_wrapMode="aligned"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -121,6 +107,28 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/raw_data_download_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:min="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/control_layout" />
+
+    <ProgressBar
+        android:id="@+id/raw_data_copy_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:min="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/raw_data_download_progress_bar" />
 
     <ImageView
         android:id="@+id/image_view"
@@ -132,6 +140,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/control_layout" />
+        app:layout_constraintTop_toBottomOf="@+id/raw_data_copy_progress_bar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
