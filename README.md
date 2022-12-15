@@ -39,24 +39,19 @@ The Cast API does provide some mechanisms for control of the ultrasound probe, s
 
 The Cast API communicates with the _Clarius Probe_ directly, and makes use of TCP technologies to create a secondary connection to the device that is able to receive images.
 
-                                      +-----------------------+
-                                      | Mobile Device         |
-    +---------+                       |    +-------------+    |
-    |         |   Primary Connection  |    |   Clarius   |    |
-    |  Probe  +-----------------------|--->+     App     |    |
-    |         |                       |    +-------------+    |
-    |         |    Cast Connection    |                       |
-    |         +<--------------+       +-----------------------+
-    |         |               |
-    +---------+               |       +-----------------------+
-                              |       | PC                    |
-                              |       |    +-------------+    |
-                              |       |    | Cast        |    |
-                              +-------|--->+ Application |    |
-                                      |    |             |    |
-                                      |    +-------------+    |
-                                      |                       |
-                                      +-----------------------+
+
+```mermaid
+  flowchart LR
+  prb[Probe]
+  subgraph mobile[Mobile Device]
+    app[Clarius App]
+  end
+  subgraph pc[PC]
+    cast[Cast Application]
+  end
+  prb<-- Primary Connection -->app
+  prb<-- Cast Connection -->cast
+```
 
 # Supported Platforms
 
