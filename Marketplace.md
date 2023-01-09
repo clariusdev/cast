@@ -7,7 +7,7 @@ Features:
 - Third party apps can be launched directly from the Clarius App.
 - Third party apps will receive the probe TCP connection info with the launcher, removing the need for manual input or Bluetooth scanning.
 
-## Enrollment
+## Enrolment
 
 TODO
 
