@@ -18,7 +18,8 @@ The Clarius app can launch partner apps with an Android intent containing the pr
 |-----|-------------|------|
 | `cus_probe_serial` | probe serial | UTF-8 string in a `byte[]` |
 | `cus_ip_address` | probe's IP address | UTF-8 string in a `byte[]` |
-| `cus_cast_port` | probe's TCP port | Java `int` |
+| `cus_cast_port` | probe's TCP port | Integer encoded in a `byte[]` |
+| `cus_network_id` | probe's network ID | Integer encoded in a `byte[]` |
 
 ### Visibility
 
