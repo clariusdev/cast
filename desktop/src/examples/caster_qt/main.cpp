@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
                 _image.resize(sz);
             memcpy(_image.data(), img, sz);
 
-            QApplication::postEvent(_caster.get(), new event::Image(IMAGE_EVENT, _image.data(), nfo->width, nfo->height, nfo->bitsPerPixel, sz));
+            QApplication::postEvent(_caster.get(), new event::Image(IMAGE_EVENT, _image.data(), nfo->tm, nfo->width, nfo->height, nfo->bitsPerPixel, sz));
         },
         // new raw data callback
         [](const void* data, const CusRawImageInfo* nfo, int, const CusPosInfo*)
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
                 if (_rfData.size() < static_cast<size_t>(sz))
                     _rfData.resize(sz);
                 memcpy(_rfData.data(), data, sz);
-                QApplication::postEvent(_caster.get(), new event::RfImage(_rfData.data(), nfo->lines, nfo->samples, nfo->bitsPerSample, sz, nfo->lateralSize, nfo->axialSize));
+                QApplication::postEvent(_caster.get(), new event::RfImage(_rfData.data(), nfo->tm, nfo->lines, nfo->samples, nfo->bitsPerSample, sz, nfo->lateralSize, nfo->axialSize));
             }
             else
             {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
                 if (_prescanImage.size() < static_cast<size_t>(sz))
                     _prescanImage.resize(sz);
                 memcpy(_prescanImage.data(), data, sz);
-                QApplication::postEvent(_caster.get(), new event::Image(PRESCAN_EVENT, _prescanImage.data(), nfo->lines, nfo->samples, nfo->bitsPerSample, sz));
+                QApplication::postEvent(_caster.get(), new event::Image(PRESCAN_EVENT, _prescanImage.data(), nfo->tm, nfo->lines, nfo->samples, nfo->bitsPerSample, sz));
             }
         },
         // new spectral image callback

@@ -28,6 +28,15 @@ typedef enum _CusUserFunction
     SetDepth,           ///< set depth in cm
     SetGain,            ///< set gain in %
     CenterGuide,        ///< toggle center guide
-    FullScreen          ///< toggle full screen
+    FullScreen,         ///< toggle full screen
+    VoiceCommand        ///< toggle voice commands
 
 } CusUserFunction;
+
+/// measurement types
+typedef enum _CusMeasurementType
+{
+    CusMeasurementTypeDistance = 1, ///< point-to-point distance
+    CusMeasurementTypeTraceDistance, ///< trace distance
+    CusMeasurementTypeTraceArea ///< trace area
+} CusMeasurementType;

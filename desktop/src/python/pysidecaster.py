@@ -202,7 +202,9 @@ class MainWidget(QtWidgets.QMainWindow):
 # @param sz full size of image
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
-def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu):
+# @param angle acquisition angle for volumetric data
+# @param imu inertial data tagged with the frame
+def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angle, imu):
     bpp = sz / (width * height)
     if bpp == 4:
         img = QtGui.QImage(image, width, height, QtGui.QImage.Format_ARGB32)
@@ -225,7 +227,8 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu)
 # @param timestamp the image timestamp in nanoseconds
 # @param jpg jpeg compression size if the data is in jpeg format
 # @param rf flag for if the image received is radiofrequency data
-def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf):
+# @param angle acquisition angle for volumetric data
+def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf, angle):
     return
 
 

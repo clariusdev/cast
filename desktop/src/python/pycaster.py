@@ -14,7 +14,9 @@ from PIL import Image
 # @param sz full size of image
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
-def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu):
+# @param angle acquisition angle for volumetric data
+# @param imu inertial data tagged with the frame
+def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angle, imu):
     bpp = sz / (width * height)
     print(
         "image: {0}, {1}x{2} @ {3} bpp, {4:.2f} um/px, imu: {5} pts".format(
@@ -40,7 +42,8 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, imu)
 # @param timestamp the image timestamp in nanoseconds
 # @param jpg jpeg compression size if the data is in jpeg format
 # @param rf flag for if the image received is radiofrequency data
-def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf):
+# @param angle acquisition angle for volumetric data
+def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf, angle):
     # check the rf flag for radiofrequency data vs raw grey grayscale
     # raw grayscale data is non scan-converted and in polar co-ordinates
     # print(

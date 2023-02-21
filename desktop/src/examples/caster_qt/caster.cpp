@@ -7,7 +7,7 @@ static Caster* _me;
 
 /// default constructor
 /// @param[in] parent the parent object
-Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(new Ui::Caster)
+Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen_(false), lasttime_(0), ui_(new Ui::Caster)
 {
     _me = this;
     ui_->setupUi(this);
@@ -29,6 +29,8 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), ui_(ne
     connect(&imageTimer_, &QTimer::timeout, [this]()
     {
         image_->setNoImage(true);
+        lasttime_ = 0;
+        updateCaptureButtons();
         ui_->status->showMessage(NO_IMAGE_STATEMENT);
     });
 }
@@ -58,6 +60,8 @@ bool Caster::event(QEvent *event)
         auto evt = static_cast<event::Image*>(event);
         newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_);
         image_->setNoImage(false);
+        lasttime_ = evt->tm_;
+        updateCaptureButtons();
         if (imageTimer_.isActive())
             imageTimer_.stop();
 
@@ -125,18 +129,28 @@ void Caster::setError(const QString& err)
 /// @param[in] en the freeze state
 void Caster::setFreeze(bool en)
 {
+    frozen_ = en;
+    if (!frozen_)
+        lasttime_ = 0;
     ui_->status->showMessage(QStringLiteral("Image: %1").arg(en ? QStringLiteral("Frozen") : QStringLiteral("Running")));
     ui_->freeze->setText(en ? QStringLiteral("Run") : QStringLiteral("Stop"));
     ui_->request->setEnabled(en);
     ui_->download->setEnabled(false);
     ui_->shallower->setEnabled(!en);
     ui_->deeper->setEnabled(!en);
+    updateCaptureButtons();
     rawData_ = RawDataInfo();
 
     if (!en)
         imageTimer_.start(3000);
     else
         imageTimer_.stop();
+}
+
+void Caster::updateCaptureButtons()
+{
+    ui_->addLabel->setEnabled(lasttime_ != 0);
+    ui_->captureImage->setEnabled(lasttime_ != 0);
 }
 
 /// called when there is a button press on the ultrasound
@@ -228,12 +242,12 @@ void Caster::newPwSpectrum(const void* rfdata, int l, int s, int bps, double per
 }
 
 /// handles the connection result
-/// @param[in] res the connection result
-void Caster::connected(bool res)
+/// @param[in] port the udp streaming port, 0 if failure
+void Caster::connected(int port)
 {
-    if (res)
+    if (port > 0)
     {
-        ui_->status->showMessage("Connection successful");
+        ui_->status->showMessage(QString("Connection successful, streaming port: %1").arg(port));
         connected_ = true;
         ui_->connect->setText("Disconnect");
         ui_->freeze->setEnabled(true);
@@ -266,11 +280,14 @@ void Caster::onConnect()
 {
     if (!connected_)
     {
-        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research", [](int ret)
+        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research", [](int port, int swRevMatch)
         {
-            _me->connected(ret > 0);
+            _me->ui_->swRevMatch->setText((swRevMatch == CUS_SUCCESS) ? "Matches" : "Mismatch");
+            _me->connected(port);
         }) < 0)
+        {
             ui_->status->showMessage("Connection attempt failed");
+        }
 
         settings_->setValue("ip", ui_->ip->text());
         settings_->setValue("port", ui_->port->text());
@@ -279,7 +296,7 @@ void Caster::onConnect()
     {
         if (cusCastDisconnect([](int ret)
         {
-            _me->disconnected(ret == 0);
+            _me->disconnected(ret == CUS_SUCCESS);
         }) < 0)
             ui_->status->showMessage("Disconnect attempt failed");
     }
@@ -313,6 +330,105 @@ void Caster::onDeeper()
 
     if (cusCastUserFunction(DepthInc, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image deeper");
+}
+
+/// called when the addLabel button is clicked
+void Caster::onAddLabel()
+{
+    QString label = ui_->labelText->text();
+    if (label.isEmpty())
+    {
+        ui_->status->showMessage("No label text provided");
+        return;
+    }
+    image_->addLabel(label);
+}
+
+/// called when the addTrace button is clicked
+void Caster::onAddTrace()
+{
+    QString label = ui_->labelText->text();
+    if (label.isEmpty())
+    {
+        ui_->status->showMessage("No label text provided");
+        return;
+    }
+    image_->addTrace(label);
+}
+
+/// called when the captureImage button is clicked
+void Caster::onCaptureImage()
+{
+    if (lasttime_ == 0)
+    {
+        ui_->status->showMessage("No image to capture");
+        return;
+    }
+    const int captureID = cusCastStartCapture(lasttime_);
+    if (captureID < 0)
+    {
+        ui_->status->showMessage("Failed to initialize capture");
+        return;
+    }
+    const std::vector<LabelInfo> labels = image_->getLabels();
+    for (const LabelInfo& label : labels)
+    {
+        const std::string text = label.text_.toStdString();
+        const QPointF center = label.rect_.center();
+        if (cusCastAddLabelOverlay(captureID, text.c_str(), center.x(), center.y(), label.rect_.width(), label.rect_.height()) < 0)
+            ui_->status->showMessage("Failed to add label " + label.text_ + " to capture");
+    }
+    const std::vector<TraceInfo> traces = image_->getTraces();
+    for (const TraceInfo& trace : traces)
+    {
+        const std::string text = trace.text_.toStdString();
+        std::vector<double> points;
+        for (const QPointF& pt : trace.points_)
+        {
+            points.push_back(pt.x());
+            points.push_back(pt.y());
+        }
+        if (cusCastAddMeasurement(captureID, CusMeasurementTypeTraceDistance, text.c_str(), points.data(), static_cast<int>(points.size())) < 0)
+            ui_->status->showMessage("Failed to add trace measurement " + trace.text_ + " to capture");
+    }
+    const QImage overlayImage = image_->overlayImage();
+    if (!overlayImage.isNull())
+    {
+        const QColor overlayColor = image_->overlayColor();
+        const int height = overlayImage.height();
+        const int width = overlayImage.width();
+        std::vector<unsigned char> bytes(width * height);
+        for (int i = 0; i < height; ++i)
+        {
+            std::memcpy(bytes.data() + i * width, overlayImage.scanLine(i), width);
+        }
+        cusCastAddImageOverlay(
+            captureID,
+            bytes.data(),
+            width,
+            height,
+            static_cast<float>(overlayColor.redF()),
+            static_cast<float>(overlayColor.greenF()),
+            static_cast<float>(overlayColor.blueF()),
+            static_cast<float>(overlayColor.alphaF())
+        );
+    }
+    if (cusCastFinishCapture(captureID, [](int ret)
+    {
+        if (ret < 0)
+            _me->ui_->status->showMessage("Failed to send capture");
+        else
+            _me->ui_->status->showMessage("Sent capture");
+    }) < 0)
+    {
+        ui_->status->showMessage("Failed to finish capture");
+    }
+}
+
+/// called when the clearScreen button is clicked
+void Caster::onClearScreen()
+{
+    image_->clearOverlays();
 }
 
 /// handles the result of a raw data request

@@ -27,9 +27,11 @@ namespace event
         /// @param[in] h the image height
         /// @param[in] bpp the image bits per pixel
         /// @param[in] sz total size of the image
-        Image(QEvent::Type evt, const void* data, int w, int h, int bpp, int sz) : QEvent(evt), data_(data), width_(w), height_(h), bpp_(bpp), size_(sz) { }
+        Image(QEvent::Type evt, const void* data, long long int tm, int w, int h, int bpp, int sz)
+            : QEvent(evt), data_(data), tm_(tm), width_(w), height_(h), bpp_(bpp), size_(sz) { }
 
         const void* data_;  ///< pointer to the image data
+        long long int tm_;  ///< timestamp
         int width_;         ///< width of the image
         int height_;        ///< height of the image
         int bpp_ ;          ///< bits per pixel
@@ -48,7 +50,7 @@ namespace event
         /// @param[in] sz size of data in bytes
         /// @param[in] lateral lateral spacing between lines
         /// @param[in] axial sample size
-        RfImage(const void* data, int l, int s, int bps, int sz, double lateral, double axial) : Image(RF_EVENT, data, l, s, bps, sz), lateral_(lateral), axial_(axial) { }
+        RfImage(const void* data, long long int tm, int l, int s, int bps, int sz, double lateral, double axial) : Image(RF_EVENT, data, tm, l, s, bps, sz), lateral_(lateral), axial_(axial) { }
 
         double lateral_;    ///< spacing between each line
         double axial_;      ///< sample size
@@ -64,7 +66,7 @@ namespace event
         /// @param[in] s # of samples per line
         /// @param[in] bps bits per sample
         /// @param[in] sz size of the image in bytes
-        Spectrum(const void* data, int l, int s, int bps, int sz, double period, double mps, double vps, bool pw) : Image(SPECTRUM_EVENT, data, l, s, bps, sz),
+        Spectrum(const void* data, int l, int s, int bps, int sz, double period, double mps, double vps, bool pw) : Image(SPECTRUM_EVENT, data, 0, l, s, bps, sz),
             period_(period), micronsPerSample_(mps), velocityPerSample_(vps), pw_(pw) { }
 
         double period_;             ///< line acquisition period in seconds
@@ -170,7 +172,7 @@ private:
     void setProgress(int progress);
     void setError(const QString& err);
     bool rawDataReady(bool success);
-    void connected(bool res);
+    void connected(int port);
     void disconnected(bool res);
     void rawData(int sz);
 
@@ -181,9 +183,16 @@ public slots:
     void onDeeper();
     void onRequest();
     void onDownload();
+    void onAddLabel();
+    void onAddTrace();
+    void onCaptureImage();
+    void onClearScreen();
 
 private:
+    void updateCaptureButtons();
     bool connected_;            ///< connection state
+    bool frozen_;               ///< freeze state
+    long long int lasttime_;    ///< timesetamp of last received frame
     RawDataInfo rawData_;       ///< raw data attributes
     Ui::Caster *ui_;            ///< ui controls, etc.
     UltrasoundImage* image_;    ///< image display

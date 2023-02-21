@@ -50,6 +50,7 @@ typedef struct _CusRawImageInfo
     long long int tm;           ///< timestamp of image
     int jpeg;                   ///< size of the jpeg image, 0 if not a jpeg compressed image
     int rf;                     ///< flag specifying data is rf and not envelope
+    double angle;               ///< acquisition angle for volumetric data
     CusTgcInfo tgc[CUS_MAXTGC]; ///< tgc points
 
 } CusRawImageInfo;
@@ -65,6 +66,7 @@ typedef struct _CusProcessedImageInfo
     double originX;             ///< image origin in microns in the horizontal axis
     double originY;             ///< image origin in microns in the vertical axis
     long long int tm;           ///< timestamp of images
+    double angle;               ///< acquisition angle for volumetric data
     int overlay;                ///< flag that the image is an overlay without grayscale (ie. color doppler or strain)
     CusImageFormat format;      ///< flag specifying the format of the image (see format definitions above)
     CusTgcInfo tgc[CUS_MAXTGC]; ///< tgc points
@@ -117,8 +119,8 @@ typedef struct _CusPosInfo
 /// point type
 typedef struct _CusPoint
 {
-    double x;                   ///< x co-ordinate for a point
-    double y;                   ///< y co-ordinate for a point
+    double x;                   ///< x coordinate for a point
+    double y;                   ///< y coordinate for a point
 
 } CusPoint;
 

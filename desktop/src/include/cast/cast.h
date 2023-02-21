@@ -60,7 +60,7 @@ extern "C"
     /// @note pass "research" as the certificate to bypass authentication
     /// @retval 0 the connection attempt was successful
     /// @retval -1 the connection attempt was not successful
-    CAST_EXPORT int cusCastConnect(const char* ipAddress, unsigned int port, const char* cert, CusReturnFn fn);
+    CAST_EXPORT int cusCastConnect(const char* ipAddress, unsigned int port, const char* cert, CusConnectFn fn);
 
     /// disconnects from an existing connection
     /// @param[in] fn callback to obtain success of call
@@ -138,4 +138,52 @@ extern "C"
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
     CAST_EXPORT int cusCastUserFunction(CusUserFunction cmd, double val, CusReturnFn fn);
+
+    /// begins a capture with the current image settings
+    /// @param[in] timestamp the timestamp of the frame to be captured
+    /// @retval the ID of the newly created capture
+    /// @retval -1 the call was not successful
+    CAST_EXPORT int cusCastStartCapture(long long int timestamp);
+
+    /// adds an image overlay to a capture which was started with cusCastStartCapture
+    /// @param[in] id the ID of the capture which is to be added to
+    /// @param[in] data pointer to the image data which is to be added (assumed 8-bit grayscale)
+    /// @param[in] width width of the image data which is to be added; must match the width from cusCastInit
+    /// @param[in] height height of the image data which is to be added; must match the height from cusCastInit
+    /// @param[in] red the value of red use in colorizing the overlay, should be between 0.0 and 1.0
+    /// @param[in] green the value of green use in colorizing the overlay, should be between 0.0 and 1.0
+    /// @param[in] blue the value of blue use in colorizing the overlay, should be between 0.0 and 1.0
+    /// @param[in] alpha the value of alpha (opacity) use in colorizing the overlay, should be between 0.0 and 1.0
+    /// @retval 0 the call was successful
+    /// @retval -1 the call was not successful
+    CAST_EXPORT int cusCastAddImageOverlay(int id, const void* data, int width, int height, float red, float green, float blue, float alpha);
+
+    /// adds a label overlay to a capture which was started with cusCastStartCapture
+    /// @param[in] id the ID of the capture which is to be added to
+    /// @param[in] text string of the label to be added
+    /// @param[in] x x-position of the label in pixels (same scale as the width from cusCastInit)
+    /// @param[in] y y-position of the label in pixels (same scale as the height from cusCastInit)
+    /// @param[in] width width of the label in pixels (same scale as the width from cusCastInit)
+    /// @param[in] height height of the label in pixels (same scale as the height from cusCastInit)
+    /// @retval 0 the call was successful
+    /// @retval -1 the call was not successful
+    CAST_EXPORT int cusCastAddLabelOverlay(int id, const char* text, double x, double y, double width, double height);
+
+    /// adds a 2-point distance or trace measurement to a capture which was started with cusCastStartCapture
+    /// @details for a distance measurement, 2 points should be given
+    /// @param[in] id the ID of the capture which is to be added to
+    /// @param[in] type the type of measurement to add
+    /// @param[in] label string label for the measurement
+    /// @param[in] pts pointer to an array of doubles (x,y positions pixels, same scale as the width/height from cusCastInit)
+    /// @param[in] count number of *doubles* in the pts array (not number of points)
+    /// @retval 0 the call was successful
+    /// @retval -1 the call was not successful
+    CAST_EXPORT int cusCastAddMeasurement(int id, CusMeasurementType type, const char* label, const double* pts, int count);
+
+    /// completes a capture which was started with cusCastStartCapture
+    /// @param[in] id the ID of the capture which is to be finished
+    /// @param[in] fn callback to obtain the success of the call, -1 if the request failed, 0 if it succeeded
+    /// @retval 0 the call was successful
+    /// @retval -1 the call was not successful
+    CAST_EXPORT int cusCastFinishCapture(int id, CusReturnFn fn);
 }

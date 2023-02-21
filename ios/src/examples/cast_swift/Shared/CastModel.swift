@@ -29,8 +29,12 @@ class CastModel: ObservableObject {
 
     /// Connect to the scanner at the given address and port
     func connectToScanner() {
-        cast.connect(address, port: port, cert: certificate) {
-            print("Connection to \(self.address):\(self.port) \($0 ? "succeeded" : "failed")")
+        cast.connect(address, port: port, cert: certificate) { (succeeded: Bool, port: Int32, swRevMatch: Bool) -> Void in
+            print("Connection to \(self.address):\(self.port) \(succeeded ? "succeeded" : "failed")")
+            if (succeeded) {
+                print("UDP stream will be on port \(port)")
+                print("App software \(swRevMatch ? "matches" : "does not match")")
+            }
         }
     }
     /// Disconnect from the current scanner

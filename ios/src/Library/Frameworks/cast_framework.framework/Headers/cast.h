@@ -8,6 +8,11 @@
 /// asynchronous result callback function
 /// @param[in] result the result (success/fail)
 typedef void (^CusResultFn)(BOOL result);
+/// asynchronous result callback function
+/// @param[in] result the result (success/fail)
+/// @param[in] port the UDP port that will be used for streaming (-1 if failed)
+/// @param[in] swRevMatch whether the sw revisions between the api and the clarius app match
+typedef void (^CusConnectFn)(BOOL result, int port, BOOL swRevMatch);
 /// button callback function
 /// @param[in] btn the button that was pressed
 /// @param[in] clicks # of clicks performed
@@ -50,6 +55,9 @@ typedef void (^CusRawFn)(int res);
 /// @param[in] res the raw data result, the size of the data package or -1 if an error occurred
 /// @param[in] data the raw data
 typedef void (^CusRawDataFn)(int res, NSData * _Nullable data);
+/// capture creation callback function
+/// @param[in] res the new capture ID, or -1 if an error occurred
+typedef void (^CusCaptureFn)(int res);
 
 //! @brief Cast interface
 __attribute__((visibility("default"))) @interface CusCast : NSObject
@@ -70,7 +78,7 @@ __attribute__((visibility("default"))) @interface CusCast : NSObject
 - (void)connect:(NSString * _Nonnull) address
             port:(unsigned int) port
             cert:(NSString * _Nonnull) cert
-        callback:(CusResultFn _Nonnull) callback;
+        callback:(CusConnectFn _Nonnull) callback;
 /// disconnects from an existing connection
 /// @param[in] callback the callback function that reports success/failure
 - (void)disconnect:(CusResultFn _Nonnull) callback;
@@ -120,7 +128,66 @@ __attribute__((visibility("default"))) @interface CusCast : NSObject
 /// @param[in] platform the platform to retrieve the firmware version for
 /// @param[in] callback callback to receive the firmware version
 - (void) getFirmwareVersion:(CusPlatform) platform
-             callback:(CusFirmwareFn _Nonnull) callback;
+                   callback:(CusFirmwareFn _Nonnull) callback;
+
+/// begins a capture with the current image settings
+/// @param[in] timestamp the timestamp of the frame to be captured
+/// @param[in] callback the callback function that receives the new capture ID or -1 if an error occurred
+- (void)startCapture:(long long int) timestamp
+            callback:(CusCaptureFn _Nonnull) callback;
+
+/// adds an image overlay to a capture which was started with startCapture
+/// @param[in] captureID the ID of the capture which is to be added to
+/// @param[in] data pointer to the image data which is to be added (assumed 8-bit grayscale)
+/// @param[in] width width of the image data which is to be added; must match the width from cusCastInit
+/// @param[in] height height of the image data which is to be added; must match the height from cusCastInit
+/// @param[in] red the value of red use in colorizing the overlay, should be between 0.0 and 1.0
+/// @param[in] green the value of green use in colorizing the overlay, should be between 0.0 and 1.0
+/// @param[in] blue the value of blue use in colorizing the overlay, should be between 0.0 and 1.0
+/// @param[in] alpha the value of alpha (opacity) use in colorizing the overlay, should be between 0.0 and 1.0
+/// @retval whether the call was successful
+- (BOOL)addImageOverlay:(int) captureID
+                   data:(NSData * _Nonnull) data
+                  width:(int) width
+                 height:(int) height
+                    red:(float) red
+                  green:(float) green
+                   blue:(float) blue
+                  alpha:(float) alpha;
+
+/// adds a label overlay to a capture which was started with startCapture
+/// @param[in] captureID the ID of the capture which is to be added to
+/// @param[in] text string of the label to be added
+/// @param[in] x x-position of the label in pixels (same scale as the width from cusCastInit)
+/// @param[in] y y-position of the label in pixels (same scale as the height from cusCastInit)
+/// @param[in] width width of the label in pixels (same scale as the width from cusCastInit)
+/// @param[in] height height of the label in pixels (same scale as the height from cusCastInit)
+/// @retval whether the call was successful
+- (BOOL)addLabelOverlay:(int) captureID
+                   text:(NSString * _Nonnull) text
+                      x:(double) x
+                      y:(double) y
+                  width:(double) width
+                 height:(double) height;
+
+/// adds a 2-point distance or trace measurement to a capture which was started with startCapture
+/// @details for a distance measurement, 2 points should be given
+/// @param[in] captureID the ID of the capture which is to be added to
+/// @param[in] type the type of measurement to be added
+/// @param[in] label string label for the measurement
+/// @param[in] points NSValue holding an array of CGPoint/NSPoint in pixels (same scale as the width/height from cusCastInit)
+/// @retval whether the call was successful
+- (BOOL)addMeasurement:(int) captureID
+                  type:(CusMeasurementType) type
+                 label:(NSString * _Nonnull) label
+                points:(NSArray * _Nonnull) points;
+
+/// completes a capture which was started with startCapture
+/// @param[in] captureID the ID of the capture which is to be finished
+/// @param[in] callback function to obtain the success of the capture creation
+/// @retval whether the sending of the capture could be started
+- (BOOL)finishCapture:(int) captureID
+             callback:(CusResultFn _Nonnull) callback;
 
 - (void)setNewRawImageCallback:(CusNewRawImageFn _Nullable) newRawImageCallback;
 - (void)setNewProcessedImageCallback:(CusNewProcessedImageFn _Nullable) newProcessedImageCallback;

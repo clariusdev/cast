@@ -200,8 +200,9 @@ class MainWidget(QtWidgets.QMainWindow):
 # @param bpp bits per pixel
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
+# @param angle acquisition angle for volumetric data
 # @param imu imu data sets
-def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, imu):
+def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, angle, imu):
     if len(imu) > 0:
         signaller.qw = imu[0].qw
         signaller.qx = imu[0].qx
@@ -222,7 +223,8 @@ def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, imu
 # @param timestamp the image timestamp in nanoseconds
 # @param jpg jpeg compression size if the data is in jpeg format
 # @param rf flag for if the image received is radiofrequency data
-def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf):
+# @param angle acquisition angle for volumetric data
+def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf, angle):
     return
 
 
