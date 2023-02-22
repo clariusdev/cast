@@ -2,6 +2,10 @@
 
 import os.path
 import sys
+import ctypes
+
+libcast = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL) # load the libcast.so shared library
+pyclariuscast = ctypes.cdll.LoadLibrary('./pyclariuscast.so') # load the pyclariuscast.so shared library
 
 import pyclariuscast
 from PySide6 import QtCore, QtGui, QtWidgets

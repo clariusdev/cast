@@ -2,6 +2,10 @@
 
 import argparse
 import os.path
+import ctypes
+
+libcast = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL) # load the libcast.so shared library
+pyclariuscast = ctypes.cdll.LoadLibrary('./pyclariuscast.so') # load the pyclariuscast.so shared library
 
 import pyclariuscast
 from PIL import Image
