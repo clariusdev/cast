@@ -26,7 +26,7 @@ public class ImageConverter {
         executor.execute(() -> {
             try {
                 Bitmap bitmap = convert(buffer, info);
-                callback.onResult(bitmap);
+                callback.onResult(bitmap, info.tm);
             } catch (Exception e) {
                 callback.onError(e);
             }
@@ -58,7 +58,7 @@ public class ImageConverter {
     }
 
     interface Callback {
-        void onResult(Bitmap bitmap);
+        void onResult(Bitmap bitmap, long timestamp);
 
         void onError(Exception e);
     }

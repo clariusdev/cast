@@ -27,14 +27,16 @@ public class CastService extends Service {
     private static final String TAG = "Cast";
     private static final String NONE = "<none>";
     private final MutableLiveData<Bitmap> processedImage = new MutableLiveData<>();
+    private final MutableLiveData<Long> imageTime = new MutableLiveData<>();
     private final MutableLiveData<String> error = new MutableLiveData<>();
     private final MutableLiveData<Integer> rawDataProgress = new MutableLiveData<>();
     private final IBinder binder = new CastBinder();
     private final ExecutorService executorService = Executors.newFixedThreadPool(1);
     private final ImageConverter converter = new ImageConverter(executorService, new ImageConverter.Callback() {
         @Override
-        public void onResult(Bitmap bitmap) {
+        public void onResult(Bitmap bitmap, long timestamp) {
             processedImage.postValue(bitmap);
+            imageTime.postValue(timestamp);
         }
 
         @Override
@@ -131,6 +133,10 @@ public class CastService extends Service {
 
         public MutableLiveData<Bitmap> getProcessedImage() {
             return processedImage;
+        }
+
+        public MutableLiveData<Long> getTimestamp() {
+            return imageTime;
         }
 
         public MutableLiveData<String> getError() {

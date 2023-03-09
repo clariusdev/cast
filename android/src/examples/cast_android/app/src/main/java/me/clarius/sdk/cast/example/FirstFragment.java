@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.function.Function;
 
 import me.clarius.sdk.Cast;
 import me.clarius.sdk.ProbeInfo;
@@ -36,7 +35,7 @@ public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
     private CastService.CastBinder castBinder;
-    private Optional<Long> networkID = Optional.empty();
+    private Long timestamp = 0L;
 
     /**
      * Defines callbacks for service binding, passed to bindService()
@@ -49,12 +48,14 @@ public class FirstFragment extends Fragment {
             // We've bound to our service, cast the IBinder now
             castBinder = (CastService.CastBinder) service;
             castBinder.getProcessedImage().observe(getViewLifecycleOwner(), binding.imageView::setImageBitmap);
+            castBinder.getTimestamp().observe(getViewLifecycleOwner(), FirstFragment.this::setTimestamp);
             castBinder.getError().observe(getViewLifecycleOwner(), FirstFragment.this::showError);
             castBinder.getRawDataProgress().observe(getViewLifecycleOwner(), binding.rawDataDownloadProgressBar::setProgress);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName component) {
+            Log.d(TAG, "service disconnected");
             castBinder = null;
         }
     };
@@ -69,59 +70,45 @@ public class FirstFragment extends Fragment {
 
     public static String probeInfoToString(final ProbeInfo info) {
         StringBuilder b = new StringBuilder();
-        b.append("v").append(info.version).append(" elements: ").append(info.elements)
-                .append(" pitch: ").append(info.pitch)
-                .append(" radius: ").append(info.radius);
+        b.append("v").append(info.version).append(" elements: ").append(info.elements).append(" pitch: ").append(info.pitch).append(" radius: ").append(info.radius);
         return b.toString();
     }
 
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState
-    ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentFirstBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
-    private static <T> Optional<T> maybeInteger(final byte[] from, Function<String, T> transform) {
-        try {
-            final String fromString = new String(from);
-            final T ret = transform.apply(fromString);
-            return Optional.of(ret);
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
-    }
-
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        final Intent intent = this.requireActivity().getIntent();
-        if (intent != null) {
-            final Bundle extras = intent.getExtras();
-            if (extras != null) {
-                networkID = maybeInteger(extras.getByteArray("cus_network_id"), Long::parseLong);
-                Log.d(TAG, "Received network ID: " + networkID.orElse(-1L));
-                final Optional<String> probeSerial = Optional.ofNullable(extras.getByteArray("cus_probe_serial")).map(FirstFragment::fromByteArray);
-                final Optional<String> ipAddress = Optional.ofNullable(extras.getByteArray("cus_ip_address")).map(FirstFragment::fromByteArray);
-                final Optional<String> castPort = Optional.ofNullable(extras.getByteArray("cus_cast_port")).map(FirstFragment::fromByteArray);
-                Log.d(TAG, "Received probe serial: " + probeSerial.orElse("<none>"));
-                Log.d(TAG, "Received IP address: " + ipAddress.orElse("<none>"));
-                Log.d(TAG, "Received cast port: " + castPort.orElse("<none>"));
-                if (ipAddress.isPresent()) {
-                    binding.ipAddress.setText(ipAddress.get());
-                }
-                if (castPort.isPresent()) {
-                    binding.tcpPort.setText(castPort.get());
-                }
-            }
-        }
-
         binding.buttonConnect.setOnClickListener(v -> doConnect());
         binding.buttonRun.setOnClickListener(v -> toggleRun());
         binding.buttonDisconnect.setOnClickListener(v -> doDisconnect());
         binding.buttonRawData.setOnClickListener(v -> getRawData());
+        binding.buttonCapture.setOnClickListener(v -> doCapture());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        final Intent intent = this.requireActivity().getIntent();
+        if (intent != null) {
+            final Bundle extras = intent.getExtras();
+            if (extras != null) {
+                final Optional<String> probeSerial = Optional.ofNullable(extras.getByteArray("cus_probe_serial")).map(FirstFragment::fromByteArray);
+                final Optional<String> ipAddress = Optional.ofNullable(extras.getByteArray("cus_ip_address")).map(FirstFragment::fromByteArray);
+                final Optional<String> castPort = Optional.ofNullable(extras.getByteArray("cus_cast_port")).map(FirstFragment::fromByteArray);
+                final Optional<String> networkId = Optional.ofNullable(extras.getByteArray("cus_network_id")).map(FirstFragment::fromByteArray);
+                Log.d(TAG, "Received probe serial: " + probeSerial.orElse("<none>"));
+                Log.d(TAG, "Received IP address: " + ipAddress.orElse("<none>"));
+                Log.d(TAG, "Received cast port: " + castPort.orElse("<none>"));
+                Log.d(TAG, "Received network ID: " + networkId.orElse("<none>"));
+                ipAddress.ifPresent(s -> binding.ipAddress.setText(s));
+                castPort.ifPresent(s -> binding.tcpPort.setText(s));
+                networkId.ifPresent(s -> binding.networkId.setText(s));
+            }
+        }
     }
 
     @Override
@@ -167,21 +154,21 @@ public class FirstFragment extends Fragment {
             binding.ipAddressLayout.setError("Cannot be empty");
             return;
         }
-        int tcpPort;
-        try {
-            tcpPort = Integer.parseInt(String.valueOf(binding.tcpPort.getText()));
-        } catch (RuntimeException e) {
+        Optional<Integer> tcpPort = Utils.maybeInt(binding.tcpPort.getText());
+        if (!tcpPort.isPresent()) {
             binding.tcpPortLayout.setError("Invalid number");
             return;
         }
-        showMessage("Connecting to " + ipAddress + ":" + tcpPort);
-        castBinder.getCast().connect(ipAddress, tcpPort, networkID, getCertificate(),
-                result -> {
-                    Log.d(TAG, "Connection result: " + result);
-                    if (result) {
-                        askProbeInfo(castBinder.getCast());
-                    }
-                });
+        Optional<Long> networkId = Utils.maybeLong(binding.networkId.getText());
+        showMessage("Connecting to " + ipAddress + ":" + tcpPort.get());
+        castBinder.getCast().connect(ipAddress, tcpPort.get(), networkId, getCertificate(), (result, port, swRevMatch) -> {
+            Log.d(TAG, "Connection result: " + result);
+            if (result) {
+                Log.d(TAG, "UDP stream will be on port " + port);
+                Log.d(TAG, "App software " + (swRevMatch ? "matches" : "does not match"));
+                askProbeInfo(castBinder.getCast());
+            }
+        });
     }
 
     private void doDisconnect() {
@@ -201,6 +188,26 @@ public class FirstFragment extends Fragment {
         final Cast cast = castBinder.getCast();
         RawDataFile handle = new RawDataFile(cast);
         cast.requestRawData(0, 0, handle::requestResultRetrieved);
+    }
+
+    private void doCapture() {
+        if (castBinder == null || timestamp == 0L) {
+            return;
+        }
+        showMessage("Starting image capture");
+        castBinder.getCast().startCapture(timestamp, captureID -> {
+            Log.d(TAG, "Start capture got ID: " + captureID);
+            if (captureID < 0) {
+                return;
+            }
+            castBinder.getCast().finishCapture(captureID, result -> {
+                Log.d(TAG, "Finish capture got result: " + result);
+            });
+        });
+    }
+
+    private void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     private void showError(CharSequence text) {
@@ -239,11 +246,10 @@ public class FirstFragment extends Fragment {
             if (result > 0) {
                 try {
                     showMessage("Saving raw data");
-                    Uri uri = IOUtils.saveInDownloads(data, requireContext(),
-                            (progress, total) -> {
-                                binding.rawDataCopyProgressBar.setMax(total);
-                                binding.rawDataCopyProgressBar.setProgress(progress);
-                            });
+                    Uri uri = IOUtils.saveInDownloads(data, requireContext(), (progress, total) -> {
+                        binding.rawDataCopyProgressBar.setMax(total);
+                        binding.rawDataCopyProgressBar.setProgress(progress);
+                    });
                     showMessage("Saved raw data in file " + uri);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -254,5 +260,4 @@ public class FirstFragment extends Fragment {
             }
         }
     }
-
 }

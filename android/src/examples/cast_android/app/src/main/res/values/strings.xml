@@ -16,8 +16,10 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
     <string name="toggle_run">Toggle run</string>
+    <string name="capture_image">Capture image</string>
     <string name="ask_state">Ask state</string>
     <string name="ultrasound_image">Ultrasound image</string>
     <string name="get_raw_data">Get raw data</string>
     <string name="ip_address">IP address</string>
+    <string name="network_id">Network ID</string>
 </resources>

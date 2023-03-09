@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="me.clarius.sdk.cast.example">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- INTERNET perm required to connect to network sockets -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -24,6 +23,8 @@
             android:theme="@style/Theme.CastExample.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <!-- Make the example app visible to the clarius app
+                to improve user workflow when launching marketplace apps -->
                 <action android:name="me.clarius.sdk.action.LAUNCH" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
