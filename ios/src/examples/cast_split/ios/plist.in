@@ -32,6 +32,8 @@
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2016-@COPYRIGHT_YEAR@ Clarius Mobile Health Corp. All Rights Reserved.</string>
+	<key>UILaunchStoryboardName</key>
+	<string>Launch Screen</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -2,8 +2,6 @@
 //  SideBySideApp.swift
 //  SideBySide
 //
-//  Created by Ben Kerby on 2022-10-05.
-//
 
 import SwiftUI
 
