@@ -9,5 +9,5 @@ Examples:
 
 Executing under Linux:
 - Install Pillow (latest PIL library) and PySide6 using pip
-- Copy the python programs to the extracted libs folder (where pycast.so and libcast.so are placed)
+- Copy the python programs to the extracted libs folder (where pyclariuscast.so and libcast.so are placed)
 - Execute: python3 {clarius_python_example}.py
