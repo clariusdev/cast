@@ -4,7 +4,7 @@ import argparse
 import os.path
 import ctypes
 
-libcast = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL) # load the libcast.so shared library
+libcast_handle = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL)._handle # load the libcast.so shared library
 pyclariuscast = ctypes.cdll.LoadLibrary('./pyclariuscast.so') # load the pyclariuscast.so shared library
 
 import pyclariuscast
@@ -129,6 +129,8 @@ def main():
             print("connected to {0} on port {1}".format(args.ip, args.port))
         else:
             print("connection failed")
+            # unload the shared library before destroying the cast object
+            ctypes.CDLL('libc.so.6').dlclose(libcast_handle)
             cast.destroy()
             return
     else:
