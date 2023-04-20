@@ -4,7 +4,7 @@ import os.path
 import sys
 import ctypes
 
-libcast = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL) # load the libcast.so shared library
+libcast_handle = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL)._handle # load the libcast.so shared library
 pyclariuscast = ctypes.cdll.LoadLibrary('./pyclariuscast.so') # load the pyclariuscast.so shared library
 
 import pyclariuscast
@@ -195,6 +195,8 @@ class MainWidget(QtWidgets.QMainWindow):
     # handles shutdown
     @Slot()
     def shutdown(self):
+        # unload the shared library before destroying the cast object
+        ctypes.CDLL('libc.so.6').dlclose(libcast_handle)
         self.cast.destroy()
         QtWidgets.QApplication.quit()
 
