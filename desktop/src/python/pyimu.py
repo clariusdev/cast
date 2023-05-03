@@ -4,8 +4,9 @@ import os.path
 import sys
 import ctypes
 
-libcast_handle = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL)._handle # load the libcast.so shared library
-pyclariuscast = ctypes.cdll.LoadLibrary('./pyclariuscast.so') # load the pyclariuscast.so shared library
+if sys.platform.startswith("linux"):
+    libcast_handle = ctypes.CDLL("./libcast.so", ctypes.RTLD_GLOBAL)._handle  # load the libcast.so shared library
+    pyclariuscast = ctypes.cdll.LoadLibrary("./pyclariuscast.so")  # load the pyclariuscast.so shared library
 
 import pyclariuscast
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -63,6 +64,7 @@ class Signaller(QtCore.QObject):
 
 # global required for the listen api callbacks
 signaller = Signaller()
+
 
 # 3d render class
 class ScannerWindow(Qt3DExtras.Qt3DWindow):
@@ -193,8 +195,9 @@ class MainWidget(QtWidgets.QMainWindow):
     # handles shutdown
     @Slot()
     def shutdown(self):
-        # unload the shared library before destroying the cast object
-        ctypes.CDLL('libc.so.6').dlclose(libcast_handle)
+        if sys.platform.startswith("linux"):
+            # unload the shared library before destroying the cast object
+            ctypes.CDLL("libc.so.6").dlclose(libcast_handle)
         self.cast.destroy()
         QtWidgets.QApplication.quit()
 
@@ -271,7 +274,7 @@ def main():
     widget = MainWidget(cast)
     widget.resize(640, 480)
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

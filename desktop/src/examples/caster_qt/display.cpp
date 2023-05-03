@@ -143,7 +143,7 @@ namespace
         const qreal height = qMin(mainSize.height(), mainSize.width()) / 10.0;
         const QPointF startPos(mainSize.width() / 2.0, mainSize.height() / 2.0);
         const QPointF topLeft = startPos - QPointF(height, height) / 2.0;
-        const QRectF rect(topLeft, QSize(height, height));
+        const QRectF rect(topLeft, QSizeF(height, height));
         QGraphicsRectItem* child = new CaliperItem(rect, addto, trace);
         child->setPen(QPen(QColor(0, 0, 0, 0)));
         scenePtr->addItem(child);

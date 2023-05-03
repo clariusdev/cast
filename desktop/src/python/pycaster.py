@@ -2,14 +2,15 @@
 
 import argparse
 import os.path
+import sys
 import ctypes
 
-libcast_handle = ctypes.CDLL('./libcast.so', ctypes.RTLD_GLOBAL)._handle # load the libcast.so shared library
-pyclariuscast = ctypes.cdll.LoadLibrary('./pyclariuscast.so') # load the pyclariuscast.so shared library
+if sys.platform.startswith("linux"):
+    libcast_handle = ctypes.CDLL("./libcast.so", ctypes.RTLD_GLOBAL)._handle  # load the libcast.so shared library
+    pyclariuscast = ctypes.cdll.LoadLibrary("./pyclariuscast.so")  # load the pyclariuscast.so shared library
 
 import pyclariuscast
 from PIL import Image
-
 
 ## called when a new processed image is streamed
 # @param image the scan-converted image data
@@ -129,8 +130,9 @@ def main():
             print("connected to {0} on port {1}".format(args.ip, args.port))
         else:
             print("connection failed")
-            # unload the shared library before destroying the cast object
-            ctypes.CDLL('libc.so.6').dlclose(libcast_handle)
+            if sys.platform.startswith("linux"):
+                # unload the shared library before destroying the cast object
+                ctypes.CDLL("libc.so.6").dlclose(libcast_handle)
             cast.destroy()
             return
     else:
