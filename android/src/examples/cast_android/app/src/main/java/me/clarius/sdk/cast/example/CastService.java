@@ -90,7 +90,7 @@ public class CastService extends Service {
         super.onCreate();
         if (cast == null) {
             Log.d(TAG, "Creating the Cast service");
-            cast = new Cast(getApplicationContext(), listener);
+            cast = new Cast(getApplicationContext().getApplicationInfo().nativeLibraryDir, listener);
             cast.initialize(getCertDir(this), new Cast.BooleanResult() {
                 @Override
                 public void accept(boolean result) {

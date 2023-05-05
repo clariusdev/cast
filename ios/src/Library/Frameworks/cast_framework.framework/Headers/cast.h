@@ -2,7 +2,6 @@
 
 #import <Foundation/Foundation.h>
 
-#include "api_common.h"
 #include "cast_def.h"
 
 /// asynchronous result callback function

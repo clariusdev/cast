@@ -4,9 +4,9 @@
 2. Re-sync Gradle
 3. Build
 
-## TODO
+## Important Notes
 
-* Provide a multi-ABI package
+* Set the DSL option `useLegacyPackaging = true` in the application's `build.gradle`, this ensures the native libraries are extracted and can be loaded at runtime because the current implementation does not support loading uncompressed libraries from the APK:
 
 ## Marketplace Integration
 
@@ -23,7 +23,7 @@ The Clarius app can launch partner apps with an Android intent containing the pr
 
 ### Visibility
 
-The Clarius app attempts to detected installed partner apps by querying the `PackageManager` to adapt its GUI.
+The Clarius app attempts to detect installed partner apps by querying the `PackageManager` to adapt its GUI.
 However, starting with Android 11 (API 30), results are filtered by the system, preventing detection.
 To allow detection, ensure your target activity declares an intent filter in the manifest file with either of the following actions:
 
@@ -41,3 +41,7 @@ For example:
             </intent-filter>
         </activity>
     </application>
+
+## TODO
+
+* Provide a multi-ABI package

@@ -4,7 +4,6 @@ plugins {
 
 android {
     compileSdk 33
-
     defaultConfig {
         applicationId "me.clarius.sdk.cast.example"
         minSdk 26
@@ -26,6 +25,12 @@ android {
     }
     buildFeatures {
         viewBinding true
+    }
+    packagingOptions {
+        jniLibs {
+            // required to load qt plugins because qt cannot find uncompressed shared libs in apk
+            useLegacyPackaging = true
+        }
     }
     namespace 'me.clarius.sdk.cast.example'
 }

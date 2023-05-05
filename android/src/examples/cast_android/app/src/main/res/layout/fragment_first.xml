@@ -149,7 +149,7 @@
         android:layout_height="0dp"
         android:layout_gravity="center"
         android:contentDescription="@string/ultrasound_image"
-        android:src="@drawable/ic_baseline_image_24"
+        android:src="@drawable/ic_baseline_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/raw_data_copy_progress_bar" />
