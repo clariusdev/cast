@@ -29,7 +29,11 @@
 #endif
 
 #ifndef CAST_DEPRECATED
-#  define CAST_DEPRECATED __attribute__ ((__deprecated__))
+#  ifdef _MSC_VER
+#    define CAST_DEPRECATED __declspec(deprecated)
+#  else
+#    define CAST_DEPRECATED __attribute__ ((__deprecated__))
+#  endif
 #endif
 
 #ifndef CAST_DEPRECATED_EXPORT
