@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <iostream>
 #include <atomic>
 #include <thread>
@@ -20,8 +21,9 @@
 static char* buffer_ = nullptr;
 static int szRawData_ = 0;
 static int counter_ = 0;
-long long int lasttime_ = 0;
-int captureID_ = -1;
+static bool streamOutput_ = true;
+static long long int lasttime_ = 0;
+static int captureID_ = -1;
 
 /// callback for error messages
 /// @param[in] err the error message sent from the casting module
@@ -101,8 +103,9 @@ void newProcessedImageFn(const void* newImage, const CusProcessedImageInfo* nfo,
 {
     (void)newImage;
     (void)pos;
-    PRINTSL << "new image (" << counter_++ << "): " << nfo->width << " x " << nfo->height << " @ " << nfo->bitsPerPixel << " bpp. @ "
-            << nfo->imageSize << "bytes. @ " << nfo->micronsPerPixel << " microns per pixel. imu points: " << npos << std::flush;
+    if (streamOutput_)
+        PRINTSL << "new image (" << counter_++ << "): " << nfo->width << " x " << nfo->height << " @ " << nfo->bitsPerPixel << " bpp. @ "
+                << nfo->imageSize << "bytes. @ " << nfo->micronsPerPixel << " microns per pixel. imu points: " << npos << std::flush;
 }
 
 /// callback for a new spectral image sent from the scanner
@@ -111,8 +114,9 @@ void newProcessedImageFn(const void* newImage, const CusProcessedImageInfo* nfo,
 void newSpectralImageFn(const void* newImage, const CusSpectralImageInfo* nfo)
 {
     (void)newImage;
-    PRINTSL << "new spectrum: " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
-          << "bits. @ " << nfo->period << " sec/line." << std::flush;
+    if (streamOutput_)
+        PRINTSL << "new spectrum: " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
+              << "bits. @ " << nfo->period << " sec/line." << std::flush;
 }
 
 /// saves raw data from the current download buffer
@@ -174,7 +178,7 @@ std::vector<std::string> getParameters(const std::string& line, std::size_t max)
     {
         const bool addAll = (nextIndex == std::string::npos || result.size() + 1 == max);
         std::size_t count = (addAll ? line.length() : nextIndex + 1) - lastIndex;
-        result.push_back(line.substr(lastIndex, count));
+        result.push_back(line.substr(lastIndex, addAll ? count : count - 1));
         lastIndex += count;
         nextIndex = line.find(' ', lastIndex);
     }
@@ -233,6 +237,10 @@ void processEventLoop(std::atomic_bool& quit)
         {
             if (cusCastUserFunction(GainDec, 0, nullptr) < 0)
                 ERROR << "error decrementing gain" << std::endl;
+        }
+        else if (cmd == 'S' || cmd == 's')
+        {
+            streamOutput_ = !streamOutput_;
         }
         else if (cmd == 'R' || cmd == 'r')
         {
@@ -304,20 +312,20 @@ void processEventLoop(std::atomic_bool& quit)
                 ERROR << "no capture in progress" << std::endl;
                 continue;
             }
-            const std::vector<std::string> params = getParameters(line, 3);
+            const std::vector<std::string> prms = getParameters(line, 3);
             double x = 0;
             double y = 0;
-            if (params.size() < 3 || !parseDouble(x, params[0]) || !parseDouble(y, params[1]))
+            if (prms.size() < 3 || !parseDouble(x, prms[0]) || !parseDouble(y, prms[1]))
             {
                 ERROR << "wrong label parameters provided";
                 ERROR << "please give parameters as -> x y text";
                 ERROR << "where x and y are the coordinates of the center of the label" << std::endl;
                 continue;
             }
-            if (cusCastAddLabelOverlay(captureID_, params.back().c_str(), x, y, 100.0, 100.0) < 0)
+            if (cusCastAddLabelOverlay(captureID_, prms.back().c_str(), x, y, 100.0, 100.0) < 0)
                 ERROR << "failed to add label to capture" << std::endl;
             else
-                PRINT << "added label '" << params.back() << "' at (" << x << ", " << y << ") to capture" << std::endl;
+                PRINT << "added label '" << prms.back() << "' at (" << x << ", " << y << ") to capture" << std::endl;
         }
         else if (cmd == 'm' || cmd == 'M')
         {
@@ -326,14 +334,14 @@ void processEventLoop(std::atomic_bool& quit)
                 ERROR << "no capture in progress" << std::endl;
                 continue;
             }
-            const std::vector<std::string> params = getParameters(line, 5);
+            const std::vector<std::string> prms = getParameters(line, 5);
             double x1 = 0;
             double y1 = 0;
             double x2 = 0;
             double y2 = 0;
-            if (params.size() < 5
-                || !parseDouble(x1, params[0]) || !parseDouble(y1, params[1])
-                || !parseDouble(x2, params[2]) || !parseDouble(y2, params[3]))
+            if (prms.size() < 5
+                || !parseDouble(x1, prms[0]) || !parseDouble(y1, prms[1])
+                || !parseDouble(x2, prms[2]) || !parseDouble(y2, prms[3]))
             {
                 ERROR << "wrong measurement parameters provided";
                 ERROR << "please give parameters as -> x1 y1 x2 y2 text";
@@ -342,18 +350,70 @@ void processEventLoop(std::atomic_bool& quit)
             }
             const double points[] = { x1, y1, x2, y2 };
             const int nDoubles = static_cast<int>(sizeof(points) / sizeof(points[0]));
-            if (cusCastAddMeasurement(captureID_, CusMeasurementTypeDistance, params.back().c_str(), points, nDoubles) < 0)
+            if (cusCastAddMeasurement(captureID_, CusMeasurementTypeDistance, prms.back().c_str(), points, nDoubles) < 0)
                 ERROR << "failed to add label to capture" << std::endl;
             else
-                PRINT << "added measurement '" << params.back() << "' from (" << x1 << ", " << y1 << ") "
+                PRINT << "added measurement '" << prms.back() << "' from (" << x1 << ", " << y1 << ") "
                     << "to (" << x2 << ", " << y2 << ") to capture" << std::endl;
+        }
+        else if (cmd == 'p' || cmd == 'P')
+        {
+            const std::vector<std::string> prms = getParameters(line, 2);
+            if (prms.size() != 2)
+            {
+                ERROR << "usage: p {param_name} {param_value}" << std::endl;;
+                continue;
+            }
+            std::string prm = prms[0];
+            std::transform(prm.begin(), prm.end(), prm.begin(), ::tolower);
+            if (prms[1] == "true" || prms[1] == "false")
+            {
+                if (cusCastEnableParameter(prms[0].c_str(), (prms[1] == "true"), [](int ret)
+                {
+                    if (ret == CUS_FAILURE)
+                        ERROR << "parameter enable/disable failed";
+                }) < 0)
+                {
+                    ERROR << "parameter enable/disable failed";
+                }
+            }
+            else if (prm.find("pulse") != std::string::npos)
+            {
+                if (cusCastSetPulse(prms[0].c_str(), prms[1].c_str(), [](int ret)
+                {
+                    if (ret == CUS_FAILURE)
+                        ERROR << "parameter pulse shape set failed";
+                }) < 0)
+                {
+                    ERROR << "parameter pulse shape set failed";
+                }
+            }
+            else
+            {
+                double val = 0;
+                if (!parseDouble(val, prms[1]))
+                {
+                    ERROR << "could not convert parameter value to numeric value";
+                    continue;
+                }
+                if (cusCastSetParameter(prms[0].c_str(), val, [](int ret)
+                {
+                    if (ret == CUS_FAILURE)
+                        ERROR << "parameter setting parameter";
+                }) < 0)
+                {
+                    ERROR << "parameter setting parameter";
+                }
+            }
         }
         else
         {
             PRINT << "valid commands: [q: quit]";
+            PRINT << "       display: [s: toggle stream outptu]";
             PRINT << "       imaging: [f: freeze, d/D: depth, g/G: gain]";
+            PRINT << "        params: [p: change parameter]";
             PRINT << "      raw data: [r: request, y: download]";
-            PRINT << "       capture: [c: start/end capture, l: add label, m: add measurement]";
+            PRINT << "       capture: [c: start/end capture, l: add label, m: add measurement]" << std::endl;;
         }
     }
 }
@@ -394,12 +454,12 @@ int init(int& argc, char** argv)
 
         po::notify(vm);
     }
-    catch(std::exception& e)
+    catch (std::exception& e)
     {
         ERROR << "Error: " << e.what() << std::endl;
         return CUS_FAILURE;
     }
-    catch(...)
+    catch (...)
     {
         ERROR << "Unknown error!" << std::endl;
         return CUS_FAILURE;

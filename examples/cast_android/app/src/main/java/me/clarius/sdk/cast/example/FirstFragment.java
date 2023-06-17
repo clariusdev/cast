@@ -184,7 +184,6 @@ public class FirstFragment extends Fragment {
         }
         showMessage("Requesting raw data");
         binding.rawDataDownloadProgressBar.setProgress(0);
-        binding.rawDataCopyProgressBar.setProgress(0);
         final Cast cast = castBinder.getCast();
         RawDataFile handle = new RawDataFile(cast);
         cast.requestRawData(0, 0, handle::requestResultRetrieved);
@@ -246,13 +245,9 @@ public class FirstFragment extends Fragment {
             if (result > 0) {
                 try {
                     showMessage("Saving raw data");
-                    Uri uri = IOUtils.saveInDownloads(data, requireContext(), (progress, total) -> {
-                        binding.rawDataCopyProgressBar.setMax(total);
-                        binding.rawDataCopyProgressBar.setProgress(progress);
-                    });
+                    Uri uri = IOUtils.saveInDocuments(data, "cast_raw_data", requireContext());
                     showMessage("Saved raw data in file " + uri);
                 } catch (IOException e) {
-                    e.printStackTrace();
                     showError(e.toString());
                 }
             } else {

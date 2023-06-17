@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
+import ctypes
 import os.path
 import sys
-import ctypes
 
 if sys.platform.startswith("linux"):
     libcast_handle = ctypes.CDLL("./libcast.so", ctypes.RTLD_GLOBAL)._handle  # load the libcast.so shared library
@@ -10,7 +10,11 @@ if sys.platform.startswith("linux"):
 
 import pyclariuscast
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.Qt3DCore import Qt3DCore
+from PySide6.Qt3DExtras import Qt3DExtras
+from PySide6.Qt3DRender import Qt3DRender
+from PySide6.QtCore import QUrl, Slot
+from PySide6.QtGui import QQuaternion, QVector3D
 
 
 # custom event for handling change in freeze state
@@ -38,7 +42,11 @@ class ImageEvent(QtCore.QEvent):
 class Signaller(QtCore.QObject):
     freeze = QtCore.Signal(bool)
     button = QtCore.Signal(int, int)
-    image = QtCore.Signal(QtGui.QImage)
+    image = QtCore.Signal(float, float, float, float)
+    qw = 0
+    qx = 0
+    qy = 0
+    qz = 0
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -50,43 +58,60 @@ class Signaller(QtCore.QObject):
         elif evt.type() == QtCore.QEvent.Type(QtCore.QEvent.User + 1):
             self.button.emit(evt.btn, evt.clicks)
         elif evt.type() == QtCore.QEvent.Type(QtCore.QEvent.User + 2):
-            self.image.emit(self.usimage)
+            self.image.emit(self.qw, self.qx, self.qy, self.qz)
         return True
 
 
-# global required for the cast api callbacks
+# global required for the listen api callbacks
 signaller = Signaller()
 
 
-# draws the ultrasound image
-class ImageView(QtWidgets.QGraphicsView):
-    def __init__(self, cast):
-        QtWidgets.QGraphicsView.__init__(self)
-        self.cast = cast
-        self.setScene(QtWidgets.QGraphicsScene())
+# 3d render class
+class ScannerWindow(Qt3DExtras.Qt3DWindow):
+    qw = 0.5
+    qx = 0.5
+    qy = -0.5
+    qz = 0.5
+    scannerTransform = Qt3DCore.QTransform()
 
-    # set the new image and redraw
-    def updateImage(self, img):
-        self.image = img
-        self.scene().invalidate()
+    def __init__(self):
+        super(ScannerWindow, self).__init__()
 
-    # resize the scan converter, image, and scene
-    def resizeEvent(self, evt):
-        w = evt.size().width()
-        h = evt.size().height()
-        self.cast.setOutputSize(w, h)
-        self.image = QtGui.QImage(w, h, QtGui.QImage.Format_ARGB32)
-        self.image.fill(QtCore.Qt.black)
-        self.setSceneRect(0, 0, w, h)
+        # camera
+        self.camera().lens().setPerspectiveProjection(50, 16 / 9, 0.1, 1000)
+        self.camera().setPosition(QVector3D(0, 0, 30))
+        self.camera().setViewCenter(QVector3D(0, 0, 0))
 
-    # black background
-    def drawBackground(self, painter, rect):
-        painter.fillRect(rect, QtCore.Qt.black)
+        # create scene from obj file
+        self.createScene()
+        self.setRootEntity(self.rootEntity)
 
-    # draws the image
-    def drawForeground(self, painter, rect):
-        if not self.image.isNull():
-            painter.drawImage(rect, self.image)
+    def updateAngle(self, qw, qx, qy, qz):
+        self.qw = qw
+        self.qx = qx
+        self.qy = qy
+        self.qz = qz
+        self.addTransform()
+
+    def addTransform(self):
+        # correct orientation
+        self.scannerTransform.setScale3D(QVector3D(100, 100, 100))
+        self.orientation = QQuaternion(self.qw, self.qx, self.qy, self.qz)
+        self.axisCorrection = QQuaternion.fromEulerAngles(0, 180, 90)
+        self.modelCorrection = QQuaternion.fromEulerAngles(-90, 0, 90)
+        self.modelRotation = self.orientation * self.axisCorrection
+        self.correctedOrientation = self.modelCorrection * self.modelRotation
+        self.scannerTransform.setRotation(self.correctedOrientation)
+        self.scannerEntity.addComponent(self.scannerTransform)
+
+    def createScene(self):
+        self.rootEntity = Qt3DCore.QEntity()
+        self.scannerEntity = Qt3DCore.QEntity(self.rootEntity)
+        # QSceneLoader loads materials from scanner.mtl referenced in scanner.obj
+        self.scanner = Qt3DRender.QSceneLoader(self.scannerEntity)
+        self.scanner.setSource(QUrl.fromLocalFile("scanner.obj"))
+        self.scannerEntity.addComponent(self.scanner)
+        self.addTransform()
 
 
 # main widget with controls and ui
@@ -106,10 +131,6 @@ class MainWidget(QtWidgets.QMainWindow):
         port.setInputMask("00000")
 
         conn = QtWidgets.QPushButton("Connect")
-        self.run = QtWidgets.QPushButton("Run")
-        quit = QtWidgets.QPushButton("Quit")
-        depthUp = QtWidgets.QPushButton("< Depth")
-        depthDown = QtWidgets.QPushButton("> Depth")
 
         # try to connect/disconnect to/from the probe
         def tryConnect():
@@ -126,41 +147,20 @@ class MainWidget(QtWidgets.QMainWindow):
                 else:
                     self.statusBar().showMessage("Failed to disconnect")
 
-        # try to freeze/unfreeze
-        def tryFreeze():
-            if cast.isConnected():
-                cast.userFunction(1, 0)
-
-        # try depth up
-        def tryDepthUp():
-            if cast.isConnected():
-                cast.userFunction(4, 0)
-
-        # try depth down
-        def tryDepthDown():
-            if cast.isConnected():
-                cast.userFunction(5, 0)
-
         conn.clicked.connect(tryConnect)
-        self.run.clicked.connect(tryFreeze)
+        quit = QtWidgets.QPushButton("Quit")
         quit.clicked.connect(self.shutdown)
-        depthUp.clicked.connect(tryDepthUp)
-        depthDown.clicked.connect(tryDepthDown)
 
         # add widgets to layout
-        self.img = ImageView(cast)
+        self.scanner = ScannerWindow()
+        scannerWidget = QtWidgets.QWidget.createWindowContainer(self.scanner)
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.img)
+        layout.addWidget(scannerWidget)
         layout.addWidget(ip)
         layout.addWidget(port)
         layout.addWidget(conn)
-        layout.addWidget(self.run)
         layout.addWidget(quit)
         central.setLayout(layout)
-        hlayout = QtWidgets.QHBoxLayout()
-        layout.addLayout(hlayout)
-        hlayout.addWidget(depthUp)
-        hlayout.addWidget(depthDown)
 
         # connect signals
         signaller.freeze.connect(self.freeze)
@@ -178,11 +178,9 @@ class MainWidget(QtWidgets.QMainWindow):
     @Slot(bool)
     def freeze(self, frozen):
         if frozen:
-            self.run.setText("Run")
             self.statusBar().showMessage("Image Stopped")
         else:
-            self.run.setText("Freeze")
-            self.statusBar().showMessage("Image Running (check firewall settings if no image seen)")
+            self.statusBar().showMessage("Image Running")
 
     # handles button messages
     @Slot(int, int)
@@ -190,9 +188,9 @@ class MainWidget(QtWidgets.QMainWindow):
         self.statusBar().showMessage("Button {0} pressed w/ {1} clicks".format(btn, clicks))
 
     # handles new images
-    @Slot(QtGui.QImage)
-    def image(self, img):
-        self.img.updateImage(img)
+    @Slot(float, float, float, float)
+    def image(self, qw, qx, qy, qz):
+        self.scanner.updateAngle(qw, qx, qy, qz)
 
     # handles shutdown
     @Slot()
@@ -208,21 +206,19 @@ class MainWidget(QtWidgets.QMainWindow):
 # @param image the scan-converted image data
 # @param width width of the image in pixels
 # @param height height of the image in pixels
-# @param sz full size of image
+# @param bpp bits per pixel
 # @param micronsPerPixel microns per pixel
 # @param timestamp the image timestamp in nanoseconds
 # @param angle acquisition angle for volumetric data
-# @param imu inertial data tagged with the frame
-def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angle, imu):
-    bpp = sz / (width * height)
-    if bpp == 4:
-        img = QtGui.QImage(image, width, height, QtGui.QImage.Format_ARGB32)
-    else:
-        img = QtGui.QImage(image, width, height, QtGui.QImage.Format_Grayscale8)
-    # a deep copy is important here, as the memory from 'image' won't be valid after the event posting
-    signaller.usimage = img.copy()
-    evt = ImageEvent()
-    QtCore.QCoreApplication.postEvent(signaller, evt)
+# @param imu imu data sets
+def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, angle, imu):
+    if len(imu) > 0:
+        signaller.qw = imu[0].qw
+        signaller.qx = imu[0].qx
+        signaller.qy = imu[0].qy
+        signaller.qz = imu[0].qz
+        evt = ImageEvent()
+        QtCore.QCoreApplication.postEvent(signaller, evt)
     return
 
 

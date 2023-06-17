@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
+import ctypes
 import os.path
 import sys
-import ctypes
 
 if sys.platform.startswith("linux"):
     libcast_handle = ctypes.CDLL("./libcast.so", ctypes.RTLD_GLOBAL)._handle  # load the libcast.so shared library
@@ -11,6 +11,9 @@ if sys.platform.startswith("linux"):
 
 import pyclariuscast
 from PIL import Image
+
+printStream = True
+
 
 ## called when a new processed image is streamed
 # @param image the scan-converted image data
@@ -23,12 +26,13 @@ from PIL import Image
 # @param imu inertial data tagged with the frame
 def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angle, imu):
     bpp = sz / (width * height)
-    print(
-        "image: {0}, {1}x{2} @ {3} bpp, {4:.2f} um/px, imu: {5} pts".format(
-            timestamp, width, height, bpp, micronsPerPixel, len(imu)
-        ),
-        end="\r",
-    )
+    if printStream:
+        print(
+            "image: {0}, {1}x{2} @ {3} bpp, {4:.2f} um/px, imu: {5} pts".format(
+                timestamp, width, height, bpp, micronsPerPixel, len(imu)
+            ),
+            end="\r",
+        )
     if bpp == 4:
         img = Image.frombytes("RGBA", (width, height), image)
     else:
@@ -49,7 +53,7 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angl
 # @param rf flag for if the image received is radiofrequency data
 # @param angle acquisition angle for volumetric data
 def newRawImage(image, lines, samples, bps, axial, lateral, timestamp, jpg, rf, angle):
-    # check the rf flag for radiofrequency data vs raw grey grayscale
+    # check the rf flag for radiofrequency data vs raw grayscale
     # raw grayscale data is non scan-converted and in polar co-ordinates
     # print(
     #    "raw image: {0}, {1}x{2} @ {3} bps, {4:.2f} um/s, {5:.2f} um/l, rf: {6}".format(
@@ -142,9 +146,9 @@ def main():
     # input loop
     key = ""
     while key != "q" and key != "Q":
-        key = input("press ('q' to quit) ('a' for action): ")
+        key = input("press (q)->quit (a)->action (s)->stream (p)->param change: ")
         if key == "a" or key == "A":
-            key = input("(f)->freeze, (i)->image, (c)->cine, (d/D)->depth, (g/G)->gain: ")
+            key = input("(f)->freeze (i)->capture image (c)->capture cine, (d/D)->depth, (g/G)->gain: ")
             if key == "f" or key == "F":
                 cast.userFunction(1, 0)
             elif key == "i" or key == "I":
@@ -165,6 +169,18 @@ def main():
                 print("successful disconnect")
             else:
                 print("disconnection failed")
+        elif key == "s" or key == "S":
+            global printStream
+            printStream = not printStream
+        elif key == "p" or key == "P":
+            inp = input("enter: {parameter name} {value [float/true/false]}").split()
+            if len(inp) != 2:
+                print("please format as: {parameter name} {value [float/true/false]}")
+            else:
+                if inp[1] == "true" or inp[1] == "false":
+                    cast.enableParam(inp[0], 1 if inp[1] == "true" else 0)
+                else:
+                    cast.setParam(inp[0], float(inp[1]))
 
     cast.destroy()
 
