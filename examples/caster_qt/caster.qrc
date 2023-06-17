@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/cast.png</file>
+    </qresource>
+</RCC>
