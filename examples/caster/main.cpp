@@ -244,7 +244,7 @@ void processEventLoop(std::atomic_bool& quit)
         }
         else if (cmd == 'R' || cmd == 'r')
         {
-            if (cusCastRequestRawData(0, 0, [](int sz)
+            if (cusCastRequestRawData(0, 0, 1, [](int sz)
             {
                 if (sz < 0)
                     ERROR << "error requesting raw data" << std::endl;
