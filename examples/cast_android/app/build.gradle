@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: '../../libs', include: 'cast-debug.aar')
+    implementation fileTree(dir: '../../../libs', include: 'cast-debug.aar')
     implementation fileTree(dir: 'libs', include: 'cast-debug.aar')
 
     implementation 'androidx.appcompat:appcompat:1.6.1'

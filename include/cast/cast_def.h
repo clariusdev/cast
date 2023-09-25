@@ -1,7 +1,7 @@
 #pragma once
 
 // SDK: cast
-// Version: 10.4.0
+// Version: 11.0.0
 
 #define CUS_MAXTGC  10
 #define CUS_SUCCESS 0
@@ -20,6 +20,7 @@ typedef enum _CusButton
 typedef enum _CusImageFormat
 {
     Uncompressed,       ///< Processed images are sent in a raw and uncompressed in 32 bits ARGB
+    Uncompressed8Bit,   ///< Processed images are sent in a raw and uncompressed in 8 bit grayscale
     Jpeg,               ///< Processed images are sent as a jpeg (with header)
     Png,                ///< Processed images are sent as a png (with header)
 
@@ -68,6 +69,7 @@ typedef enum _CusUserFunction
     ColorGainInc,       ///< increase color gain
     ColorPrfDec,        ///< decrease color prf
     ColorPrfInc,        ///< increase color prf
+    SwitchArray,        ///< switch array
 
 } CusUserFunction;
 
@@ -121,34 +123,36 @@ typedef struct _CusProbeInfo
 /// Processed image information supplied with each frame
 typedef struct _CusProcessedImageInfo
 {
-    int width;          ///< Width of the image in pixels
-    int height;         ///< Height of the image in pixels
-    int bitsPerPixel;   ///< Bits per pixel
-    int imageSize;      ///< Total size of image in bytes
-    double micronsPerPixel; ///< Microns per pixel (always 1:1 aspect ratio axially/laterally)
-    double originX;     ///< Image origin in microns in the horizontal axis
-    double originY;     ///< Image origin in microns in the vertical axis
-    long long int tm;   ///< Timestamp of images
-    double angle;       ///< Acquisition angle for volumetric data
-    int overlay;        ///< Flag that the image is an overlay without grayscale (ie. color doppler or strain)
-    CusImageFormat format; ///< Flag specifying the format of the image (see format definitions above)
-    CusTgcInfo tgc [CUS_MAXTGC]; ///< TGC points
+    int width;          ///< width of the image in pixels
+    int height;         ///< height of the image in pixels
+    int bitsPerPixel;   ///< bits per pixel
+    int imageSize;      ///< total size of image in bytes
+    double micronsPerPixel; ///< microns per pixel (always 1:1 aspect ratio axially/laterally)
+    double originX;     ///< image origin in microns in the horizontal axis
+    double originY;     ///< image origin in microns in the vertical axis
+    long long int tm;   ///< timestamp of images
+    double angle;       ///< acquisition angle for volumetric data
+    double fps;         ///< frame rate in hz
+    int overlay;        ///< flag that the image is an overlay without grayscale (ie. color doppler or strain)
+    CusImageFormat format; ///< flag specifying the format of the image (see format definitions above)
+    CusTgcInfo tgc [CUS_MAXTGC]; ///< tgc points
 
 } CusProcessedImageInfo;
 
 /// Raw image information supplied with each frame
 typedef struct _CusRawImageInfo
 {
-    int lines;          ///< Number of ultrasound lines in the image
-    int samples;        ///< Number of samples per line in the image
-    int bitsPerSample;  ///< Bits per sample
-    double axialSize;   ///< Axial microns per sample
-    double lateralSize; ///< Lateral microns per line
-    long long int tm;   ///< Timestamp of image
-    int jpeg;           ///< Size of the jpeg image, 0 if not a jpeg compressed image
-    int rf;             ///< Flag specifying data is rf and not envelope
-    double angle;       ///< Acquisition angle for volumetric data
-    CusTgcInfo tgc [CUS_MAXTGC]; ///< TGC points
+    int lines;          ///< number of ultrasound lines in the image
+    int samples;        ///< number of samples per line in the image
+    int bitsPerSample;  ///< bits per sample
+    double axialSize;   ///< axial microns per sample
+    double lateralSize; ///< lateral microns per line
+    long long int tm;   ///< timestamp of image
+    int jpeg;           ///< size of the jpeg image, 0 if not a jpeg compressed image
+    int rf;             ///< flag specifying data is rf and not envelope
+    double angle;       ///< acquisition angle for volumetric data
+    double fps;         ///< frame rate in hz
+    CusTgcInfo tgc [CUS_MAXTGC]; ///< tgc points
 
 } CusRawImageInfo;
 

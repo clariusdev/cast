@@ -111,12 +111,13 @@ extern "C"
     /// makes a request for raw data from the probe
     /// @param[in] start the first frame to request, as determined by timestamp in nanoseconds, set to 0 along with end to requests all data in buffer
     /// @param[in] end the last frame to request, as determined by timestamp in nanoseconds, set to 0 along with start to requests all data in buffer
+    /// @param[in] lzo flag to specify a tarball with lzo compressed raw data inside (default) vs no compression of raw data
     /// @param[in] fn callback to obtain the raw data size result, -1 if the request failed, 0 if no raw data exists, otherwise the raw data size
     /// @return success of the call
     /// @retval 0 the request was successfully made
     /// @retval -1 the request could not be made
     /// @note the probe must be frozen and in a raw data buffering mode in order for the call to succeed
-    CAST_EXPORT int cusCastRequestRawData(long long int start, long long int end, CusRawFn fn);
+    CAST_EXPORT int cusCastRequestRawData(long long int start, long long int end, int lzo, CusRawFn fn);
 
     /// retrieves raw data from a previous request
     /// @param[out] data a pointer to a buffer that has been allocated to read the raw data into, this must be pre-allocated with
