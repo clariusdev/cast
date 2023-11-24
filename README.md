@@ -3,6 +3,10 @@ Clarius Cast API
 
 This repository contains all related items for the Clarius Cast API
 
+# Download
+
+https://github.com/clariusdev/cast/releases
+
 # Overview
 
 The Cast API is based on the Clarius Cast protocol that the Clarius App uses for streaming images to multiple clients at once. Its primary use is for research purposes when access to real-time images is required, the Cast API provides a relatively simple way to get started. The pure C API is deployed on desktop only, primarily because Clarius uses Qt heavily, a library that can often introduce difficulties when deploying or linking on mobile platforms. For commercial users wanting to deploy on mobile, Clarius has created a Java version specifically for interfacing to the Clarius App in an Android environment and an Objective-C framework specifically for interfacing to the Clarius App in an iOS environment.
