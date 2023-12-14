@@ -14,6 +14,7 @@ namespace Ui
 #define ERROR_EVENT     static_cast<QEvent::Type>(QEvent::User + 7)
 #define PROGRESS_EVENT  static_cast<QEvent::Type>(QEvent::User + 8)
 #define RAWDATA_EVENT   static_cast<QEvent::Type>(QEvent::User + 9)
+#define IMU_EVENT       static_cast<QEvent::Type>(QEvent::User + 10)
 
 namespace event
 {
@@ -73,6 +74,18 @@ namespace event
         double micronsPerSample_;   ///< microns per pixel/sample in an m spectrum
         double velocityPerSample_;  ///< velocity in m/s per pixel/sample in a pw spectrum
         bool pw_;                   ///< flag specifying the data is pw and not m
+    };
+
+    /// wrapper for new imu data events that can be posted from the api callbacks
+    class Imu : public QEvent
+    {
+    public:
+        /// default constructor
+        /// @param[in] evt the event type
+        /// @param[in] imu latest imu data
+        Imu(QEvent::Type evt, const QQuaternion& imu) : QEvent(evt), imu_(imu) { }
+
+        QQuaternion imu_;   ///< latest imu position
     };
 
     /// wrapper for freeze events that can be posted from the api callbacks

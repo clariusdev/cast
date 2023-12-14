@@ -504,7 +504,7 @@ int init(int& argc, char** argv)
     PRINT << "starting caster...";
 
     // initialize with callbacks
-    if (cusCastInit(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, newSpectralImageFn, freezeFn, buttonFn, progressFn, errorFn, width, height) < 0)
+    if (cusCastInit(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, newSpectralImageFn, nullptr, freezeFn, buttonFn, progressFn, errorFn, width, height) < 0)
     {
         ERROR << "could not initialize caster" << std::endl;
         return CUS_FAILURE;

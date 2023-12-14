@@ -41,3 +41,6 @@ typedef void (*CusRawFn)(int res);
 /// error callback function
 /// @param[in] msg the error message with associated error that occurred
 typedef void (*CusErrorFn)(const char* msg);
+/// new imu data callback function
+/// @param[in] pos the positional information data tagged with the image
+typedef void (*CusNewImuDataFn)(const CusPosInfo* pos);

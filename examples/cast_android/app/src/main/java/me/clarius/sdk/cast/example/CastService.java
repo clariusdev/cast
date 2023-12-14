@@ -70,6 +70,10 @@ public class CastService extends Service {
         }
 
         @Override
+        public void newImuDataFn(PosInfo[] pos) {
+        }
+
+        @Override
         public void progress(int i) {
             rawDataProgress.postValue(i);
         }

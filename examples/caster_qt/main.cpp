@@ -68,6 +68,14 @@ int main(int argc, char *argv[])
             QApplication::postEvent(_caster.get(), new event::Spectrum(_spectrum.data(), nfo->lines, nfo->samples, nfo->bitsPerSample, sz, nfo->period,
                                                                        nfo->micronsPerSample, nfo->velocityPerSample, nfo->pw ? true : false));
         },
+        // new imu data callback
+        [](const CusPosInfo* pos)
+        {
+            QQuaternion imu;
+            if (pos)
+                imu = QQuaternion(static_cast<float>(pos->qw), static_cast<float>(pos->qx), static_cast<float>(pos->qy), static_cast<float>(pos->qz));
+            QApplication::postEvent(_caster.get(), new event::Imu(IMU_EVENT, imu));
+        },
         // freeze state change callback
         [](int frozen)
         {

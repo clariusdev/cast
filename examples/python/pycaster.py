@@ -82,6 +82,12 @@ def newSpectrumImage(image, lines, samples, bps, period, micronsPerSample, veloc
     return
 
 
+## called when a new imu data is streamed
+# @param imu inertial data tagged with the frame
+def newImuData(imu):
+    return
+
+
 ## called when freeze state changes
 # @param frozen the freeze state
 def freezeFn(frozen):
@@ -125,7 +131,7 @@ def main():
     path = os.path.expanduser("~/")
 
     # initialize
-    cast = pyclariuscast.Caster(newProcessedImage, newRawImage, newSpectrumImage, freezeFn, buttonsFn)
+    cast = pyclariuscast.Caster(newProcessedImage, newRawImage, newSpectrumImage, newImuData, freezeFn, buttonsFn)
     ret = cast.init(path, args.width, args.height)
     if ret:
         print("initialization succeeded")
