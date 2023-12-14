@@ -12,6 +12,7 @@ extern "C"
     /// @param[in] newProcessedImage new processed image callback (scan-converted image)
     /// @param[in] newRawImage new raw image callback - (pre scan-converted image or rf signal)
     /// @param[in] newSpectralImage new processed spectral image callback
+    /// @param[in] newImuData new imu data callback
     /// @param[in] freeze freeze state callback
     /// @param[in] btn button press callback
     /// @param[in] progress readback progress callback
@@ -28,6 +29,7 @@ extern "C"
         CusNewProcessedImageFn newProcessedImage,
         CusNewRawImageFn newRawImage,
         CusNewSpectralImageFn newSpectralImage,
+        CusNewImuDataFn newImuData,
         CusFreezeFn freeze,
         CusButtonFn btn,
         CusProgressFn progress,
