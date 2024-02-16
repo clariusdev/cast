@@ -454,7 +454,7 @@ void Caster::onRequest()
     if (!connected_)
         return;
 
-    if (cusCastRequestRawData(0, 0, ui_->lzo->isChecked() ? 1 : 0, [](int sz)
+    if (cusCastRequestRawData(0, 0, ui_->lzo->isChecked() ? 1 : 0, [](int sz, const char*)
     {
         _me->rawData(sz);
     }) < 0)

@@ -50,6 +50,11 @@ typedef void (^CusErrorFn)(NSString * _Nonnull msg);
 /// freeze callback function
 /// @param[in] frozen true if imaging is currently frozen
 typedef void (^CusFreezeFn)(BOOL frozen);
+/// raw data availability callback function
+/// @param[in] res the request result: 0 on success, -1 on error
+/// @param[in] b an array of NSNumber representing the timestamps for raw b data, nil on error
+/// @param[in] iqrf an array of NSNumber representing the timestamps for raw iq/rf data, nil on error
+typedef void (^CusRawAvailabilityFn)(int res, NSArray * _Nullable b, NSArray * _Nullable iqrf);
 /// raw data size callback function
 /// @param[in] res the size of the data package requested or actually downloaded or -1 if an error occurred
 typedef void (^CusRawFn)(int res);
@@ -101,14 +106,20 @@ __attribute__((visibility("default"))) @interface CusCast : NSObject
 /// sets the format for processed images, by default the format will be uncompressed argb
 /// @param[in] format the format of the image
 - (void)setFormat:(CusImageFormat) format;
+/// makes a request to return the availability of all the raw data currently buffered on the probe
+/// @param[in] res result callback function that will return all the timestamps of the data blocks that are buffered
+/// @note the probe must be frozen with raw data buffering enabled prior to calling the function
+- (void)requestRawDataAvailability:(CusRawAvailabilityFn _Nonnull) res;
 /// makes a request for raw data from the probe
 /// @param[in] start the first frame to request, as determined by timestamp in nanoseconds, set to 0 along with end to requests all data in buffer
 /// @param[in] end the last frame to request, as determined by timestamp in nanoseconds, set to 0 along with start to requests all data in buffer
+/// @param[in] lzo flag to package the raw data with lzo compression
 /// @param[in] res result callback function, will return size of buffer required upon success, 0 if no raw data was buffered, or -1 if request could not be made,
 /// @note the probe must be frozen and in a raw data buffering mode in order for the call to succeed
 - (void)requestRawData:(CusRawFn _Nonnull) res
                 start:(long long int) start
-                end:(long long int) end;
+                end:(long long int) end
+                lzo:(BOOL) lzo;
 /// retrieves raw data from a previous request
 /// @param[in] res result callback function, will return size of buffer required upon success, 0 if no raw data was buffered, or -1 if request could not be made,
 /// @note the probe must be frozen and a successful call to requestRawData must have taken place in order for the call to succeed
