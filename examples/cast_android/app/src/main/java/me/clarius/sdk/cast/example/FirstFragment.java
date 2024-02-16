@@ -186,7 +186,10 @@ public class FirstFragment extends Fragment {
         binding.rawDataDownloadProgressBar.setProgress(0);
         final Cast cast = castBinder.getCast();
         RawDataFile handle = new RawDataFile(cast);
-        cast.requestRawData(0, 0, handle::requestResultRetrieved);
+        final int start = 0;
+        final int end = 0;
+        final boolean lzo = true;
+        cast.requestRawData(start, end, lzo, handle::requestResultRetrieved);
     }
 
     private void doCapture() {
