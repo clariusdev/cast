@@ -3,9 +3,10 @@
 #include "cast_def.h"
 
 /// return status callback function
-/// @param[in] port the udp port on a successful connection attempt, CUS_FAILURE on an unsuccessful attempt or other error
+/// @param[in] imagePort the udp port on a successful connection attempt, CUS_FAILURE on an unsuccessful attempt or other error
+/// @param[in] imuPort the new imu data UDP streaming port, CUS_FAILURE on an unsuccessful attempt or other error
 /// @param[in] swRevMatch flag if the sw revisions between the api and the clarius app match, CUS_SUCCESS if a match, CUS_FAILURE on a mismatch
-typedef void (*CusConnectFn)(int port, int swRevMatch);
+typedef void (*CusConnectFn)(int imagePort, int imuPort, int swRevMatch);
 /// return status callback function
 /// @param[in] retCode the return code (CUS_SUCCESS or CUS_FAILURE)
 typedef void (*CusReturnFn)(int retCode);

@@ -3,51 +3,54 @@
 #include "cast_export.h"
 #include "cast_cb.h"
 
-extern "C"
-{
+/// initialization parameters for cusCastInit
+typedef struct _CusInitParams
+{    struct Args
+    {
+        int argc;       ///< the argument count for input parameters to pass to the library
+        char** argv;    ///< the arguments to pass to the library, possibly required for qt graphics buffer initialization
+    }
+    args;
+    const char* storeDir;                           ///< the directory to store security keys
+    CusNewProcessedImageFn newProcessedImageFn;     ///< new processed image callback (scan-converted image)
+    CusNewRawImageFn newRawImageFn;                 ///< new raw image callback (pre scan-converted image or rf data)
+    CusNewSpectralImageFn newSpectralImageFn;       ///< new processed spectral image callback
+    CusNewImuDataFn newImuDataFn;                   ///< new imu data callback
+    CusFreezeFn freezeFn;                           ///< freeze state callback
+    CusButtonFn buttonFn;                           ///< button press callback
+    CusProgressFn progressFn;                       ///< readback progress callback
+    CusErrorFn errorFn;                             ///< error message callback
+    int width;                                      ///< the width of the output buffer
+    int height;                                     ///< the height of the output buffer
+
+} CusInitParams;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
     /// initializes the casting functionality
-    /// @param[in] argc the argument count for input parameters to pass to the library
-    /// @param[in] argv the arguments to pass to the library, possibly required for qt graphics buffer initialization
-    /// @param[in] dir the directory to store security keys
-    /// @param[in] newProcessedImage new processed image callback (scan-converted image)
-    /// @param[in] newRawImage new raw image callback - (pre scan-converted image or rf signal)
-    /// @param[in] newSpectralImage new processed spectral image callback
-    /// @param[in] newImuData new imu data callback
-    /// @param[in] freeze freeze state callback
-    /// @param[in] btn button press callback
-    /// @param[in] progress readback progress callback
-    /// @param[in] err error message callback
-    /// @param[in] width the width of the output buffer
-    /// @param[in] height the height of the output buffer
+    /// @param[in] params the sdk configuration parameters
     /// @return success of the call
     /// @retval 0 the initialization was successful
     /// @retval -1 the initialization was not successful
     /// @note must be called before any other functions will succeed
-    CAST_EXPORT int cusCastInit(int argc,
-        char** argv,
-        const char* dir,
-        CusNewProcessedImageFn newProcessedImage,
-        CusNewRawImageFn newRawImage,
-        CusNewSpectralImageFn newSpectralImage,
-        CusNewImuDataFn newImuData,
-        CusFreezeFn freeze,
-        CusButtonFn btn,
-        CusProgressFn progress,
-        CusErrorFn err,
-        int width,
-        int height
-    );
+    CAST_EXPORT int cusCastInit(const CusInitParams* params);
+
+    /// get init params with default values
+    /// @return a zero initialized struct
+    CAST_EXPORT CusInitParams cusCastDefaultInitParams(void);
 
     /// cleans up memory allocated by the caster
     /// @retval 0 the destroy attempt was successful
     /// @retval -1 the destroy attempt was not successful
     /// @note should be called prior to exiting the application
-    CAST_EXPORT int cusCastDestroy();
+    CAST_EXPORT int cusCastDestroy(void);
 
     /// retrieves the firmware version for a given platform
     /// @param[in] platform the platform to retrieve the firmware version for
     /// @param[out] version holds the firmware version for the given platform
-    /// @param[in] sz size of the version string buffer, suggest at least 32 bytes allocated
+    /// @param[in] sz size of the version string buffer, suggest at least 64 bytes allocated
     /// @return success of the call
     /// @retval 0 the information was retrieved
     /// @retval -1 the information could not be retrieved
@@ -76,7 +79,7 @@ extern "C"
     /// @retval 0 there is currently no connection
     /// @retval 1 there is currently a connection
     /// @retval -1 the module is not initialized
-    CAST_EXPORT int cusCastIsConnected();
+    CAST_EXPORT int cusCastIsConnected(void);
 
     /// retrieves the current probe information
     /// @param[out] info the probe information
@@ -158,6 +161,7 @@ extern "C"
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
     /// @note see external documentation for supported parameters
+    /// @warning changing parameters through this function may result in unstable operation, degradation of image quality, or operation outside of the safety limits that clarius tests to
     CAST_EXPORT int cusCastSetParameter(const char* prm, double val, CusReturnFn fn);
 
     /// enables or disables a parameter for researchers to gain access to lower level control of device
@@ -168,6 +172,7 @@ extern "C"
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
     /// @note see external documentation for supported parameters
+    /// @warning changing parameters through this function may result in unstable operation, degradation of image quality, or operation outside of the safety limits that clarius tests to
     CAST_EXPORT int cusCastEnableParameter(const char* prm, int en, CusReturnFn fn);
 
     /// sets a pulse shape parameter to a specific value for researchers to gain access to lower level control of device
@@ -178,6 +183,7 @@ extern "C"
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
     /// @note see external documentation for supported parameters
+    /// @warning changing parameters through this function may result in unstable operation, degradation of image quality, or operation outside of the safety limits that clarius tests to
     CAST_EXPORT int cusCastSetPulse(const char* prm, const char* shape, CusReturnFn fn);
 
     /// begins a capture with the current image settings
@@ -227,4 +233,7 @@ extern "C"
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
     CAST_EXPORT int cusCastFinishCapture(int id, CusReturnFn fn);
+
+#ifdef __cplusplus
 }
+#endif

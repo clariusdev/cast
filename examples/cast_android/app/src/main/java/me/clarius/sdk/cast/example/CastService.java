@@ -70,7 +70,7 @@ public class CastService extends Service {
         }
 
         @Override
-        public void newImuDataFn(PosInfo[] pos) {
+        public void newImuDataFn(PosInfo pos) {
         }
 
         @Override
