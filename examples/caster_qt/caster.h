@@ -5,6 +5,8 @@ namespace Ui
     class Caster;
 }
 
+class ProbeRender;
+
 #define IMAGE_EVENT     static_cast<QEvent::Type>(QEvent::User + 1)
 #define PRESCAN_EVENT   static_cast<QEvent::Type>(QEvent::User + 2)
 #define RF_EVENT        static_cast<QEvent::Type>(QEvent::User + 3)
@@ -28,8 +30,8 @@ namespace event
         /// @param[in] h the image height
         /// @param[in] bpp the image bits per pixel
         /// @param[in] sz total size of the image
-        Image(QEvent::Type evt, const void* data, long long int tm, int w, int h, int bpp, int sz)
-            : QEvent(evt), data_(data), tm_(tm), width_(w), height_(h), bpp_(bpp), size_(sz) { }
+        Image(QEvent::Type evt, const void* data, long long int tm, int w, int h, int bpp, int sz, const QQuaternion& imu)
+            : QEvent(evt), data_(data), tm_(tm), width_(w), height_(h), bpp_(bpp), size_(sz), imu_(imu) { }
 
         const void* data_;  ///< pointer to the image data
         long long int tm_;  ///< timestamp
@@ -37,6 +39,7 @@ namespace event
         int height_;        ///< height of the image
         int bpp_ ;          ///< bits per pixel
         int size_;          ///< total size of the image
+        QQuaternion imu_;   ///< latest imu position
     };
 
     /// wrapper for new rf events that can be posted from the api callbacks
@@ -51,7 +54,7 @@ namespace event
         /// @param[in] sz size of data in bytes
         /// @param[in] lateral lateral spacing between lines
         /// @param[in] axial sample size
-        RfImage(const void* data, long long int tm, int l, int s, int bps, int sz, double lateral, double axial) : Image(RF_EVENT, data, tm, l, s, bps, sz), lateral_(lateral), axial_(axial) { }
+        RfImage(const void* data, long long int tm, int l, int s, int bps, int sz, double lateral, double axial) : Image(RF_EVENT, data, tm, l, s, bps, sz, {}), lateral_(lateral), axial_(axial) { }
 
         double lateral_;    ///< spacing between each line
         double axial_;      ///< sample size
@@ -67,7 +70,7 @@ namespace event
         /// @param[in] s # of samples per line
         /// @param[in] bps bits per sample
         /// @param[in] sz size of the image in bytes
-        Spectrum(const void* data, int l, int s, int bps, int sz, double period, double mps, double vps, bool pw) : Image(SPECTRUM_EVENT, data, 0, l, s, bps, sz),
+        Spectrum(const void* data, int l, int s, int bps, int sz, double period, double mps, double vps, bool pw) : Image(SPECTRUM_EVENT, data, 0, l, s, bps, sz, {}),
             period_(period), micronsPerSample_(mps), velocityPerSample_(vps), pw_(pw) { }
 
         double period_;             ///< line acquisition period in seconds
@@ -81,9 +84,8 @@ namespace event
     {
     public:
         /// default constructor
-        /// @param[in] evt the event type
         /// @param[in] imu latest imu data
-        Imu(QEvent::Type evt, const QQuaternion& imu) : QEvent(evt), imu_(imu) { }
+        explicit Imu(const QQuaternion& imu) : QEvent(IMU_EVENT), imu_(imu) { }
 
         QQuaternion imu_;   ///< latest imu position
     };
@@ -94,7 +96,7 @@ namespace event
     public:
         /// default constructor
         /// @param[in] frozen the freeze state
-        Freeze(bool frozen) : QEvent(FREEZE_EVENT), frozen_(frozen) { }
+        explicit Freeze(bool frozen) : QEvent(FREEZE_EVENT), frozen_(frozen) { }
 
         bool frozen_;   ///< the freeze state
     };
@@ -118,7 +120,7 @@ namespace event
     public:
         /// default constructor
         /// @param[in] err the error message
-        Error(const QString& err) : QEvent(ERROR_EVENT), error_(err) { }
+        explicit Error(const QString& err) : QEvent(ERROR_EVENT), error_(err) { }
 
         QString error_;     ///< the error message
     };
@@ -129,7 +131,7 @@ namespace event
     public:
         /// default constructor
         /// @param[in] progress the current progress
-        Progress(int progress) : QEvent(PROGRESS_EVENT), progress_(progress) { }
+        explicit Progress(int progress) : QEvent(PROGRESS_EVENT), progress_(progress) { }
 
         int progress_;  ///< the current progress
     };
@@ -140,7 +142,7 @@ namespace event
     public:
         /// default constructor
         /// @param[in] success success of downloading raw data
-        RawData(bool success) : QEvent(RAWDATA_EVENT), success_(success) { }
+        explicit RawData(bool success) : QEvent(RAWDATA_EVENT), success_(success) { }
 
         bool success_;  ///< the current progress
     };
@@ -175,7 +177,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event) override;
 
 private:
-    void newProcessedImage(const void* img, int w, int h, int bpp, int sz);
+    void newProcessedImage(const void* img, int w, int h, int bpp, int sz, const QQuaternion& imu);
     void newPrescanImage(const void* img, int w, int h, int bpp, int sz);
     void newRfData(const void* rfdata, int l, int s, int bps, double lateral, double axial);
     void newMSpectrum(const void* rfdata, int l, int s, int bps, double period, double micronsPerSample);
@@ -185,9 +187,10 @@ private:
     void setProgress(int progress);
     void setError(const QString& err);
     bool rawDataReady(bool success);
-    void connected(int port);
-    void disconnected(bool res);
     void rawData(int sz);
+    void connected(int imagePort, int imuPort);
+    void disconnected(bool res);
+    void newImuData(const QQuaternion& imu);
 
 public slots:
     void onConnect();
@@ -206,9 +209,11 @@ private:
     bool connected_;            ///< connection state
     bool frozen_;               ///< freeze state
     long long int lasttime_;    ///< timesetamp of last received frame
+    uint32_t imuSamples_;       ///< keeps track of samples collected
     RawDataInfo rawData_;       ///< raw data attributes
     Ui::Caster *ui_;            ///< ui controls, etc.
     UltrasoundImage* image_;    ///< image display
+    ProbeRender* render_;           ///< probe renderer
     RfSignal* signal_;          ///< rf signal display
     QImage prescan_;            ///< pre-scan converted image
     QTimer imageTimer_;         ///< timer to warn the user about the firewall

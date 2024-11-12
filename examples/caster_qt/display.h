@@ -65,7 +65,6 @@ private:
     QPainterPath overlay_; ///< user overlay
     QColor overlayColor_; ///< overlay color
     QPoint lastPoint_;
-    QMutex lock_;   ///< locking mechanism
     std::vector<QGraphicsItem*> labels_;
     std::vector<Trace> traces_;
 };
@@ -91,5 +90,4 @@ protected:
 private:
     QVector<int16_t> signal_;   ///< the rf signal
     qreal zoom_;                ///< zoom level
-    QMutex lock_;               ///< locking mechanism
 };

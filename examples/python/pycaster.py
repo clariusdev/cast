@@ -185,6 +185,8 @@ def main():
             else:
                 if inp[1] == "true" or inp[1] == "false":
                     cast.enableParam(inp[0], 1 if inp[1] == "true" else 0)
+                elif "+" in inp[1]:
+                    cast.setPulse(inp[0], inp[1])
                 else:
                     cast.setParam(inp[0], float(inp[1]))
 

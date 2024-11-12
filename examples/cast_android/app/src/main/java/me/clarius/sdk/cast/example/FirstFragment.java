@@ -161,10 +161,11 @@ public class FirstFragment extends Fragment {
         }
         Optional<Long> networkId = Utils.maybeLong(binding.networkId.getText());
         showMessage("Connecting to " + ipAddress + ":" + tcpPort.get());
-        castBinder.getCast().connect(ipAddress, tcpPort.get(), networkId, getCertificate(), (result, port, swRevMatch) -> {
+        castBinder.getCast().connect(ipAddress, tcpPort.get(), networkId, getCertificate(), (result, imagePort, imuPort, swRevMatch) -> {
             Log.d(TAG, "Connection result: " + result);
             if (result) {
-                Log.d(TAG, "UDP stream will be on port " + port);
+                Log.d(TAG, "UDP stream will be on port " + imagePort);
+                Log.d(TAG, "IMU stream will be on port " + imuPort);
                 Log.d(TAG, "App software " + (swRevMatch ? "matches" : "does not match"));
                 askProbeInfo(castBinder.getCast());
             }

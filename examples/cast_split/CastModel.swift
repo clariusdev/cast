@@ -29,10 +29,11 @@ class CastModel: ObservableObject {
 
     /// Connect to the scanner at the given address and port
     func connectToScanner() {
-        cast.connect(address, port: port, cert: certificate) { (succeeded: Bool, port: Int32, swRevMatch: Bool) -> Void in
+        cast.connect(address, port: port, cert: certificate) { (succeeded: Bool, imagePort: Int32, imuPort: Int32, swRevMatch: Bool) -> Void in
             print("Connection to \(self.address):\(self.port) \(succeeded ? "succeeded" : "failed")")
             if (succeeded) {
-                print("UDP stream will be on port \(port)")
+                print("Image UDP stream will be on port \(imagePort)")
+                print("IMU UDP stream will be on port \(imuPort)")
                 print("App software \(swRevMatch ? "matches" : "does not match")")
             }
         }
@@ -103,6 +104,9 @@ class CastModel: ObservableObject {
             let rowBytes = nfo.width * nfo.bitsPerPixel / 8
             let totalBytes = Int(nfo.height * rowBytes)
             let rawBytes = UnsafeMutableRawPointer.allocate(byteCount: totalBytes, alignment: 1)
+            defer {
+                rawBytes.deallocate()
+            }
             let bmpInfo = CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
             imageData.copyBytes(to: UnsafeMutableRawBufferPointer(start: rawBytes, count: totalBytes))
             guard let colorspace = CGColorSpace(name: CGColorSpace.sRGB) else {

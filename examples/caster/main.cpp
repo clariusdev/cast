@@ -69,6 +69,14 @@ void printImuData(int npos, const CusPosInfo* pos)
     }
 }
 
+/// @brief Receives the new imu data streamed from the scanner
+/// @param pos the positional information data streamed
+void newImuData(const CusPosInfo* pos)
+{
+    PRINT << "imu data streamed:";
+    printImuData(1, pos);
+}
+
 /// callback for a new pre-scan converted data sent from the scanner
 /// @param[in] newImage a pointer to the raw image bits
 /// @param[in] nfo the image properties
@@ -83,7 +91,7 @@ void newRawImageFn(const void* newImage, const CusRawImageInfo* nfo, int npos, c
           << "bits. @ " << nfo->axialSize << " microns per sample. imu points: " << npos;
     else
         PRINT << "new pre-scan data (" << newImage << "): " << nfo->lines << " x " << nfo->samples << " @ " << nfo->bitsPerSample
-          << "bits. @ " << nfo->axialSize << " microns per sample. imu points: " << npos << " jpeg size: " << (int)nfo->jpeg;
+          << "bits. @ " << nfo->axialSize << " microns per sample. imu points: " << npos << " jpeg size: " << static_cast<int>(nfo->jpeg);
 
     if (npos)
         printImuData(npos, pos);
@@ -268,7 +276,7 @@ void processEventLoop(std::atomic_bool& quit)
                 ERROR << "no raw data to download" << std::endl;
             else
             {
-                buffer_ = (char*)malloc(szRawData_);
+                buffer_ = reinterpret_cast<char*>(malloc(szRawData_));
 
                 if (cusCastReadRawData((void**)(&buffer_), [](int ret)
                 {
@@ -361,7 +369,7 @@ void processEventLoop(std::atomic_bool& quit)
             const std::vector<std::string> prms = getParameters(line, 2);
             if (prms.size() != 2)
             {
-                ERROR << "usage: p {param_name} {param_value}" << std::endl;;
+                ERROR << "usage: p {param_name} {param_value}" << std::endl;
                 continue;
             }
             std::string prm = prms[0];
@@ -413,7 +421,7 @@ void processEventLoop(std::atomic_bool& quit)
             PRINT << "       imaging: [f: freeze, d/D: depth, g/G: gain]";
             PRINT << "        params: [p: change parameter]";
             PRINT << "      raw data: [r: request, y: download]";
-            PRINT << "       capture: [c: start/end capture, l: add label, m: add measurement]" << std::endl;;
+            PRINT << "       capture: [c: start/end capture, l: add label, m: add measurement]" << std::endl;
         }
     }
 }
@@ -503,21 +511,43 @@ int init(int& argc, char** argv)
 
     PRINT << "starting caster...";
 
+    auto initParams = cusCastDefaultInitParams();
+    initParams.args.argc = argc;
+    initParams.args.argv = argv;
+    initParams.storeDir = keydir.c_str();
+    initParams.newProcessedImageFn = newProcessedImageFn;
+    initParams.newRawImageFn = newRawImageFn;
+    initParams.newSpectralImageFn = newSpectralImageFn;
+    initParams.newImuDataFn = newImuData;
+    initParams.freezeFn = freezeFn;
+    initParams.buttonFn = buttonFn;
+    initParams.progressFn = progressFn;
+    initParams.errorFn = errorFn;
+    initParams.width = width;
+    initParams.height = height;
     // initialize with callbacks
-    if (cusCastInit(argc, argv, keydir.c_str(), newProcessedImageFn, newRawImageFn, newSpectralImageFn, nullptr, freezeFn, buttonFn, progressFn, errorFn, width, height) < 0)
+    if (cusCastInit(&initParams) < 0)
     {
         ERROR << "could not initialize caster" << std::endl;
         return CUS_FAILURE;
     }
-    if (cusCastConnect(ipAddr.c_str(), port, "research", [](int port, int swRevMatch)
+    if (cusCastConnect(ipAddr.c_str(), port, "research", [](int imagePort, int imuPort, int swRevMatch)
     {
-        if (port == CUS_FAILURE)
+        if (imagePort == CUS_FAILURE)
             ERROR << "could not connect to scanner" << std::endl;
         else
         {
-            PRINT << "...connected, streaming port: " << port << " -- check firewall settings if no image callback received";
+            PRINT << "...connected, streaming port: " << imagePort << " -- check firewall settings if no image callback received";
+            if (imuPort > 0)
+            {
+                PRINT << "imu now streaming at port: " << imuPort;
+            }
+            else
+            {
+                PRINT << "imu streaming off";
+            }
             if (swRevMatch == CUS_FAILURE)
-                ERROR << "software revisions do not match" << std::endl;
+                ERROR << "software revisions do not match, that is not necessarily a problem" << std::endl;
         }
 
     }) < 0)

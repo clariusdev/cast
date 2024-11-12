@@ -43,14 +43,12 @@ void UltrasoundImage::loadImage(const void* img, int w, int h, int bpp, int sz)
         return;
 
     // set the image data
-    QMutexLocker<QMutex> locker(&lock_);
     // check that the size matches the dimensions (uncompressed)
     if (sz == (w * h * (bpp / 8)))
-        memcpy(image_.bits(), img, w * h * (bpp / 8));
+        std::memcpy(image_.bits(), img, w * h * (bpp / 8));
     // try to load jpeg
     else
         image_.loadFromData(static_cast<const uchar*>(img), sz, "JPG");
-    locker.unlock();
 
     // redraw
     scene()->invalidate();
@@ -277,10 +275,8 @@ void UltrasoundImage::resizeEvent(QResizeEvent* e)
     setSceneRect(0, 0, w, h);
     cusCastSetOutputSize(w, h);
 
-    QMutexLocker<QMutex> locker(&lock_);
     image_ = QImage(w, h, QImage::Format_ARGB32);
     image_.fill(Qt::black);
-    locker.unlock();
 
     overlay_.clear();
 
@@ -348,14 +344,10 @@ void UltrasoundImage::drawBackground(QPainter* painter, const QRectF& r)
 {
     QGraphicsView::drawBackground(painter, r);
 
-    QMutexLocker<QMutex> locker(&lock_);
-
     painter->fillRect(r, QBrush(Qt::black));
 
     if (!image_.isNull())
         painter->drawImage(r, image_);
-
-    locker.unlock();
 
     QColor overlayColor(overlayColor_);
     overlayColor.setAlpha(255);
@@ -412,12 +404,10 @@ void RfSignal::loadSignal(const void* rf, int l, int s, int ss)
         setVisible(true);
 
     // pick the center line to display
-    QMutexLocker<QMutex> locker(&lock_);
     signal_.clear();
     const int16_t* buf = static_cast<const int16_t*>(rf) + ((l / 2) * s);
     for (auto i = 0; i < s; i++)
         signal_.push_back(*buf++);
-    locker.unlock();
 
     // redraw
     scene()->invalidate();
@@ -473,7 +463,6 @@ void RfSignal::drawForeground(QPainter* painter, const QRectF& r)
 {
     if (!signal_.isEmpty())
     {
-        QMutexLocker<QMutex> locker(&lock_);
         painter->setPen(QColor(96, 96, 0));
         qreal x = 0, baseline = r.height() / 2;
         double sampleSize = static_cast<double>(r.width()) / static_cast<double>(signal_.size());
@@ -486,6 +475,5 @@ void RfSignal::drawForeground(QPainter* painter, const QRectF& r)
             p = pt;
             x = x + sampleSize;
         }
-        locker.unlock();
     }
 }

@@ -1,5 +1,6 @@
 #include "caster.h"
 #include "display.h"
+#include "3d.h"
 #include "ui_caster.h"
 #include <cast/cast.h>
 
@@ -7,7 +8,7 @@ static Caster* _me;
 
 /// default constructor
 /// @param[in] parent the parent object
-Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen_(false), lasttime_(0), ui_(new Ui::Caster)
+Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen_(false), lasttime_(0), imuSamples_(0), ui_(new Ui::Caster)
 {
     _me = this;
     ui_->setupUi(this);
@@ -17,6 +18,14 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen
     ui_->image->addWidget(image_);
     ui_->image->addWidget(signal_);
     imageTimer_.setSingleShot(true);
+
+    render_ = new ProbeRender(QGuiApplication::primaryScreen());
+    ui_->render->addWidget(QWidget::createWindowContainer(render_));
+    auto reset = new QPushButton(QStringLiteral("Reset"), this);
+    ui_->render->addWidget(reset);
+    // ** ensure the path is updated as necessary
+    render_->init(QStringLiteral("scanner.obj"));
+    render_->show();
 
     settings_ = std::make_unique<QSettings>(QStringLiteral("settings.ini"), QSettings::IniFormat);
     auto ip = settings_->value("ip").toString();
@@ -32,6 +41,12 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen
         lasttime_ = 0;
         updateCaptureButtons();
         ui_->status->showMessage(NO_IMAGE_STATEMENT);
+    });
+
+    QObject::connect(reset, &QPushButton::clicked, [this]()
+    {
+        render_->reset();
+        imuSamples_ = 0;
     });
 }
 
@@ -58,7 +73,7 @@ bool Caster::event(QEvent *event)
     if (event->type() == IMAGE_EVENT)
     {
         auto evt = static_cast<event::Image*>(event);
-        newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_);
+        newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_, evt->imu_);
         image_->setNoImage(false);
         lasttime_ = evt->tm_;
         updateCaptureButtons();
@@ -112,6 +127,12 @@ bool Caster::event(QEvent *event)
     else if (event->type() == ERROR_EVENT)
     {
         setError((static_cast<event::Error*>(event))->error_);
+        return true;
+    }
+    else if (event->type() == IMU_EVENT)
+    {
+        auto evt = static_cast<event::Imu*>(event);
+        newImuData(evt->imu_);
         return true;
     }
 
@@ -174,9 +195,11 @@ void Caster::setProgress(int progress)
 /// @param[in] h height of the image
 /// @param[in] bpp the bits per pixel
 /// @param[in] sz size of the image in bytes
-void Caster::newProcessedImage(const void* img, int w, int h, int bpp, int sz)
+void Caster::newProcessedImage(const void* img, int w, int h, int bpp, int sz, const QQuaternion& imu)
 {
     image_->loadImage(img, w, h, bpp, sz);
+    if (!imu.isNull())
+        render_->update(imu);
 }
 
 /// called when a new pre-scan image has been sent
@@ -242,12 +265,13 @@ void Caster::newPwSpectrum(const void* rfdata, int l, int s, int bps, double per
 }
 
 /// handles the connection result
-/// @param[in] port the udp streaming port, 0 if failure
-void Caster::connected(int port)
+/// @param[in] imagePort the image udp streaming port, 0 if failure
+/// @param[in] imuPort the imu udp streaming port, 0 if failure
+void Caster::connected(int imagePort, int imuPort)
 {
-    if (port > 0)
+    if (imagePort > 0)
     {
-        ui_->status->showMessage(QString("Connection successful, streaming port: %1").arg(port));
+        ui_->status->showMessage(QString("Connection successful, streaming port: %1, imu port: %2").arg(imagePort).arg(imuPort));
         connected_ = true;
         ui_->connect->setText("Disconnect");
         ui_->freeze->setEnabled(true);
@@ -280,10 +304,11 @@ void Caster::onConnect()
 {
     if (!connected_)
     {
-        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research", [](int port, int swRevMatch)
+        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research",
+            [](int imagePort, int imuPort, int swRevMatch)
         {
             _me->ui_->swRevMatch->setText((swRevMatch == CUS_SUCCESS) ? "Matches" : "Mismatch");
-            _me->connected(port);
+            _me->connected(imagePort, imuPort);
         }) < 0)
         {
             ui_->status->showMessage("Connection attempt failed");
@@ -512,4 +537,15 @@ bool Caster::rawDataReady(bool success)
     }
 
     return true;
+}
+
+/// called when a new imu data been sent
+/// @param[in] imu the imu data if valid
+void Caster::newImuData(const QQuaternion& imu)
+{
+    if (!imu.isNull())
+    {
+        render_->update(imu);
+        ui_->imuData->setText(QStringLiteral("Collected %1 IMU Samples").arg(++imuSamples_));
+    }
 }

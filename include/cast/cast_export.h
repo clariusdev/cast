@@ -33,6 +33,7 @@
 #  define CAST_DEPRECATED_NO_EXPORT CAST_NO_EXPORT CAST_DEPRECATED
 #endif
 
+/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
 #if 0 /* DEFINE_NO_DEPRECATED */
 #  ifndef CAST_NO_DEPRECATED
 #    define CAST_NO_DEPRECATED
