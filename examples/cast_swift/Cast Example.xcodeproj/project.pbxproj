@@ -13,15 +13,11 @@
 		526CE01F28B71DC100405847 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE00D28B71DC000405847 /* ContentView.swift */; };
 		526CE02028B71DC100405847 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 526CE00E28B71DC100405847 /* Assets.xcassets */; };
 		526CE02128B71DC100405847 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 526CE00E28B71DC100405847 /* Assets.xcassets */; };
-		526CE03128B71E8C00405847 /* cast_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 526CE03028B71E8C00405847 /* cast_framework.framework */; };
-		526CE03228B71E8C00405847 /* cast_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 526CE03028B71E8C00405847 /* cast_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		526CE03528B71F3700405847 /* CastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE03428B71F3700405847 /* CastModel.swift */; };
 		526CE03628B71F3700405847 /* CastModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526CE03428B71F3700405847 /* CastModel.swift */; };
 		5275387C28D13D04002FFF14 /* Cast-Example--iOS--Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5275387B28D13D04002FFF14 /* Cast-Example--iOS--Info.plist */; };
 		52DBCDB828C9489200680ABA /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 52DBCDB728C9489200680ABA /* Yams */; };
 		52DBCDBB28C948C700680ABA /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 52DBCDBA28C948C700680ABA /* Yams */; };
-		52DBCDBD28C96DBD00680ABA /* cast_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52DBCDBC28C96DBD00680ABA /* cast_framework.framework */; };
-		52DBCDBE28C96DBD00680ABA /* cast_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52DBCDBC28C96DBD00680ABA /* cast_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52DBCDC128C96EAF00680ABA /* BluetoothModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */; };
 		52DBCDC228C96EAF00680ABA /* BluetoothModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */; };
 		52DBCDC628C96EBE00680ABA /* Scanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC328C96EBE00680ABA /* Scanner.swift */; };
@@ -30,6 +26,10 @@
 		52DBCDC928C96EBE00680ABA /* ScannerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC428C96EBE00680ABA /* ScannerList.swift */; };
 		52DBCDCA28C96EBE00680ABA /* ScannersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC528C96EBE00680ABA /* ScannersModel.swift */; };
 		52DBCDCB28C96EBE00680ABA /* ScannersModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DBCDC528C96EBE00680ABA /* ScannersModel.swift */; };
+		BB18C63D2D530A9B004C9F48 /* cast_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BB18C6352D530A8B004C9F48 /* cast_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		BB18C63E2D530AA0004C9F48 /* cast_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BB18C6372D530A8B004C9F48 /* cast_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		BB18C63F2D530AAE004C9F48 /* cast_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB18C6372D530A8B004C9F48 /* cast_framework.framework */; };
+		BB18C6402D530ADB004C9F48 /* cast_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB18C6352D530A8B004C9F48 /* cast_framework.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,7 +39,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				526CE03228B71E8C00405847 /* cast_framework.framework in Embed Frameworks */,
+				BB18C63E2D530AA0004C9F48 /* cast_framework.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -50,7 +50,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				52DBCDBE28C96DBD00680ABA /* cast_framework.framework in Embed Frameworks */,
+				BB18C63D2D530A9B004C9F48 /* cast_framework.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -66,15 +66,15 @@
 		526CE01B28B71DC100405847 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		526CE02A28B71E3800405847 /* Cast Example (iOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Cast Example (iOS)-Bridging-Header.h"; sourceTree = "<group>"; };
 		526CE02B28B71E3800405847 /* Cast Example (macOS)-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Cast Example (macOS)-Bridging-Header.h"; sourceTree = "<group>"; };
-		526CE03028B71E8C00405847 /* cast_framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cast_framework.framework; path = "../../Library/Frameworks/cast_framework.framework"; sourceTree = "<group>"; };
 		526CE03428B71F3700405847 /* CastModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastModel.swift; sourceTree = "<group>"; };
 		5275387B28D13D04002FFF14 /* Cast-Example--iOS--Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Cast-Example--iOS--Info.plist"; sourceTree = "<group>"; };
-		52DBCDBC28C96DBD00680ABA /* cast_framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cast_framework.framework; path = "../../Library/Frameworks/cast_framework.framework"; sourceTree = "<group>"; };
 		52DBCDC028C96EAF00680ABA /* BluetoothModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothModel.swift; sourceTree = "<group>"; };
 		52DBCDC328C96EBE00680ABA /* Scanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scanner.swift; sourceTree = "<group>"; };
 		52DBCDC428C96EBE00680ABA /* ScannerList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerList.swift; sourceTree = "<group>"; };
 		52DBCDC528C96EBE00680ABA /* ScannersModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannersModel.swift; sourceTree = "<group>"; };
 		52DBCDCC28C974E100680ABA /* Cast-Example--macOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Cast-Example--macOS--Info.plist"; sourceTree = "<group>"; };
+		BB18C6352D530A8B004C9F48 /* cast_framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = cast_framework.framework; sourceTree = "<group>"; };
+		BB18C6372D530A8B004C9F48 /* cast_framework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = cast_framework.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,7 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52DBCDBD28C96DBD00680ABA /* cast_framework.framework in Frameworks */,
+				BB18C6402D530ADB004C9F48 /* cast_framework.framework in Frameworks */,
 				52DBCDB828C9489200680ABA /* Yams in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,8 +91,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB18C63F2D530AAE004C9F48 /* cast_framework.framework in Frameworks */,
 				52DBCDBB28C948C700680ABA /* Yams in Frameworks */,
-				526CE03128B71E8C00405847 /* cast_framework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,12 +102,12 @@
 		526CE00628B71DC000405847 = {
 			isa = PBXGroup;
 			children = (
+				BB18C6342D530A67004C9F48 /* Frameworks */,
 				5275387B28D13D04002FFF14 /* Cast-Example--iOS--Info.plist */,
 				52DBCDCC28C974E100680ABA /* Cast-Example--macOS--Info.plist */,
 				526CE00B28B71DC000405847 /* Shared */,
 				526CE01A28B71DC100405847 /* macOS */,
 				526CE01428B71DC100405847 /* Products */,
-				526CE02F28B71E8C00405847 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -145,13 +145,29 @@
 			path = macOS;
 			sourceTree = "<group>";
 		};
-		526CE02F28B71E8C00405847 /* Frameworks */ = {
+		BB18C6342D530A67004C9F48 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				52DBCDBC28C96DBD00680ABA /* cast_framework.framework */,
-				526CE03028B71E8C00405847 /* cast_framework.framework */,
+				BB18C6362D530A8B004C9F48 /* ios-arm64 */,
+				BB18C6382D530A8B004C9F48 /* macos-arm64 */,
 			);
-			name = Frameworks;
+			path = Frameworks;
+			sourceTree = "<group>";
+		};
+		BB18C6362D530A8B004C9F48 /* ios-arm64 */ = {
+			isa = PBXGroup;
+			children = (
+				BB18C6352D530A8B004C9F48 /* cast_framework.framework */,
+			);
+			path = "ios-arm64";
+			sourceTree = "<group>";
+		};
+		BB18C6382D530A8B004C9F48 /* macos-arm64 */ = {
+			isa = PBXGroup;
+			children = (
+				BB18C6372D530A8B004C9F48 /* cast_framework.framework */,
+			);
+			path = "macos-arm64";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -416,8 +432,13 @@
 				DEVELOPMENT_TEAM = CUNXN3MT5U;
 				ENABLE_BITCODE = NO;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/Frameworks/ios-arm64/",
+					"$(PROJECT_DIR)/Frameworks/ios-arm64",
+					"$(PROJECT_DIR)/Frameworks/macos-arm64",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/Frameworks/ios-arm64/cast_framework.framework/Headers";
 				INFOPLIST_FILE = "Cast-Example--iOS--Info.plist";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Requires Bluetooth to Look for Scanners";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -454,8 +475,13 @@
 				DEVELOPMENT_TEAM = CUNXN3MT5U;
 				ENABLE_BITCODE = NO;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/Frameworks/ios-arm64/",
+					"$(PROJECT_DIR)/Frameworks/ios-arm64",
+					"$(PROJECT_DIR)/Frameworks/macos-arm64",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/Frameworks/ios-arm64/cast_framework.framework/Headers";
 				INFOPLIST_FILE = "Cast-Example--iOS--Info.plist";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Requires Bluetooth to Look for Scanners";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -491,11 +517,16 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CUNXN3MT5U;
+				DEVELOPMENT_TEAM = RMRP42X8WA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/Frameworks/macos-arm64",
+					"$(PROJECT_DIR)/Frameworks/ios-arm64",
+					"$(PROJECT_DIR)/Frameworks/macos-arm64",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/Frameworks/macos-arm64/cast_framework.framework/Headers";
 				INFOPLIST_FILE = "Cast-Example--macOS--Info.plist";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is required for connecting to scanners.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -525,11 +556,16 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CUNXN3MT5U;
+				DEVELOPMENT_TEAM = RMRP42X8WA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = "../../Library/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/Frameworks/macos-arm64",
+					"$(PROJECT_DIR)/Frameworks/ios-arm64",
+					"$(PROJECT_DIR)/Frameworks/macos-arm64",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/Frameworks/macos-arm64/cast_framework.framework/Headers";
 				INFOPLIST_FILE = "Cast-Example--macOS--Info.plist";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is required for connecting to scanners.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
