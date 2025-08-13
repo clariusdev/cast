@@ -1,5 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>res/cast.png</file>
+        <file>res/c3.obj</file>
+        <file>res/c3.mtl</file>
+        <file>res/l15.obj</file>
+        <file>res/l15.mtl</file>
+        <file>res/l20.obj</file>
+        <file>res/l20.mtl</file>
     </qresource>
 </RCC>

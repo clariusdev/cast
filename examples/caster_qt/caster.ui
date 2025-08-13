@@ -315,6 +315,23 @@
   <widget class="QStatusBar" name="status"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>ip</tabstop>
+  <tabstop>port</tabstop>
+  <tabstop>connect</tabstop>
+  <tabstop>freeze</tabstop>
+  <tabstop>shallower</tabstop>
+  <tabstop>deeper</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lzo</tabstop>
+  <tabstop>download</tabstop>
+  <tabstop>labelText</tabstop>
+  <tabstop>addLabel</tabstop>
+  <tabstop>clearScreen</tabstop>
+  <tabstop>captureImage</tabstop>
+  <tabstop>request</tabstop>
+  <tabstop>addTrace</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
