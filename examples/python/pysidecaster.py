@@ -12,7 +12,7 @@ if sys.platform.startswith("linux"):
 
 import pyclariuscast
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Slot
 
 CMD_FREEZE: Final = 1
 CMD_CAPTURE_IMAGE: Final = 2
@@ -142,13 +142,12 @@ class MainWidget(QtWidgets.QMainWindow):
                     self.statusBar().showMessage("Connected")
                     conn.setText("Disconnect")
                 else:
-                    self.statusBar().showMessage("Failed to connect to {0}".format(ip.text()))
+                    self.statusBar().showMessage(f"Failed to connect to {ip.text()}")
+            elif cast.disconnect():
+                self.statusBar().showMessage("Disconnected")
+                conn.setText("Connect")
             else:
-                if cast.disconnect():
-                    self.statusBar().showMessage("Disconnected")
-                    conn.setText("Connect")
-                else:
-                    self.statusBar().showMessage("Failed to disconnect")
+                self.statusBar().showMessage("Failed to disconnect")
 
         # try to freeze/unfreeze
         def tryFreeze():
@@ -272,7 +271,7 @@ class MainWidget(QtWidgets.QMainWindow):
     # handles button messages
     @Slot(int, int)
     def button(self, btn, clicks):
-        self.statusBar().showMessage("Button {0} pressed w/ {1} clicks".format(btn, clicks))
+        self.statusBar().showMessage(f"Button {btn} pressed w/ {clicks} clicks")
 
     # handles new images
     @Slot(QtGui.QImage)
@@ -308,7 +307,6 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angl
     signaller.usimage = img.copy()
     evt = ImageEvent()
     QtCore.QCoreApplication.postEvent(signaller, evt)
-    return
 
 
 ## called when a new raw image is streamed
@@ -350,7 +348,6 @@ def newImuData(imu):
 def freezeFn(frozen):
     evt = FreezeEvent(frozen)
     QtCore.QCoreApplication.postEvent(signaller, evt)
-    return
 
 
 ## called when a button is pressed
@@ -359,7 +356,6 @@ def freezeFn(frozen):
 def buttonsFn(button, clicks):
     evt = ButtonEvent(button, clicks)
     QtCore.QCoreApplication.postEvent(signaller, evt)
-    return
 
 
 ## main function

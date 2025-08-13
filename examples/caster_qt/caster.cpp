@@ -23,8 +23,7 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen
     ui_->render->addWidget(QWidget::createWindowContainer(render_));
     auto reset = new QPushButton(QStringLiteral("Reset"), this);
     ui_->render->addWidget(reset);
-    // ** ensure the path is updated as necessary
-    render_->init(QStringLiteral("scanner.obj"));
+    render_->init(QStringLiteral(":/res/l15.obj"));
     render_->show();
 
     settings_ = std::make_unique<QSettings>(QStringLiteral("settings.ini"), QSettings::IniFormat);
@@ -60,9 +59,9 @@ Caster::~Caster()
 void Caster::closeEvent(QCloseEvent*)
 {
     if (connected_)
-        cusCastDisconnect(nullptr);
+        castDisconnect(nullptr);
 
-    cusCastDestroy();
+    castDestroy();
 }
 
 /// handles custom events posted by caster api callbacks
@@ -304,7 +303,7 @@ void Caster::onConnect()
 {
     if (!connected_)
     {
-        if (cusCastConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research",
+        if (castConnect(ui_->ip->text().toStdString().c_str(), ui_->port->text().toInt(), "research",
             [](int imagePort, int imuPort, int swRevMatch)
         {
             _me->ui_->swRevMatch->setText((swRevMatch == CUS_SUCCESS) ? "Matches" : "Mismatch");
@@ -319,7 +318,7 @@ void Caster::onConnect()
     }
     else
     {
-        if (cusCastDisconnect([](int ret)
+        if (castDisconnect([](int ret)
         {
             _me->disconnected(ret == CUS_SUCCESS);
         }) < 0)
@@ -333,7 +332,7 @@ void Caster::onFreeze()
     if (!connected_)
         return;
 
-    if (cusCastUserFunction(Freeze, 0, nullptr) < 0)
+    if (castUserFunction(Freeze, 0, nullptr) < 0)
         ui_->status->showMessage("Toggle freeze failed");
 }
 
@@ -343,7 +342,7 @@ void Caster::onShallower()
     if (!connected_)
         return;
 
-    if (cusCastUserFunction(DepthDec, 0, nullptr) < 0)
+    if (castUserFunction(DepthDec, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image shallower");
 }
 
@@ -353,7 +352,7 @@ void Caster::onDeeper()
     if (!connected_)
         return;
 
-    if (cusCastUserFunction(DepthInc, 0, nullptr) < 0)
+    if (castUserFunction(DepthInc, 0, nullptr) < 0)
         ui_->status->showMessage("Could not image deeper");
 }
 
@@ -389,7 +388,7 @@ void Caster::onCaptureImage()
         ui_->status->showMessage("No image to capture");
         return;
     }
-    const int captureID = cusCastStartCapture(lasttime_);
+    const int captureID = castStartCapture(lasttime_);
     if (captureID < 0)
     {
         ui_->status->showMessage("Failed to initialize capture");
@@ -400,7 +399,7 @@ void Caster::onCaptureImage()
     {
         const std::string text = label.text_.toStdString();
         const QPointF center = label.rect_.center();
-        if (cusCastAddLabelOverlay(captureID, text.c_str(), center.x(), center.y(), label.rect_.width(), label.rect_.height()) < 0)
+        if (castAddLabelOverlay(captureID, text.c_str(), center.x(), center.y(), label.rect_.width(), label.rect_.height()) < 0)
             ui_->status->showMessage("Failed to add label " + label.text_ + " to capture");
     }
     const std::vector<TraceInfo> traces = image_->getTraces();
@@ -413,7 +412,7 @@ void Caster::onCaptureImage()
             points.push_back(pt.x());
             points.push_back(pt.y());
         }
-        if (cusCastAddMeasurement(captureID, CusMeasurementTypeTraceDistance, text.c_str(), points.data(), static_cast<int>(points.size())) < 0)
+        if (castAddMeasurement(captureID, CusMeasurementTypeTraceDistance, text.c_str(), points.data(), static_cast<int>(points.size())) < 0)
             ui_->status->showMessage("Failed to add trace measurement " + trace.text_ + " to capture");
     }
     const QImage overlayImage = image_->overlayImage();
@@ -427,7 +426,7 @@ void Caster::onCaptureImage()
         {
             std::memcpy(bytes.data() + i * width, overlayImage.scanLine(i), width);
         }
-        cusCastAddImageOverlay(
+        castAddImageOverlay(
             captureID,
             bytes.data(),
             width,
@@ -438,7 +437,7 @@ void Caster::onCaptureImage()
             static_cast<float>(overlayColor.alphaF())
         );
     }
-    if (cusCastFinishCapture(captureID, [](int ret)
+    if (castFinishCapture(captureID, [](int ret)
     {
         if (ret < 0)
             _me->ui_->status->showMessage("Failed to send capture");
@@ -479,7 +478,7 @@ void Caster::onRequest()
     if (!connected_)
         return;
 
-    if (cusCastRequestRawData(0, 0, ui_->lzo->isChecked() ? 1 : 0, [](int sz, const char*)
+    if (castRequestRawData(0, 0, ui_->lzo->isChecked() ? 1 : 0, [](int sz, const char*)
     {
         _me->rawData(sz);
     }) < 0)
@@ -504,7 +503,7 @@ void Caster::onDownload()
         rawData_.data_.resize(rawData_.size_);
         rawData_.ptr_ = rawData_.data_.data();
 
-        if (cusCastReadRawData((void**)(&rawData_.ptr_), [](int ret)
+        if (castReadRawData((void**)(&rawData_.ptr_), [](int ret)
         {
             // call is complete, post event to manage actual storage
             QApplication::postEvent(_me, new event::RawData(ret < 0 ? false : true));

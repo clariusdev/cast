@@ -1,7 +1,7 @@
 #pragma once
 
 // SDK: cast
-// Version: 12.0.2
+// Version: 12.2.0
 
 #define CUS_MAXTGC  10
 #define CUS_SUCCESS 0
@@ -32,10 +32,11 @@ typedef enum _CusPlatform
     V1,                 ///< First generation
     HD,                 ///< Second generation (HD)
     HD3,                ///< Third generation (HD3)
+    HD4,                ///< Fourth generation (HD4)
 
 } CusPlatform;
 
-/// The possible user functions from a button, foot pedal, or listener
+/// The possible user functions from a button or listener
 typedef enum _CusUserFunction
 {
     Freeze = 1,         ///< toggle freeze
@@ -50,12 +51,14 @@ typedef enum _CusUserFunction
     Flip,               ///< toggle horizontal flip
     PlayCine,           ///< play cine when frozen
     BMode,              ///< enter b mode
+    TMode,              ///< enter t mode
     MMode,              ///< enter m mode
     ColorDoppler,       ///< enter color doppler mode
     PowerDoppler,       ///< enter power doppler mode
     PwDoppler,          ///< enter pulsed wave doppler mode (when available)
     NeedleEnhance,      ///< enter needle enhance mode (when available)
     Strain,             ///< enter strain elastography mode (when available)
+    Ceus,               ///< enter contrast enhanced mode (when available)
     RfMode,             ///< enter rf mode (when available)
     NeedleSide,         ///< toggle needle enhance side
     SetDepth,           ///< set depth in cm
@@ -63,13 +66,21 @@ typedef enum _CusUserFunction
     CenterGuide,        ///< toggle center guide
     FullScreen,         ///< toggle full screen
     VoiceCommand,       ///< toggle voice controls
-    DynamicRngDec,      ///< decrease dynamic range
-    DynamicRngInc,      ///< increase dynamic range
+    ContrastDec,        ///< decrease contrast
+    ContrastInc,        ///< increase contrast
     ColorGainDec,       ///< decrease color gain
     ColorGainInc,       ///< increase color gain
     ColorPrfDec,        ///< decrease color prf
     ColorPrfInc,        ///< increase color prf
     SwitchArray,        ///< switch array
+    Split1,             ///< split screen into 1 display
+    Split2,             ///< split screen into 2 displays
+    Split4,             ///< split screen into 4 displays
+    SplitNext,          ///< activate the next display
+    Annotate,           ///< opens annotations
+    ClearScreen,        ///< clears screen
+    PreviousFrame,      ///< previous cine frame
+    NextFrame,          ///< next cine frame
 
 } CusUserFunction;
 
@@ -117,6 +128,7 @@ typedef struct _CusProbeInfo
     int elements;       ///< Number of probe elements
     int pitch;          ///< Element pitch
     int radius;         ///< Radius in millimeters
+    int frequency;      ///< Center frequency in Hz
 
 } CusProbeInfo;
 
