@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk = 34
     defaultConfig {
         applicationId 'me.clarius.sdk.cast.example'
-        minSdk 26
-        targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 1
+        versionName = '1.0'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -19,12 +19,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
     buildFeatures {
-        viewBinding true
+        viewBinding = true
     }
     packagingOptions {
         jniLibs {
@@ -32,16 +28,15 @@ android {
             useLegacyPackaging = true
         }
     }
-    namespace 'me.clarius.sdk.cast.example'
+    namespace = 'me.clarius.sdk.cast.example'
 }
 
 dependencies {
-    implementation fileTree(dir: '../../../libs', include: 'cast-debug.aar')
-    implementation fileTree(dir: 'libs', include: 'cast-debug.aar')
+    implementation fileTree(dir: '../../../lib', include: 'cast-debug.aar')
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.navigation:navigation-fragment:2.8.2'
-    implementation 'androidx.navigation:navigation-ui:2.8.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.navigation:navigation-fragment:2.8.6'
+    implementation 'androidx.navigation:navigation-ui:2.8.6'
 }

@@ -273,7 +273,7 @@ void UltrasoundImage::resizeEvent(QResizeEvent* e)
     auto w = e->size().width(), h = e->size().height();
 
     setSceneRect(0, 0, w, h);
-    cusCastSetOutputSize(w, h);
+    castSetOutputSize(w, h);
 
     image_ = QImage(w, h, QImage::Format_ARGB32);
     image_.fill(Qt::black);
