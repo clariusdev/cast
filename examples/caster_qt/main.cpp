@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     const int height = 480; // Height of the rendered image
 
     auto storeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toLocal8Bit();
-    auto initParams = cusCastDefaultInitParams();
+    auto initParams = castDefaultInitParams();
     initParams.args.argc = argc;
     initParams.args.argv = argv;
     initParams.storeDir = storeDir.constData();
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
             QApplication::postEvent(_caster.get(), new event::Error(err));
         };
 
-    if (cusCastInit(&initParams) != CUS_SUCCESS)
+    if (castInit(&initParams) != CUS_SUCCESS)
     {
         qDebug() << "error initializing listener";
         return -1;
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
     _caster->show();
     const int result = a.exec();
-    cusCastDestroy();
+    castDestroy();
     _caster.reset();
     return result;
 }

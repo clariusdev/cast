@@ -28,9 +28,7 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angl
     bpp = sz / (width * height)
     if printStream:
         print(
-            "image: {0}, {1}x{2} @ {3} bpp, {4:.2f} um/px, imu: {5} pts".format(
-                timestamp, width, height, bpp, micronsPerPixel, len(imu)
-            ),
+            f"image: {timestamp}, {width}x{height} @ {bpp} bpp, {micronsPerPixel:.2f} um/px, imu: {len(imu)} pts",
             end="\r",
         )
     if bpp == 4:
@@ -38,7 +36,6 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angl
     else:
         img = Image.frombytes("L", (width, height), image)
     # img.save("processed_image.png")
-    return
 
 
 ## called when a new raw image is streamed
@@ -95,15 +92,13 @@ def freezeFn(frozen):
         print("\nimaging frozen")
     else:
         print("imaging running")
-    return
 
 
 ## called when a button is pressed
 # @param button the button that was pressed
 # @param clicks number of clicks performed
 def buttonsFn(button, clicks):
-    print("button pressed: {0}, clicks: {1}".format(button, clicks))
-    return
+    print(f"button pressed: {button}, clicks: {clicks}")
 
 
 ## main function
@@ -137,7 +132,7 @@ def main():
         print("initialization succeeded")
         ret = cast.connect(args.ip, args.port, "research")
         if ret:
-            print("connected to {0} on port {1}".format(args.ip, args.port))
+            print(f"connected to {args.ip} on port {args.port}")
         else:
             print("connection failed")
             if sys.platform.startswith("linux"):
@@ -182,13 +177,12 @@ def main():
             inp = input("enter: {parameter name} {value [float/true/false]}").split()
             if len(inp) != 2:
                 print("please format as: {parameter name} {value [float/true/false]}")
+            elif inp[1] == "true" or inp[1] == "false":
+                cast.enableParam(inp[0], 1 if inp[1] == "true" else 0)
+            elif "+" in inp[1]:
+                cast.setPulse(inp[0], inp[1])
             else:
-                if inp[1] == "true" or inp[1] == "false":
-                    cast.enableParam(inp[0], 1 if inp[1] == "true" else 0)
-                elif "+" in inp[1]:
-                    cast.setPulse(inp[0], inp[1])
-                else:
-                    cast.setParam(inp[0], float(inp[1]))
+                cast.setParam(inp[0], float(inp[1]))
 
     cast.destroy()
 
