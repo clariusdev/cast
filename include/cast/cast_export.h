@@ -9,20 +9,20 @@
 #  ifndef CAST_EXPORT
 #    ifdef cast_EXPORTS
         /* We are building this library */
-#      define CAST_EXPORT __declspec(dllexport)
+#      define CAST_EXPORT __attribute__((visibility("default")))
 #    else
         /* We are using this library */
-#      define CAST_EXPORT __declspec(dllimport)
+#      define CAST_EXPORT __attribute__((visibility("default")))
 #    endif
 #  endif
 
 #  ifndef CAST_NO_EXPORT
-#    define CAST_NO_EXPORT 
+#    define CAST_NO_EXPORT __attribute__((visibility("hidden")))
 #  endif
 #endif
 
 #ifndef CAST_DEPRECATED
-#  define CAST_DEPRECATED __declspec(deprecated)
+#  define CAST_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
 #ifndef CAST_DEPRECATED_EXPORT
