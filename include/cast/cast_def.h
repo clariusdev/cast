@@ -1,7 +1,7 @@
 #pragma once
 
 // SDK: cast
-// Version: 12.2.2
+// Version: 12.2.4
 
 #define CUS_MAXTGC  10
 #define CUS_SUCCESS 0
