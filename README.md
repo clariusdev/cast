@@ -13,6 +13,10 @@ The Cast API is based on the Clarius Cast protocol that the Clarius App uses for
 
 The Cast API does provide some mechanisms for control of the ultrasound probe, such as the ability to freeze, change parameters such as depth and gain; however these are generally considered secondary functions, as the main purpose of the Cast API is to easily obtain the images in real-time, as opposed to duplicating a control interface.
 
+**Important**
+
+🔴 ***The Clarius App must be running and connected to a probe in order to use the Cast API, it cannot run stand-alone.***
+
 # Features
 
 - Obtain greyscale and color Doppler **images** (cartesian data) in real-time over the wireless network
@@ -59,8 +63,8 @@ The Cast API communicates with the _Clarius Probe_ directly, and makes use of TC
 
 # Supported Platforms
 
-- **Windows**: Tested on Windows 10
-- **Linux**: Tested on Ubuntu 20.04 and higher
+- **Windows**: Tested on Windows 10 and 11
+- **Linux**: Tested on Ubuntu 22.04 and 24.04
 - **macOS**: Tested on macOS 10.15 and higher
 - **iOS**: Tested on iOS 13 or higher (note that clients wanting to run side-by-side on same device must use **iPadOS**)
 - **Android**: Tested on Android 10 or higher
@@ -105,16 +109,16 @@ imageCallback(image)
 
 # Network Information
 
-The Clarius App will display the network information on a top bar above the image for any probe licensed for the Cast API. The port and IP address are required to make a connection through the Cast API.
+For any Cast API **licensed probe**, the Clarius App will display the network information when the battery/temperature display area is tapped. The port and IP address are **required** to make a connection through the Cast API.
 
-|<img height="250px" alt="connection in progress" src="blob/1.png"/>|<img height="250px" alt="connected" src="blob/2.png"/>|
+|<img height="250px" alt="connection in progress" src="blob/1.png"/>|
 
-Licenced probes also have the option for forcing the port by adjusting the Clarius Cast Permission setting within the App to "Research". This provides a potentially more streamlined method when automating connections from the custom software.
+Licenced probes also have the option to force the Cast port to 5828 by adjusting the **Clarius Cast Permission** setting within the App to "Research". This provides a potentially more streamlined method when automating connections from software using the Cast API.
 
 |<img height="250px" alt="setting" src="blob/3.png"/>|
 
-Since most connections will be made using the probe's own Wi-Fi network, it is important to ensure the computer running the Cast program is on the same network. Probe networks are typically prefixed with "DIRECT-", and the password is available for 60 seconds on the mobile device clipboard once the Clarius App has connected.
+Since most connections will be made using the probe's own Wi-Fi network, it is important to ensure the computer running the Cast program is on the same network. Probe networks are typically prefixed with "DIRECT-". The network password is available in the **Status** page of the Clarius App.
 
 # Notes
 
-- When running under Windows, execution may require temporarily disabling the firewall defender or adding an exception for the executable - the latter is recommended. This is due to the use of randomized ports that the API makes use of for streaming images.
+- When running under Windows, execution may require temporarily disabling the firewall or adding an exception for the executable - the latter is recommended. This is due to the use of randomized ports that the API makes use of for streaming images.
