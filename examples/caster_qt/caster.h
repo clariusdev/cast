@@ -199,13 +199,8 @@ public slots:
     void onDeeper();
     void onRequest();
     void onDownload();
-    void onAddLabel();
-    void onAddTrace();
-    void onCaptureImage();
-    void onClearScreen();
 
 private:
-    void updateCaptureButtons();
     bool connected_;            ///< connection state
     bool frozen_;               ///< freeze state
     long long int lasttime_;    ///< timesetamp of last received frame

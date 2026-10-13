@@ -39,8 +39,9 @@ int main(int argc, char *argv[])
             std::memcpy(_image.data(), img, sz);
             QQuaternion imu;
             imu.setScalar(0.0);
+            // pos holds all the imu samples collected during the frame; use the newest for display
             if (npos && pos)
-                imu = QQuaternion(static_cast<float>(pos[0].qw), static_cast<float>(pos[0].qx), static_cast<float>(pos[0].qy), static_cast<float>(pos[0].qz));
+                imu = QQuaternion(static_cast<float>(pos[npos - 1].qw), static_cast<float>(pos[npos - 1].qx), static_cast<float>(pos[npos - 1].qy), static_cast<float>(pos[npos - 1].qz));
 
             QApplication::postEvent(_caster.get(), new event::Image(IMAGE_EVENT, _image.data(), nfo->tm, nfo->width, nfo->height, nfo->bitsPerPixel, sz, imu));
         };
@@ -79,13 +80,16 @@ int main(int argc, char *argv[])
             std::memcpy(_spectrum.data(), img, sz);
 
             QApplication::postEvent(_caster.get(), new event::Spectrum(_spectrum.data(), nfo->lines, nfo->samples, nfo->bitsPerSample, sz, nfo->period,
-                                                                       nfo->micronsPerSample, nfo->velocityPerSample, nfo->pw ? true : false));
+                                                                       nfo->micronsPerSample, nfo->velocityPerSample, nfo->pw != 0));
         };
 
     initParams.newImuDataFn =
         [](const CusPosInfo* pos)
         {
             QQuaternion imu;
+            // mark invalid data with a zero quaternion, otherwise the default constructed
+            // identity would pass the isNull() check downstream and snap the rendered view
+            imu.setScalar(0.0);
             if (pos)
                 imu = QQuaternion(static_cast<float>(pos->qw), static_cast<float>(pos->qx), static_cast<float>(pos->qy), static_cast<float>(pos->qz));
             QApplication::postEvent(_caster.get(), new event::Imu(imu));
@@ -95,7 +99,7 @@ int main(int argc, char *argv[])
         [](int frozen)
         {
             // post event here, as the gui (statusbar) will be updated directly, and it needs to come from the application thread
-            QApplication::postEvent(_caster.get(), new event::Freeze(frozen ? true : false));
+            QApplication::postEvent(_caster.get(), new event::Freeze(frozen != 0));
         };
 
     initParams.buttonFn =

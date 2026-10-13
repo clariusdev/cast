@@ -1,6 +1,32 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    id 'com.android.application' version '8.8.0' apply false
+    id 'com.android.application' version '9.2.1' apply false
+}
+
+// Pin transitive dependency versions for reproducible builds (SonarCloud text:S8569).
+// Regenerate after any dependency change with:  ./gradlew resolveAndLockAll --write-locks
+allprojects {
+    dependencyLocking {
+        lockAllConfigurations()
+    }
+}
+
+tasks.register('resolveAndLockAll') {
+    notCompatibleWithConfigurationCache('Resolves configurations at execution time')
+    doFirst {
+        assert gradle.startParameter.writeDependencyLocks : 'run with --write-locks'
+    }
+    doLast {
+        allprojects.each { p ->
+            p.configurations.toList().findAll { it.canBeResolved }.each { c ->
+                try {
+                    c.resolve()
+                } catch (Exception e) {
+                    logger.warn("skip ${p.path}:${c.name}: ${e.message}")
+                }
+            }
+        }
+    }
 }
 
 tasks.register('clean', Delete) {

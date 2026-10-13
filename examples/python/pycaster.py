@@ -10,7 +10,8 @@ if sys.platform.startswith("linux"):
     pyclariuscast = ctypes.cdll.LoadLibrary("./pyclariuscast.so")  # load the pyclariuscast.so shared library
 
 import pyclariuscast
-from PIL import Image
+
+# from PIL import Image  # uncomment together with the img.save() blocks below to save frames
 
 printStream = True
 
@@ -31,10 +32,10 @@ def newProcessedImage(image, width, height, sz, micronsPerPixel, timestamp, angl
             f"image: {timestamp}, {width}x{height} @ {bpp} bpp, {micronsPerPixel:.2f} um/px, imu: {len(imu)} pts",
             end="\r",
         )
-    if bpp == 4:
-        img = Image.frombytes("RGBA", (width, height), image)
-    else:
-        img = Image.frombytes("L", (width, height), image)
+    # if bpp == 4:
+    #     img = Image.frombytes("RGBA", (width, height), image)
+    # else:
+    #     img = Image.frombytes("L", (width, height), image)
     # img.save("processed_image.png")
 
 

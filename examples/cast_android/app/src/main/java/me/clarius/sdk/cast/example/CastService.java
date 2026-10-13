@@ -70,6 +70,10 @@ public class CastService extends Service {
         }
 
         @Override
+        public void newImageReadyFn(int stream, long timestamp, int size) {
+        }
+
+        @Override
         public void newImuDataFn(PosInfo pos) {
         }
 

@@ -10,6 +10,12 @@ typedef void (*CusConnectFn)(int imagePort, int imuPort, int swRevMatch);
 /// return status callback function
 /// @param[in] retCode the return code (CUS_SUCCESS or CUS_FAILURE)
 typedef void (*CusReturnFn)(int retCode);
+/// parameter value callback function, invoked asynchronously when the controlling Clarius App
+/// reports the current value of a parameter requested through castGetParameter
+/// @param[in] prm the parameter the value is being reported for
+/// @param[in] val the numeric value (booleans are reported as 0 or 1); 0 when the parameter is an enumeration or is unavailable
+/// @param[in] str the enumeration/string value when the parameter holds one, null otherwise
+typedef void (*CusParamFn)(const char* prm, double val, const char* str);
 /// new data callback function
 /// @param[in] img pointer to the new grayscale image information
 /// @param[in] nfo image information associated with the image data
@@ -26,6 +32,11 @@ typedef void (*CusNewProcessedImageFn)(const void* img, const CusProcessedImageI
 /// @param[in] img pointer to the new grayscale image information
 /// @param[in] nfo image information associated with the image data
 typedef void (*CusNewSpectralImageFn)(const void* img, const CusSpectralImageInfo* nfo);
+/// new image ready callback function
+/// @param[in] stream the image stream the image is ready from
+/// @param[in] timestamp the timestamp of the frame that is ready
+/// @param[in] size the size of the new image in bytes
+typedef void (*CusNewImageReadyFn)(int stream, long long timestamp, int size);
 /// freeze callback function
 /// @param[in] state 1 = frozen, 0 = imaging
 typedef void (*CusFreezeFn)(int state);

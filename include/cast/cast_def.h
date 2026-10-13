@@ -1,7 +1,7 @@
 #pragma once
 
 // SDK: cast
-// Version: 12.2.4
+// Version: 13.1.0
 
 #define CUS_MAXTGC  10
 #define CUS_SUCCESS 0
@@ -25,6 +25,15 @@ typedef enum _CusImageFormat
     Png,                ///< Processed images are sent as a png (with header)
 
 } CusImageFormat;
+
+/// The types of raw data compression which are handled in the software
+typedef enum _CusRawCompression
+{
+    RawCompressionNone, ///< no compression (store)
+    RawCompressionDeflate, ///< deflate compression
+    RawCompressionZstd, ///< zstandard compression
+
+} CusRawCompression;
 
 /// Major Clarius platforms
 typedef enum _CusPlatform
@@ -80,17 +89,10 @@ typedef enum _CusUserFunction
     ClearScreen,        ///< clears screen
     PreviousFrame,      ///< previous cine frame
     NextFrame,          ///< next cine frame
+    RoiLateral,         ///< move roi laterally
+    RoiAxial,           ///< move roi axially
 
 } CusUserFunction;
-
-/// Supported measurement types
-typedef enum _CusMeasurementType
-{
-    CusMeasurementTypeDistance = 1, ///< point-to-point distance
-    CusMeasurementTypeTraceDistance, ///< trace distance
-    CusMeasurementTypeTraceArea, ///< trace area
-
-} CusMeasurementType;
 
 /// TGC information
 typedef struct _CusTgcInfo
@@ -158,6 +160,8 @@ typedef struct _CusRawImageInfo
     int bitsPerSample;  ///< bits per sample
     double axialSize;   ///< axial microns per sample
     double lateralSize; ///< lateral microns per line
+    double samplingRate; ///< sampling rate in mhz
+    double vsound;      ///< speed of sound in m/s
     long long int tm;   ///< timestamp of image
     int jpeg;           ///< size of the jpeg image, 0 if not a jpeg compressed image
     int rf;             ///< flag specifying data is rf and not envelope

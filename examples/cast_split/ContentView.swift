@@ -97,11 +97,6 @@ struct ContentView: View {
                             }) {
                                 Text("Add Measurement")
                             }
-                            Button(action: {
-                                cast.createCapture(labels: self.labels, measurements: self.measurements)
-                            }) {
-                                Text("Create Capture")
-                            }
                         }
                         HStack {
                             TextField("Text", text: $labelToAdd)

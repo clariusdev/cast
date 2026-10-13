@@ -68,14 +68,17 @@ signaller = Signaller()
 
 # 3d render class
 class ScannerWindow(Qt3DExtras.Qt3DWindow):
-    qw = 0.5
-    qx = 0.5
-    qy = -0.5
-    qz = 0.5
-    scannerTransform = Qt3DCore.QTransform()
+    # the imu quaternion rotates the probe body frame into a fixed world frame with z up
+    # (gravity aligned) and x toward magnetic north; yaw is arbitrary and slowly drifts when
+    # the magnetometer is not collecting. these corrections are fixed rotations, not part of
+    # the imu data: axisCorrection maps that world frame onto the Qt3D view frame (y up,
+    # z toward the viewer), and modelCorrection accounts for the orientation the probe mesh
+    # was authored in.
+    axisCorrection = QQuaternion.fromEulerAngles(0, 180, 90)
+    modelCorrection = QQuaternion.fromEulerAngles(-90, 0, 90)
 
     def __init__(self):
-        super(ScannerWindow, self).__init__()
+        super().__init__()
 
         # camera
         self.camera().lens().setPerspectiveProjection(50, 16 / 9, 0.1, 1000)
@@ -87,22 +90,16 @@ class ScannerWindow(Qt3DExtras.Qt3DWindow):
         self.setRootEntity(self.rootEntity)
 
     def updateAngle(self, qw, qx, qy, qz):
-        self.qw = qw
-        self.qx = qx
-        self.qy = qy
-        self.qz = qz
-        self.addTransform()
+        # a zero quaternion marks invalid data; streamed values also lose precision in
+        # conversion, so renormalize before rendering to keep the rotation pure
+        orientation = QQuaternion(qw, qx, qy, qz)
+        if orientation.lengthSquared() < 0.5:
+            return
+        self.orientation = orientation.normalized()
+        self.applyOrientation()
 
-    def addTransform(self):
-        # correct orientation
-        self.scannerTransform.setScale3D(QVector3D(100, 100, 100))
-        self.orientation = QQuaternion(self.qw, self.qx, self.qy, self.qz)
-        self.axisCorrection = QQuaternion.fromEulerAngles(0, 180, 90)
-        self.modelCorrection = QQuaternion.fromEulerAngles(-90, 0, 90)
-        self.modelRotation = self.orientation * self.axisCorrection
-        self.correctedOrientation = self.modelCorrection * self.modelRotation
-        self.scannerTransform.setRotation(self.correctedOrientation)
-        self.scannerEntity.addComponent(self.scannerTransform)
+    def applyOrientation(self):
+        self.scannerTransform.setRotation(self.modelCorrection * (self.orientation * self.axisCorrection))
 
     def createScene(self):
         self.rootEntity = Qt3DCore.QEntity()
@@ -111,7 +108,12 @@ class ScannerWindow(Qt3DExtras.Qt3DWindow):
         self.scanner = Qt3DRender.QSceneLoader(self.scannerEntity)
         self.scanner.setSource(QUrl.fromLocalFile("scanner.obj"))
         self.scannerEntity.addComponent(self.scanner)
-        self.addTransform()
+        # the transform component is created once; only its rotation changes on imu updates
+        self.scannerTransform = Qt3DCore.QTransform()
+        self.scannerTransform.setScale3D(QVector3D(100, 100, 100))
+        self.scannerEntity.addComponent(self.scannerTransform)
+        self.orientation = QQuaternion(0.5, 0.5, -0.5, 0.5)
+        self.applyOrientation()
 
 
 # main widget with controls and ui
@@ -211,11 +213,12 @@ class MainWidget(QtWidgets.QMainWindow):
 # @param angle acquisition angle for volumetric data
 # @param imu imu data sets
 def newProcessedImage(image, width, height, bpp, micronsPerPixel, timestamp, angle, imu):
+    # imu holds all the samples collected during the frame; use the newest for display
     if len(imu) > 0:
-        signaller.qw = imu[0].qw
-        signaller.qx = imu[0].qx
-        signaller.qy = imu[0].qy
-        signaller.qz = imu[0].qz
+        signaller.qw = imu[-1].qw
+        signaller.qx = imu[-1].qx
+        signaller.qy = imu[-1].qy
+        signaller.qz = imu[-1].qz
         evt = ImageEvent()
         QtCore.QCoreApplication.postEvent(signaller, evt)
 

@@ -10,6 +10,8 @@
 #include <boost/program_options.hpp>
 #else
 #include <unistd.h>
+#include <sys/stat.h>
+#include <cstdlib>
 #endif
 
 #include <cast/cast.h>
@@ -23,7 +25,6 @@ static int szRawData_ = 0;
 static int counter_ = 0;
 static bool streamOutput_ = true;
 static long long int lasttime_ = 0;
-static int captureID_ = -1;
 
 /// callback for error messages
 /// @param[in] err the error message sent from the casting module
@@ -160,14 +161,6 @@ bool saveRawData()
     return true;
 }
 
-void doneCapture(int result)
-{
-    if (result < 0)
-        ERROR << "failed to submit capture";
-    else
-        PRINT << "successfully submitted capture";
-}
-
 char getCommand(const std::string& line)
 {
     if (line.empty() || (line.size() > 1 && line[1] != ' '))
@@ -252,7 +245,7 @@ void processEventLoop(std::atomic_bool& quit)
         }
         else if (cmd == 'R' || cmd == 'r')
         {
-            if (castRequestRawData(0, 0, 1, [](int sz, const char*)
+            if (castRequestRawData(0, 0, RawCompressionZstd, [](int sz, const char*)
             {
                 if (sz < 0)
                     ERROR << "error requesting raw data" << std::endl;
@@ -288,81 +281,6 @@ void processEventLoop(std::atomic_bool& quit)
                 }) < 0)
                     ERROR << "error downloading raw data" << std::endl;
             }
-        }
-        else if (cmd == 'C' || cmd == 'c')
-        {
-            if (lasttime_ == 0)
-            {
-                ERROR << "no images received yet" << std::endl;
-                continue;
-            }
-            if (captureID_ < 0)
-            {
-                captureID_ = castStartCapture(lasttime_);
-                if (captureID_ < 0)
-                    ERROR << "failed to start capture" << std::endl;
-                else
-                    PRINT << "started capture " << captureID_ << std::endl;
-            }
-            else
-            {
-                if (castFinishCapture(captureID_, &doneCapture) < 0)
-                    ERROR << "failed to finish capture" << std::endl;
-                else
-                    PRINT << "finished capture " << captureID_ << std::endl;
-                captureID_ = -1;
-            }
-        }
-        else if (cmd == 'l' || cmd == 'L')
-        {
-            if (captureID_ < 0)
-            {
-                ERROR << "no capture in progress" << std::endl;
-                continue;
-            }
-            const std::vector<std::string> prms = getParameters(line, 3);
-            double x = 0;
-            double y = 0;
-            if (prms.size() < 3 || !parseDouble(x, prms[0]) || !parseDouble(y, prms[1]))
-            {
-                ERROR << "wrong label parameters provided";
-                ERROR << "please give parameters as -> x y text";
-                ERROR << "where x and y are the coordinates of the center of the label" << std::endl;
-                continue;
-            }
-            if (castAddLabelOverlay(captureID_, prms.back().c_str(), x, y, 100.0, 100.0) < 0)
-                ERROR << "failed to add label to capture" << std::endl;
-            else
-                PRINT << "added label '" << prms.back() << "' at (" << x << ", " << y << ") to capture" << std::endl;
-        }
-        else if (cmd == 'm' || cmd == 'M')
-        {
-            if (captureID_ < 0)
-            {
-                ERROR << "no capture in progress" << std::endl;
-                continue;
-            }
-            const std::vector<std::string> prms = getParameters(line, 5);
-            double x1 = 0;
-            double y1 = 0;
-            double x2 = 0;
-            double y2 = 0;
-            if (prms.size() < 5
-                || !parseDouble(x1, prms[0]) || !parseDouble(y1, prms[1])
-                || !parseDouble(x2, prms[2]) || !parseDouble(y2, prms[3]))
-            {
-                ERROR << "wrong measurement parameters provided";
-                ERROR << "please give parameters as -> x1 y1 x2 y2 text";
-                ERROR << "for a measurement from (x1,y1) to (x2,y2) with label 'text'" << std::endl;
-                continue;
-            }
-            const double points[] = { x1, y1, x2, y2 };
-            const int nDoubles = static_cast<int>(sizeof(points) / sizeof(points[0]));
-            if (castAddMeasurement(captureID_, CusMeasurementTypeDistance, prms.back().c_str(), points, nDoubles) < 0)
-                ERROR << "failed to add label to capture" << std::endl;
-            else
-                PRINT << "added measurement '" << prms.back() << "' from (" << x1 << ", " << y1 << ") "
-                    << "to (" << x2 << ", " << y2 << ") to capture" << std::endl;
         }
         else if (cmd == 'p' || cmd == 'P')
         {
@@ -414,14 +332,33 @@ void processEventLoop(std::atomic_bool& quit)
                 }
             }
         }
+        else if (cmd == 'o' || cmd == 'O')
+        {
+            const std::vector<std::string> prms = getParameters(line, 1);
+            if (prms.size() != 1)
+            {
+                ERROR << "usage: o {param_name}" << std::endl;
+                continue;
+            }
+            // the value is reported asynchronously by the connected Clarius App through the callback
+            if (castGetParameter(prms[0].c_str(), [](const char* prm, double val, const char* str)
+            {
+                if (str)
+                    PRINT << "parameter " << prm << " = " << str;
+                else
+                    PRINT << "parameter " << prm << " = " << val;
+            }) < 0)
+            {
+                ERROR << "could not request parameter value";
+            }
+        }
         else
         {
             PRINT << "valid commands: [q: quit]";
             PRINT << "       display: [s: toggle stream outptu]";
             PRINT << "       imaging: [f: freeze, d/D: depth, g/G: gain]";
-            PRINT << "        params: [p: change parameter]";
+            PRINT << "        params: [p: change parameter, o: get parameter value]";
             PRINT << "      raw data: [r: request, y: download]";
-            PRINT << "       capture: [c: start/end capture, l: add label, m: add measurement]" << std::endl;
         }
     }
 }
@@ -474,7 +411,24 @@ int init(int& argc, char** argv)
     }
 #else // every other platform has 'getopt' which we're using so as to not pull in the Boost dependency
     int o;
-    keydir = "/tmp/";
+    // Default the key store to a per-user, owner-only directory instead of the world-writable /tmp
+    // (CWE-377); override with -k. A 0700 parent protects the generated key/cert regardless of umask.
+    {
+        const char* xdgRuntime = std::getenv("XDG_RUNTIME_DIR");
+        const char* homeDir = std::getenv("HOME");
+        std::string base = (xdgRuntime && *xdgRuntime) ? std::string(xdgRuntime)
+                         : (homeDir && *homeDir)       ? std::string(homeDir) + "/.clarius"
+                                                       : std::string();
+        // With no per-user location, require an explicit -k (checked after option parsing) rather
+        // than defaulting to a guessable, world-writable path like /tmp where the generated SSL
+        // private key could be pre-created or read by another local user (CWE-377).
+        if (base.size())
+        {
+            mkdir(base.c_str(), 0700);
+            keydir = base + "/caster/";
+            mkdir(keydir.c_str(), 0700);
+        }
+    }
 
     // check command line options
     while ((o = getopt(argc, argv, "k:a:p:")) != -1)
@@ -494,6 +448,12 @@ int init(int& argc, char** argv)
         case '?': PRINT << "invalid argument, valid options: -a [addr], -p [port], -k [keydir]"; break;
         default: break;
         }
+    }
+
+    if (!keydir.size())
+    {
+        ERROR << "no key directory available; set HOME or XDG_RUNTIME_DIR, or run with '-k [keydir]'" << std::endl;
+        return CUS_FAILURE;
     }
 
     if (!ipAddr.size())

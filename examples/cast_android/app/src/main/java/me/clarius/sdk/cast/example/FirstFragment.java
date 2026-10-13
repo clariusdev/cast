@@ -86,7 +86,6 @@ public class FirstFragment extends Fragment {
         binding.buttonRun.setOnClickListener(v -> toggleRun());
         binding.buttonDisconnect.setOnClickListener(v -> doDisconnect());
         binding.buttonRawData.setOnClickListener(v -> getRawData());
-        binding.buttonCapture.setOnClickListener(v -> doCapture());
     }
 
     @Override
@@ -189,24 +188,8 @@ public class FirstFragment extends Fragment {
         RawDataFile handle = new RawDataFile(cast);
         final int start = 0;
         final int end = 0;
-        final boolean lzo = true;
-        cast.requestRawData(start, end, lzo, handle::requestResultRetrieved);
-    }
-
-    private void doCapture() {
-        if (castBinder == null || timestamp == 0L) {
-            return;
-        }
-        showMessage("Starting image capture");
-        castBinder.getCast().startCapture(timestamp, captureID -> {
-            Log.d(TAG, "Start capture got ID: " + captureID);
-            if (captureID < 0) {
-                return;
-            }
-            castBinder.getCast().finishCapture(captureID, result -> {
-                Log.d(TAG, "Finish capture got result: " + result);
-            });
-        });
+        final boolean compress = true;
+        cast.requestRawData(start, end, compress, handle::requestResultRetrieved);
     }
 
     private void setTimestamp(Long timestamp) {

@@ -15,6 +15,7 @@ typedef struct _CusInitParams
     CusNewProcessedImageFn newProcessedImageFn;     ///< new processed image callback (scan-converted image)
     CusNewRawImageFn newRawImageFn;                 ///< new raw image callback (pre scan-converted image or rf data)
     CusNewSpectralImageFn newSpectralImageFn;       ///< new processed spectral image callback
+    CusNewImageReadyFn newImageReadyFn;             ///< new image is ready
     CusNewImuDataFn newImuDataFn;                   ///< new imu data callback
     CusFreezeFn freezeFn;                           ///< freeze state callback
     CusButtonFn buttonFn;                           ///< button press callback
@@ -124,13 +125,13 @@ extern "C" {
     /// makes a request for raw data from the probe
     /// @param[in] start the first frame to request, as determined by timestamp in nanoseconds, set to 0 along with end to requests all data in buffer
     /// @param[in] end the last frame to request, as determined by timestamp in nanoseconds, set to 0 along with start to requests all data in buffer
-    /// @param[in] lzo flag to specify a tarball with lzo compressed raw data inside (default) vs no compression of raw data
+    /// @param[in] compression the compression type to use for the raw data package
     /// @param[in] fn result callback function, will return size of buffer required upon success, 0 if no raw data was buffered, or -1 if request could not be made
     /// @return success of the call
     /// @retval 0 the request was successfully made
     /// @retval -1 the request could not be made
     /// @note the probe must be frozen and in a raw data buffering mode in order for the call to succeed
-    CAST_EXPORT int castRequestRawData(long long int start, long long int end, int lzo, CusRawRequestFn fn);
+    CAST_EXPORT int castRequestRawData(long long int start, long long int end, CusRawCompression compression, CusRawRequestFn fn);
 
     /// retrieves raw data from a previous request
     /// @param[out] data a pointer to a buffer that has been allocated to read the raw data into, this must be pre-allocated with
@@ -152,6 +153,18 @@ extern "C" {
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
     CAST_EXPORT int castUserFunction(CusUserFunction cmd, double val, CusReturnFn fn);
+
+    /// requests the current value of a parameter for researchers to gain access to lower level state of the device
+    /// @param[in] prm the parameter to retrieve
+    /// @param[in] fn callback that receives the parameter value once the connected Clarius App reports it
+    /// @return success of issuing the request
+    /// @retval 0 the request was issued successfully
+    /// @retval -1 the request could not be issued
+    /// @note the value is delivered asynchronously through fn, not when this call returns, because the request is
+    ///       forwarded to the controlling Clarius App which owns the parameter values
+    /// @note the Clarius App must be running, connected, and have the appropriate research feature enabled
+    /// @note see external documentation for supported parameters
+    CAST_EXPORT int castGetParameter(const char* prm, CusParamFn fn);
 
     /// sets a parameter to a specific value for researchers to gain access to lower level control of device
     /// @param[in] prm the parameter to change
@@ -186,53 +199,16 @@ extern "C" {
     /// @warning changing parameters through this function may result in unstable operation, degradation of image quality, or operation outside of the safety limits that clarius tests to
     CAST_EXPORT int castSetPulse(const char* prm, const char* shape, CusReturnFn fn);
 
-    /// begins a capture with the current image settings
-    /// @param[in] timestamp the timestamp of the frame to be captured
-    /// @retval the ID of the newly created capture
-    /// @retval -1 the call was not successful
-    CAST_EXPORT int castStartCapture(long long int timestamp);
-
-    /// adds an image overlay to a capture which was started with castStartCapture
-    /// @param[in] id the ID of the capture which is to be added to
-    /// @param[in] data pointer to the image data which is to be added (assumed 8-bit grayscale)
-    /// @param[in] width width of the image data which is to be added; must match the width from castInit
-    /// @param[in] height height of the image data which is to be added; must match the height from castInit
-    /// @param[in] red the value of red use in colorizing the overlay, should be between 0.0 and 1.0
-    /// @param[in] green the value of green use in colorizing the overlay, should be between 0.0 and 1.0
-    /// @param[in] blue the value of blue use in colorizing the overlay, should be between 0.0 and 1.0
-    /// @param[in] alpha the value of alpha (opacity) use in colorizing the overlay, should be between 0.0 and 1.0
+    /// sets an enumerated parameter to a specific string value representation of the enumeration
+    /// @param[in] prm the parameter to change
+    /// @param[in] val the enumeration text to set the parameter as
+    /// @param[in] fn callback to obtain success of call
+    /// @return success of the call
     /// @retval 0 the call was successful
     /// @retval -1 the call was not successful
-    CAST_EXPORT int castAddImageOverlay(int id, const void* data, int width, int height, float red, float green, float blue, float alpha);
-
-    /// adds a label overlay to a capture which was started with castStartCapture
-    /// @param[in] id the ID of the capture which is to be added to
-    /// @param[in] text string of the label to be added
-    /// @param[in] x x-position of the label in pixels (same scale as the width from castInit)
-    /// @param[in] y y-position of the label in pixels (same scale as the height from castInit)
-    /// @param[in] width width of the label in pixels (same scale as the width from castInit)
-    /// @param[in] height height of the label in pixels (same scale as the height from castInit)
-    /// @retval 0 the call was successful
-    /// @retval -1 the call was not successful
-    CAST_EXPORT int castAddLabelOverlay(int id, const char* text, double x, double y, double width, double height);
-
-    /// adds a 2-point distance or trace measurement to a capture which was started with castStartCapture
-    /// @details for a distance measurement, 2 points should be given
-    /// @param[in] id the ID of the capture which is to be added to
-    /// @param[in] type the type of measurement to add
-    /// @param[in] label string label for the measurement
-    /// @param[in] pts pointer to an array of doubles (x,y positions pixels, same scale as the width/height from castInit)
-    /// @param[in] count number of *doubles* in the pts array (not number of points)
-    /// @retval 0 the call was successful
-    /// @retval -1 the call was not successful
-    CAST_EXPORT int castAddMeasurement(int id, CusMeasurementType type, const char* label, const double* pts, int count);
-
-    /// completes a capture which was started with castStartCapture
-    /// @param[in] id the ID of the capture which is to be finished
-    /// @param[in] fn callback to obtain the success of the call, -1 if the request failed, 0 if it succeeded
-    /// @retval 0 the call was successful
-    /// @retval -1 the call was not successful
-    CAST_EXPORT int castFinishCapture(int id, CusReturnFn fn);
+    /// @note see external documentation for supported parameters
+    /// @warning changing parameters through this function may result in unstable operation, degradation of image quality, or operation outside of the safety limits that clarius tests to
+    CAST_EXPORT int castSetEnum(const char* prm, const char* val, CusReturnFn fn);
 
 #ifdef __cplusplus
 }

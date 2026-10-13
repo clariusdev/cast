@@ -6,6 +6,21 @@
 
 static Caster* _me;
 
+namespace
+{
+    /// picks the bundled probe mesh that best matches the connected scanhead geometry
+    /// @param[in] nfo the connected probe information
+    /// @return resource path of the mesh to render
+    QString probeMesh(const CusProbeInfo& nfo)
+    {
+        if (nfo.radius > 0)
+            return QStringLiteral(":/res/c3.obj");
+        if (nfo.frequency >= 17000000)
+            return QStringLiteral(":/res/l20.obj");
+        return QStringLiteral(":/res/l15.obj");
+    }
+}
+
 /// default constructor
 /// @param[in] parent the parent object
 Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen_(false), lasttime_(0), imuSamples_(0), ui_(new Ui::Caster)
@@ -38,7 +53,6 @@ Caster::Caster(QWidget *parent) : QMainWindow(parent), connected_(false), frozen
     {
         image_->setNoImage(true);
         lasttime_ = 0;
-        updateCaptureButtons();
         ui_->status->showMessage(NO_IMAGE_STATEMENT);
     });
 
@@ -75,7 +89,6 @@ bool Caster::event(QEvent *event)
         newProcessedImage(evt->data_, evt->width_, evt->height_, evt->bpp_, evt->size_, evt->imu_);
         image_->setNoImage(false);
         lasttime_ = evt->tm_;
-        updateCaptureButtons();
         if (imageTimer_.isActive())
             imageTimer_.stop();
 
@@ -158,19 +171,12 @@ void Caster::setFreeze(bool en)
     ui_->download->setEnabled(false);
     ui_->shallower->setEnabled(!en);
     ui_->deeper->setEnabled(!en);
-    updateCaptureButtons();
     rawData_ = RawDataInfo();
 
     if (!en)
         imageTimer_.start(3000);
     else
         imageTimer_.stop();
-}
-
-void Caster::updateCaptureButtons()
-{
-    ui_->addLabel->setEnabled(lasttime_ != 0);
-    ui_->captureImage->setEnabled(lasttime_ != 0);
 }
 
 /// called when there is a button press on the ultrasound
@@ -222,11 +228,9 @@ void Caster::newPrescanImage(const void* img, int w, int h, int bpp, int sz)
 /// @param[in] bps the bits per sample (should always be 16)
 /// @param[in] lateral spacing between lines
 /// @param[in] axial sample size
-void Caster::newRfData(const void* rfdata, int l, int s, int bps, double lateral, double axial)
+void Caster::newRfData(const void* rfdata, int l, int s, int bps, [[maybe_unused]] double lateral, [[maybe_unused]] double axial)
 {
     signal_->loadSignal(rfdata, l, s, bps / 8);
-    Q_UNUSED(lateral)
-    Q_UNUSED(axial)
 }
 
 /// called when new m spectral data has been sent
@@ -236,14 +240,8 @@ void Caster::newRfData(const void* rfdata, int l, int s, int bps, double lateral
 /// @param[in] bps the bits per sample
 /// @param[in] period seconds per line
 /// @param[in] micronsPerSample # of microns per sample
-void Caster::newMSpectrum(const void* rfdata, int l, int s, int bps, double period, double micronsPerSample)
+void Caster::newMSpectrum([[maybe_unused]] const void* rfdata, [[maybe_unused]] int l, [[maybe_unused]] int s, [[maybe_unused]] int bps, [[maybe_unused]] double period, [[maybe_unused]] double micronsPerSample)
 {
-    Q_UNUSED(rfdata)
-    Q_UNUSED(l)
-    Q_UNUSED(s)
-    Q_UNUSED(bps)
-    Q_UNUSED(period)
-    Q_UNUSED(micronsPerSample)
 }
 
 /// called when new pw spectral data has been sent
@@ -253,14 +251,8 @@ void Caster::newMSpectrum(const void* rfdata, int l, int s, int bps, double peri
 /// @param[in] bps the bits per sample
 /// @param[in] period seconds per line
 /// @param[in] velocityPerSample speed per sample in m/s
-void Caster::newPwSpectrum(const void* rfdata, int l, int s, int bps, double period, double velocityPerSample)
+void Caster::newPwSpectrum([[maybe_unused]] const void* rfdata, [[maybe_unused]] int l, [[maybe_unused]] int s, [[maybe_unused]] int bps, [[maybe_unused]] double period, [[maybe_unused]] double velocityPerSample)
 {
-    Q_UNUSED(rfdata)
-    Q_UNUSED(l)
-    Q_UNUSED(s)
-    Q_UNUSED(bps)
-    Q_UNUSED(period)
-    Q_UNUSED(velocityPerSample)
 }
 
 /// handles the connection result
@@ -276,6 +268,14 @@ void Caster::connected(int imagePort, int imuPort)
         ui_->freeze->setEnabled(true);
         ui_->shallower->setEnabled(true);
         ui_->deeper->setEnabled(true);
+
+        // render the mesh matching the connected scanhead, queued so the scene update runs on the gui thread
+        QMetaObject::invokeMethod(this, [this]()
+        {
+            CusProbeInfo nfo;
+            if (castProbeInfo(&nfo) == CUS_SUCCESS)
+                render_->load(probeMesh(nfo));
+        }, Qt::QueuedConnection);
     }
     else
         ui_->status->showMessage("Could not connect to the specified device");
@@ -356,105 +356,6 @@ void Caster::onDeeper()
         ui_->status->showMessage("Could not image deeper");
 }
 
-/// called when the addLabel button is clicked
-void Caster::onAddLabel()
-{
-    QString label = ui_->labelText->text();
-    if (label.isEmpty())
-    {
-        ui_->status->showMessage("No label text provided");
-        return;
-    }
-    image_->addLabel(label);
-}
-
-/// called when the addTrace button is clicked
-void Caster::onAddTrace()
-{
-    QString label = ui_->labelText->text();
-    if (label.isEmpty())
-    {
-        ui_->status->showMessage("No label text provided");
-        return;
-    }
-    image_->addTrace(label);
-}
-
-/// called when the captureImage button is clicked
-void Caster::onCaptureImage()
-{
-    if (lasttime_ == 0)
-    {
-        ui_->status->showMessage("No image to capture");
-        return;
-    }
-    const int captureID = castStartCapture(lasttime_);
-    if (captureID < 0)
-    {
-        ui_->status->showMessage("Failed to initialize capture");
-        return;
-    }
-    const std::vector<LabelInfo> labels = image_->getLabels();
-    for (const LabelInfo& label : labels)
-    {
-        const std::string text = label.text_.toStdString();
-        const QPointF center = label.rect_.center();
-        if (castAddLabelOverlay(captureID, text.c_str(), center.x(), center.y(), label.rect_.width(), label.rect_.height()) < 0)
-            ui_->status->showMessage("Failed to add label " + label.text_ + " to capture");
-    }
-    const std::vector<TraceInfo> traces = image_->getTraces();
-    for (const TraceInfo& trace : traces)
-    {
-        const std::string text = trace.text_.toStdString();
-        std::vector<double> points;
-        for (const QPointF& pt : trace.points_)
-        {
-            points.push_back(pt.x());
-            points.push_back(pt.y());
-        }
-        if (castAddMeasurement(captureID, CusMeasurementTypeTraceDistance, text.c_str(), points.data(), static_cast<int>(points.size())) < 0)
-            ui_->status->showMessage("Failed to add trace measurement " + trace.text_ + " to capture");
-    }
-    const QImage overlayImage = image_->overlayImage();
-    if (!overlayImage.isNull())
-    {
-        const QColor overlayColor = image_->overlayColor();
-        const int height = overlayImage.height();
-        const int width = overlayImage.width();
-        std::vector<unsigned char> bytes(width * height);
-        for (int i = 0; i < height; ++i)
-        {
-            std::memcpy(bytes.data() + i * width, overlayImage.scanLine(i), width);
-        }
-        castAddImageOverlay(
-            captureID,
-            bytes.data(),
-            width,
-            height,
-            static_cast<float>(overlayColor.redF()),
-            static_cast<float>(overlayColor.greenF()),
-            static_cast<float>(overlayColor.blueF()),
-            static_cast<float>(overlayColor.alphaF())
-        );
-    }
-    if (castFinishCapture(captureID, [](int ret)
-    {
-        if (ret < 0)
-            _me->ui_->status->showMessage("Failed to send capture");
-        else
-            _me->ui_->status->showMessage("Sent capture");
-    }) < 0)
-    {
-        ui_->status->showMessage("Failed to finish capture");
-    }
-}
-
-/// called when the clearScreen button is clicked
-void Caster::onClearScreen()
-{
-    image_->clearOverlays();
-}
-
 /// handles the result of a raw data request
 /// @param[in] sz size of the raw data available, or status if not available
 void Caster::rawData(int sz)
@@ -478,7 +379,7 @@ void Caster::onRequest()
     if (!connected_)
         return;
 
-    if (castRequestRawData(0, 0, ui_->lzo->isChecked() ? 1 : 0, [](int sz, const char*)
+    if (castRequestRawData(0, 0, ui_->compression->isChecked() ? RawCompressionZstd : RawCompressionNone, [](int sz, const char*)
     {
         _me->rawData(sz);
     }) < 0)
@@ -506,7 +407,7 @@ void Caster::onDownload()
         if (castReadRawData((void**)(&rawData_.ptr_), [](int ret)
         {
             // call is complete, post event to manage actual storage
-            QApplication::postEvent(_me, new event::RawData(ret < 0 ? false : true));
+            QApplication::postEvent(_me, new event::RawData(ret >= 0));
         }) < 0)
             ui_->status->showMessage("Raw data download failed");
     }

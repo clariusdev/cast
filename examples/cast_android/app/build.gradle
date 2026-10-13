@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 36
     defaultConfig {
         applicationId 'me.clarius.sdk.cast.example'
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = '1.0'
 
@@ -35,8 +35,8 @@ dependencies {
     implementation fileTree(dir: '../../../lib', include: 'cast-debug.aar')
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-    implementation 'androidx.navigation:navigation-fragment:2.8.6'
-    implementation 'androidx.navigation:navigation-ui:2.8.6'
+    implementation 'androidx.navigation:navigation-fragment:2.9.6'
+    implementation 'androidx.navigation:navigation-ui:2.9.6'
 }

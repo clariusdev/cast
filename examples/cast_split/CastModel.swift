@@ -50,36 +50,6 @@ class CastModel: ObservableObject {
             print("User function freeze \($0 ? "succeeded" : "failed")")
         })
     }
-    /// Send a create capture command
-    func createCapture(labels: [CaptureLabel], measurements: [Measurement]) {
-        if (lastTime == 0) {
-            print("Cannot capture, no image received from scanner")
-            return
-        }
-        cast.startCapture(lastTime) { (captureID: Int32) -> Void in
-            if (captureID < 0) {
-                print("Failed to start capture")
-                return
-            }
-            for label in labels {
-                let position = label.position * self.size;
-                self.cast.addLabelOverlay(captureID, text: label.text, x: position.x, y: position.y, width: self.size.width, height: self.size.height)
-            }
-            for measurement in measurements {
-                var scaled: [CGPoint] = []
-                scaled.append(measurement.position1 * self.size)
-                scaled.append(measurement.position2 * self.size)
-                self.cast.addMeasurement(captureID, type: CusMeasurementTypeDistance, label: measurement.text, points: scaled)
-            }
-            self.cast.finishCapture(captureID) { (result: Bool) -> Void in
-                if (result) {
-                    print("Created capture successfully")
-                } else {
-                    print("Failed to finish capture")
-                }
-            }
-        }
-    }
     /// Framework instance
     private let cast = CusCast()
     /// Initialize the framework and register for callbacks
