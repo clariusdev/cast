@@ -41,6 +41,8 @@ typedef enum _CusPlatform
     V1,                 ///< First generation
     HD,                 ///< Second generation (HD)
     HD3,                ///< Third generation (HD3)
+    HD4,                ///< Fourth generation (HD4)
+    LCP,                ///< Fifth generation (LCP)
 
 } CusPlatform;
 
